@@ -8,6 +8,7 @@ import Home from "./pages/Home";
 import DashboardLayout from "./components/DashboardLayout";
 import FarmManagement from "./pages/FarmManagement";
 import CropTracking from "./pages/CropTracking";
+import Livestock from "./pages/Livestock";
 
 function Router() {
   return (
@@ -27,7 +28,14 @@ function Router() {
           </DashboardLayout>
         )}
       </Route>
-      <Route path={"/404"} component={NotFound} />
+      <Route path="/livestock">
+        {() => (
+          <DashboardLayout>
+            <Livestock />
+          </DashboardLayout>
+        )}
+      </Route>
+        <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>
   );

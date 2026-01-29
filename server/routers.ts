@@ -12,6 +12,12 @@ import {
   soilTests,
   fertilizerApplications,
   yieldRecords,
+  animals,
+  animalTypes,
+  animalHealthRecords,
+  breedingRecords,
+  feedingRecords,
+  performanceMetrics,
 } from "../drizzle/schema";
 import { eq } from "drizzle-orm";
 
@@ -169,7 +175,8 @@ export const appRouter = router({
         }),
     }),
 
-    yields: router({      list: protectedProcedure
+    yields: router({
+      list: protectedProcedure
         .input(z.object({ cycleId: z.number() }))
         .query(async ({ input }) => {
           const db = await getDb();
@@ -199,6 +206,168 @@ export const appRouter = router({
           });
         }),
     }),
+  }),
+
+  // ============================================================================
+  // LIVESTOCK MANAGEMENT
+  // ============================================================================
+  animals: router({
+    list: protectedProcedure
+      .input(z.object({ farmId: z.number() }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) return [];
+        return await db.select().from(animals).where(eq(animals.farmId, input.farmId));
+      }),
+
+    create: protectedProcedure
+      .input(z.object({
+        farmId: z.number(),
+        typeId: z.number(),
+        uniqueTagId: z.string().optional(),
+        birthDate: z.date().optional(),
+        gender: z.enum(["male", "female", "unknown"]).optional(),
+        breed: z.string().optional(),
+        status: z.enum(["active", "sold", "culled", "deceased"]).optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+
+        return await db.insert(animals).values({
+          farmId: input.farmId,
+          typeId: input.typeId,
+          uniqueTagId: input.uniqueTagId,
+          birthDate: input.birthDate,
+          gender: input.gender || "unknown",
+          breed: input.breed,
+          status: input.status || "active",
+        });
+      }),
+
+    update: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        status: z.enum(["active", "sold", "culled", "deceased"]).optional(),
+        breed: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+
+        const updates: any = {};
+        if (input.status) updates.status = input.status;
+        if (input.breed) updates.breed = input.breed;
+
+        return await db.update(animals).set(updates).where(eq(animals.id, input.id));
+      }),
+  }),
+
+  healthRecords: router({
+    list: protectedProcedure
+      .input(z.object({ animalId: z.number() }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) return [];
+        return await db.select().from(animalHealthRecords).where(eq(animalHealthRecords.animalId, input.animalId));
+      }),
+
+    create: protectedProcedure
+      .input(z.object({
+        animalId: z.number(),
+        recordDate: z.date(),
+        eventType: z.enum(["vaccination", "treatment", "illness", "checkup", "other"]),
+        details: z.string().optional(),
+        veterinarianUserId: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+
+        return await db.insert(animalHealthRecords).values({
+          animalId: input.animalId,
+          recordDate: input.recordDate,
+          eventType: input.eventType,
+          details: input.details,
+          veterinarianUserId: input.veterinarianUserId,
+        });
+      }),
+
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        return await db.delete(animalHealthRecords).where(eq(animalHealthRecords.id, input.id));
+      }),
+  }),
+
+  vaccinations: router({
+    listByAnimal: protectedProcedure
+      .input(z.object({ animalId: z.number() }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) return [];
+        return await db
+          .select()
+          .from(animalHealthRecords)
+          .where(eq(animalHealthRecords.animalId, input.animalId));
+      }),
+
+    record: protectedProcedure
+      .input(z.object({
+        animalId: z.number(),
+        vaccineType: z.string(),
+        recordDate: z.date(),
+        nextDueDate: z.date().optional(),
+        details: z.string().optional(),
+        veterinarianUserId: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+
+        const detailsText = `${input.vaccineType}${input.nextDueDate ? ` - Next due: ${input.nextDueDate.toISOString().split('T')[0]}` : ''}${input.details ? ` - ${input.details}` : ''}`;
+
+        return await db.insert(animalHealthRecords).values({
+          animalId: input.animalId,
+          recordDate: input.recordDate,
+          eventType: "vaccination",
+          details: detailsText,
+          veterinarianUserId: input.veterinarianUserId,
+        });
+      }),
+  }),
+
+  performanceMetrics: router({
+    listByAnimal: protectedProcedure
+      .input(z.object({ animalId: z.number() }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) return [];
+        return await db.select().from(performanceMetrics).where(eq(performanceMetrics.animalId, input.animalId));
+      }),
+
+    record: protectedProcedure
+      .input(z.object({
+        animalId: z.number(),
+        metricDate: z.date(),
+        weightKg: z.string().optional(),
+        milkYieldLiters: z.string().optional(),
+        eggCount: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+
+        return await db.insert(performanceMetrics).values({
+          animalId: input.animalId,
+          metricDate: input.metricDate,
+          weightKg: input.weightKg as any,
+          milkYieldLiters: input.milkYieldLiters as any,
+          eggCount: input.eggCount,
+        });
+      }),
   }),
 });
 

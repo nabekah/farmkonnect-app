@@ -151,4 +151,92 @@ describe("tRPC Routers", () => {
       expect(caller.auth.logout).toBeDefined();
     });
   });
+
+  describe("Livestock Management", () => {
+    it("should have animals.list procedure", () => {
+      const caller = appRouter.createCaller({
+        user: { id: 1, email: "test@example.com", role: "user" },
+        db: {} as any,
+      });
+      expect(caller.animals.list).toBeDefined();
+    });
+
+    it("should have animals.create procedure", () => {
+      const caller = appRouter.createCaller({
+        user: { id: 1, email: "test@example.com", role: "user" },
+        db: {} as any,
+      });
+      expect(caller.animals.create).toBeDefined();
+    });
+
+    it("should have animals.update procedure", () => {
+      const caller = appRouter.createCaller({
+        user: { id: 1, email: "test@example.com", role: "user" },
+        db: {} as any,
+      });
+      expect(caller.animals.update).toBeDefined();
+    });
+  });
+
+  describe("Health Records Router", () => {
+    it("should have healthRecords.list procedure", () => {
+      const caller = appRouter.createCaller({
+        user: { id: 1, email: "test@example.com", role: "user" },
+        db: {} as any,
+      });
+      expect(caller.healthRecords.list).toBeDefined();
+    });
+
+    it("should have healthRecords.create procedure", () => {
+      const caller = appRouter.createCaller({
+        user: { id: 1, email: "test@example.com", role: "user" },
+        db: {} as any,
+      });
+      expect(caller.healthRecords.create).toBeDefined();
+    });
+
+    it("should have healthRecords.delete procedure", () => {
+      const caller = appRouter.createCaller({
+        user: { id: 1, email: "test@example.com", role: "user" },
+        db: {} as any,
+      });
+      expect(caller.healthRecords.delete).toBeDefined();
+    });
+  });
+
+  describe("Vaccinations Router", () => {
+    it("should have vaccinations.listByAnimal procedure", () => {
+      const caller = appRouter.createCaller({
+        user: { id: 1, email: "test@example.com", role: "user" },
+        db: {} as any,
+      });
+      expect(caller.vaccinations.listByAnimal).toBeDefined();
+    });
+
+    it("should have vaccinations.record procedure", () => {
+      const caller = appRouter.createCaller({
+        user: { id: 1, email: "test@example.com", role: "user" },
+        db: {} as any,
+      });
+      expect(caller.vaccinations.record).toBeDefined();
+    });
+  });
+
+  describe("Performance Metrics Router", () => {
+    it("should have performanceMetrics.listByAnimal procedure", () => {
+      const caller = appRouter.createCaller({
+        user: { id: 1, email: "test@example.com", role: "user" },
+        db: {} as any,
+      });
+      expect(caller.performanceMetrics.listByAnimal).toBeDefined();
+    });
+
+    it("should have performanceMetrics.record procedure", () => {
+      const caller = appRouter.createCaller({
+        user: { id: 1, email: "test@example.com", role: "user" },
+        db: {} as any,
+      });
+      expect(caller.performanceMetrics.record).toBeDefined();
+    });
+  });
 });
