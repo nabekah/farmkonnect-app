@@ -5,14 +5,29 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
+import DashboardLayout from "./components/DashboardLayout";
+import FarmManagement from "./pages/FarmManagement";
+import CropTracking from "./pages/CropTracking";
 
 function Router() {
-  // make sure to consider if you need authentication for certain routes
   return (
     <Switch>
       <Route path={"/"} component={Home} />
+      <Route path="/farms">
+        {() => (
+          <DashboardLayout>
+            <FarmManagement />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/crops">
+        {() => (
+          <DashboardLayout>
+            <CropTracking />
+          </DashboardLayout>
+        )}
+      </Route>
       <Route path={"/404"} component={NotFound} />
-      {/* Final fallback route */}
       <Route component={NotFound} />
     </Switch>
   );
