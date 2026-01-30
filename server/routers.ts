@@ -4,6 +4,7 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
 import { notificationRouter } from "./notificationRouter";
 import { feedingRouter } from "./feedingRouter";
+import { marketplaceRouter } from "./marketplaceRouter";
 import { z } from "zod";
 import { getDb } from "./db";
 import { TRPCError } from "@trpc/server";
@@ -481,6 +482,7 @@ export const appRouter = router({
 
   notifications: notificationRouter,
   feeding: feedingRouter,
+  marketplace: marketplaceRouter,
 });
 
 export type AppRouter = typeof appRouter;

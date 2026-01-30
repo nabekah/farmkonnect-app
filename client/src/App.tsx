@@ -12,6 +12,7 @@ import CropTracking from "./pages/CropTracking";
 import Livestock from "./pages/Livestock";
 import ThemeAdmin from "./components/ThemeAdmin";
 import { Analytics } from "./pages/Analytics";
+import { Marketplace } from "./pages/Marketplace";
 
 function Router() {
   return (
@@ -42,6 +43,13 @@ function Router() {
         {() => (
           <DashboardLayout>
             <Analytics />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/marketplace">
+        {() => (
+          <DashboardLayout>
+            <Marketplace />
           </DashboardLayout>
         )}
       </Route>

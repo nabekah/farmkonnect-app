@@ -512,3 +512,113 @@ export const notifications = mysqlTable("notifications", {
 
 export type Notification = typeof notifications.$inferSelect;
 export type InsertNotification = typeof notifications.$inferInsert;
+
+
+// ============================================================================
+// MARKETPLACE - PRODUCTS
+// ============================================================================
+export const marketplaceProducts = mysqlTable("marketplaceProducts", {
+  id: int("id").autoincrement().primaryKey(),
+  sellerId: int("sellerId").notNull(),
+  farmId: int("farmId"),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  category: varchar("category", { length: 100 }).notNull(), // e.g., "Vegetables", "Dairy", "Meat", "Grains"
+  productType: varchar("productType", { length: 100 }).notNull(), // e.g., "Tomato", "Milk", "Beef"
+  price: decimal("price", { precision: 10, scale: 2 }).notNull(),
+  quantity: decimal("quantity", { precision: 10, scale: 2 }).notNull(),
+  unit: varchar("unit", { length: 50 }).notNull(), // e.g., "kg", "liter", "dozen", "bunch"
+  imageUrl: varchar("imageUrl", { length: 500 }),
+  status: mysqlEnum("status", ["active", "inactive", "sold_out", "discontinued"]).default("active").notNull(),
+  rating: decimal("rating", { precision: 3, scale: 2 }).default("0"),
+  reviewCount: int("reviewCount").default(0),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type MarketplaceProduct = typeof marketplaceProducts.$inferSelect;
+export type InsertMarketplaceProduct = typeof marketplaceProducts.$inferInsert;
+
+// ============================================================================
+// MARKETPLACE - ORDERS
+// ============================================================================
+export const marketplaceOrders = mysqlTable("marketplaceOrders", {
+  id: int("id").autoincrement().primaryKey(),
+  buyerId: int("buyerId").notNull(),
+  sellerId: int("sellerId").notNull(),
+  orderNumber: varchar("orderNumber", { length: 50 }).notNull().unique(),
+  totalAmount: decimal("totalAmount", { precision: 10, scale: 2 }).notNull(),
+  status: mysqlEnum("status", ["pending", "confirmed", "shipped", "delivered", "cancelled", "refunded"]).default("pending").notNull(),
+  paymentStatus: mysqlEnum("paymentStatus", ["unpaid", "paid", "refunded"]).default("unpaid").notNull(),
+  deliveryAddress: text("deliveryAddress"),
+  deliveryDate: date("deliveryDate"),
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type MarketplaceOrder = typeof marketplaceOrders.$inferSelect;
+export type InsertMarketplaceOrder = typeof marketplaceOrders.$inferInsert;
+
+// ============================================================================
+// MARKETPLACE - ORDER ITEMS
+// ============================================================================
+export const marketplaceOrderItems = mysqlTable("marketplaceOrderItems", {
+  id: int("id").autoincrement().primaryKey(),
+  orderId: int("orderId").notNull(),
+  productId: int("productId").notNull(),
+  quantity: decimal("quantity", { precision: 10, scale: 2 }).notNull(),
+  unitPrice: decimal("unitPrice", { precision: 10, scale: 2 }).notNull(),
+  subtotal: decimal("subtotal", { precision: 10, scale: 2 }).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type MarketplaceOrderItem = typeof marketplaceOrderItems.$inferSelect;
+export type InsertMarketplaceOrderItem = typeof marketplaceOrderItems.$inferInsert;
+
+// ============================================================================
+// MARKETPLACE - TRANSACTIONS
+// ============================================================================
+export const marketplaceTransactions = mysqlTable("marketplaceTransactions", {
+  id: int("id").autoincrement().primaryKey(),
+  orderId: int("orderId").notNull(),
+  transactionId: varchar("transactionId", { length: 100 }).unique(),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  paymentMethod: varchar("paymentMethod", { length: 50 }).notNull(), // e.g., "credit_card", "bank_transfer", "cash"
+  status: mysqlEnum("status", ["pending", "completed", "failed", "refunded"]).default("pending").notNull(),
+  reference: varchar("reference", { length: 255 }),
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  completedAt: timestamp("completedAt"),
+});
+export type MarketplaceTransaction = typeof marketplaceTransactions.$inferSelect;
+export type InsertMarketplaceTransaction = typeof marketplaceTransactions.$inferInsert;
+
+// ============================================================================
+// MARKETPLACE - REVIEWS
+// ============================================================================
+export const marketplaceReviews = mysqlTable("marketplaceReviews", {
+  id: int("id").autoincrement().primaryKey(),
+  productId: int("productId").notNull(),
+  buyerId: int("buyerId").notNull(),
+  orderId: int("orderId"),
+  rating: int("rating").notNull(), // 1-5 stars
+  title: varchar("title", { length: 255 }),
+  comment: text("comment"),
+  helpful: int("helpful").default(0),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type MarketplaceReview = typeof marketplaceReviews.$inferSelect;
+export type InsertMarketplaceReview = typeof marketplaceReviews.$inferInsert;
+
+// ============================================================================
+// MARKETPLACE - SHOPPING CART
+// ============================================================================
+export const marketplaceCart = mysqlTable("marketplaceCart", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  productId: int("productId").notNull(),
+  quantity: decimal("quantity", { precision: 10, scale: 2 }).notNull(),
+  addedAt: timestamp("addedAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type MarketplaceCart = typeof marketplaceCart.$inferSelect;
+export type InsertMarketplaceCart = typeof marketplaceCart.$inferInsert;

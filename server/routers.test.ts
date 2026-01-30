@@ -431,3 +431,142 @@ describe("Real-time Notification Polling", () => {
     expect(refetchMethods.length).toBe(2);
   });
 });
+
+
+describe("Marketplace Router", () => {
+  it("should have marketplace router defined", () => {
+    const caller = appRouter.createCaller({
+      user: { id: 1, email: "test@example.com", role: "user" },
+      db: {} as any,
+    });
+    expect(caller.marketplace).toBeDefined();
+  });
+
+  it("should have listProducts procedure", () => {
+    const caller = appRouter.createCaller({
+      user: { id: 1, email: "test@example.com", role: "user" },
+      db: {} as any,
+    });
+    expect(caller.marketplace.listProducts).toBeDefined();
+  });
+
+  it("should have getProduct procedure", () => {
+    const caller = appRouter.createCaller({
+      user: { id: 1, email: "test@example.com", role: "user" },
+      db: {} as any,
+    });
+    expect(caller.marketplace.getProduct).toBeDefined();
+  });
+
+  it("should have createProduct procedure", () => {
+    const caller = appRouter.createCaller({
+      user: { id: 1, email: "test@example.com", role: "user" },
+      db: {} as any,
+    });
+    expect(caller.marketplace.createProduct).toBeDefined();
+  });
+
+  it("should have updateProduct procedure", () => {
+    const caller = appRouter.createCaller({
+      user: { id: 1, email: "test@example.com", role: "user" },
+      db: {} as any,
+    });
+    expect(caller.marketplace.updateProduct).toBeDefined();
+  });
+
+  it("should have deleteProduct procedure", () => {
+    const caller = appRouter.createCaller({
+      user: { id: 1, email: "test@example.com", role: "user" },
+      db: {} as any,
+    });
+    expect(caller.marketplace.deleteProduct).toBeDefined();
+  });
+
+  it("should have getCart procedure", () => {
+    const caller = appRouter.createCaller({
+      user: { id: 1, email: "test@example.com", role: "user" },
+      db: {} as any,
+    });
+    expect(caller.marketplace.getCart).toBeDefined();
+  });
+
+  it("should have addToCart procedure", () => {
+    const caller = appRouter.createCaller({
+      user: { id: 1, email: "test@example.com", role: "user" },
+      db: {} as any,
+    });
+    expect(caller.marketplace.addToCart).toBeDefined();
+  });
+
+  it("should have removeFromCart procedure", () => {
+    const caller = appRouter.createCaller({
+      user: { id: 1, email: "test@example.com", role: "user" },
+      db: {} as any,
+    });
+    expect(caller.marketplace.removeFromCart).toBeDefined();
+  });
+
+  it("should have listOrders procedure", () => {
+    const caller = appRouter.createCaller({
+      user: { id: 1, email: "test@example.com", role: "user" },
+      db: {} as any,
+    });
+    expect(caller.marketplace.listOrders).toBeDefined();
+  });
+
+  it("should have getOrder procedure", () => {
+    const caller = appRouter.createCaller({
+      user: { id: 1, email: "test@example.com", role: "user" },
+      db: {} as any,
+    });
+    expect(caller.marketplace.getOrder).toBeDefined();
+  });
+
+  it("should have createOrder procedure", () => {
+    const caller = appRouter.createCaller({
+      user: { id: 1, email: "test@example.com", role: "user" },
+      db: {} as any,
+    });
+    expect(caller.marketplace.createOrder).toBeDefined();
+  });
+
+  it("should have updateOrderStatus procedure", () => {
+    const caller = appRouter.createCaller({
+      user: { id: 1, email: "test@example.com", role: "user" },
+      db: {} as any,
+    });
+    expect(caller.marketplace.updateOrderStatus).toBeDefined();
+  });
+
+  it("should have recordTransaction procedure", () => {
+    const caller = appRouter.createCaller({
+      user: { id: 1, email: "test@example.com", role: "user" },
+      db: {} as any,
+    });
+    expect(caller.marketplace.recordTransaction).toBeDefined();
+  });
+
+  it("should have getProductReviews procedure", () => {
+    const caller = appRouter.createCaller({
+      user: { id: 1, email: "test@example.com", role: "user" },
+      db: {} as any,
+    });
+    expect(caller.marketplace.getProductReviews).toBeDefined();
+  });
+
+  it("should have createReview procedure", () => {
+    const caller = appRouter.createCaller({
+      user: { id: 1, email: "test@example.com", role: "user" },
+      db: {} as any,
+    });
+    expect(caller.marketplace.createReview).toBeDefined();
+  });
+
+  it("should have getSellerStats procedure", () => {
+    const caller = appRouter.createCaller({
+      user: { id: 1, email: "test@example.com", role: "user" },
+      db: {} as any,
+    });
+    expect(caller.marketplace.getSellerStats).toBeDefined();
+  });
+});
