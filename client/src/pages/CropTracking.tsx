@@ -215,7 +215,12 @@ export default function CropTracking() {
                       ) : (
                         crops.map((crop: any) => (
                           <SelectItem key={crop.id} value={crop.id.toString()}>
-                            {crop.cropName || crop.name || "Unknown Crop"}
+                            <div className="flex flex-col">
+                              <span className="font-medium">{crop.cropName || crop.name || "Unknown Crop"}</span>
+                              {crop.variety && (
+                                <span className="text-xs text-muted-foreground">Variety: {crop.variety}</span>
+                              )}
+                            </div>
                           </SelectItem>
                         ))
                       )}
@@ -258,18 +263,31 @@ export default function CropTracking() {
             {cycles.map((cycle: any) => (
               <Card key={cycle.id}>
                 <CardHeader>
-                  <CardTitle className="text-lg">{cycle.varietyName || `Cycle ${cycle.id}`}</CardTitle>
+                  <CardTitle className="text-lg">
+                    {cycle.crop?.cropName || "Unknown Crop"} - {cycle.varietyName || `Cycle ${cycle.id}`}
+                  </CardTitle>
+                  {cycle.crop?.variety && (
+                    <p className="text-sm text-muted-foreground mt-1">Variety: {cycle.crop.variety}</p>
+                  )}
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-sm text-gray-600">Area</p>
-                      <p className="font-semibold">{cycle.areaPlantedHectares} ha</p>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-sm text-gray-600">Area</p>
+                        <p className="font-semibold">{cycle.areaPlantedHectares} ha</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600">Status</p>
+                        <p className="font-semibold capitalize">{cycle.status}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm text-gray-600">Status</p>
-                      <p className="font-semibold capitalize">{cycle.status}</p>
-                    </div>
+                    {cycle.crop?.cultivarParameters && (
+                      <div className="border-t pt-3">
+                        <p className="text-sm font-medium text-gray-700 mb-1">Cultivar Parameters</p>
+                        <p className="text-sm text-gray-600">{cycle.crop.cultivarParameters}</p>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>

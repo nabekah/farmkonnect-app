@@ -70,6 +70,8 @@ export const crops = mysqlTable("crops", {
   id: int("id").autoincrement().primaryKey(),
   cropName: varchar("cropName", { length: 255 }).notNull(),
   scientificName: varchar("scientificName", { length: 255 }),
+  variety: varchar("variety", { length: 255 }),
+  cultivarParameters: text("cultivarParameters"),
   description: text("description"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });

@@ -91,14 +91,62 @@ const westAfricanFarms = [
 ];
 
 const cropData = [
-  { name: "Maize", type: "cereal", season: "rainy" },
-  { name: "Cassava", type: "root", season: "year-round" },
-  { name: "Cocoa", type: "cash", season: "year-round" },
-  { name: "Groundnut", type: "legume", season: "dry" },
-  { name: "Yam", type: "root", season: "rainy" },
-  { name: "Plantain", type: "fruit", season: "year-round" },
-  { name: "Rice", type: "cereal", season: "rainy" },
-  { name: "Millet", type: "cereal", season: "dry" },
+  { 
+    name: "Maize", 
+    type: "cereal", 
+    season: "rainy",
+    variety: "Golden Jubilee, Obatanpa",
+    cultivarParameters: "Maturity: 90-120 days, Spacing: 75cm x 25cm, Yield: 4-6 tons/ha"
+  },
+  { 
+    name: "Cassava", 
+    type: "root", 
+    season: "year-round",
+    variety: "Afisiafi, Bankye Hemaa",
+    cultivarParameters: "Maturity: 9-12 months, Spacing: 1m x 1m, Yield: 20-30 tons/ha"
+  },
+  { 
+    name: "Cocoa", 
+    type: "cash", 
+    season: "year-round",
+    variety: "Amelonado, Trinitario",
+    cultivarParameters: "Maturity: 3-5 years, Spacing: 3m x 3m, Yield: 400-800 kg/ha"
+  },
+  { 
+    name: "Groundnut", 
+    type: "legume", 
+    season: "dry",
+    variety: "Chinese, Manipinta",
+    cultivarParameters: "Maturity: 90-120 days, Spacing: 50cm x 20cm, Yield: 1.5-2.5 tons/ha"
+  },
+  { 
+    name: "Yam", 
+    type: "root", 
+    season: "rainy",
+    variety: "Pona, Dente",
+    cultivarParameters: "Maturity: 7-9 months, Spacing: 1m x 1m, Yield: 15-25 tons/ha"
+  },
+  { 
+    name: "Plantain", 
+    type: "fruit", 
+    season: "year-round",
+    variety: "Apantu, Apem",
+    cultivarParameters: "Maturity: 10-12 months, Spacing: 3m x 3m, Yield: 10-20 tons/ha"
+  },
+  { 
+    name: "Rice", 
+    type: "cereal", 
+    season: "rainy",
+    variety: "Jasmine 85, AGRA Rice",
+    cultivarParameters: "Maturity: 120-150 days, Spacing: 20cm x 20cm, Yield: 3-5 tons/ha"
+  },
+  { 
+    name: "Millet", 
+    type: "cereal", 
+    season: "dry",
+    variety: "Pearl Millet, Finger Millet",
+    cultivarParameters: "Maturity: 75-90 days, Spacing: 45cm x 15cm, Yield: 1-2 tons/ha"
+  },
 ];
 
 const animalTypesData = [
@@ -209,8 +257,8 @@ async function seedData() {
     for (const crop of cropData) {
       try {
         await connection.execute(
-          `INSERT INTO crops (name, type, season, createdAt, updatedAt) VALUES (?, ?, ?, NOW(), NOW())`,
-          [crop.name, crop.type, crop.season]
+          `INSERT INTO crops (cropName, scientificName, variety, cultivarParameters, description, createdAt) VALUES (?, ?, ?, ?, ?, NOW())`,
+          [crop.name, null, crop.variety, crop.cultivarParameters, `${crop.type} crop, ${crop.season} season`]
         );
       } catch (e) {
         console.log(`  ⚠️  Crop "${crop.name}" may already exist`);

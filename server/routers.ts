@@ -87,7 +87,15 @@ export const appRouter = router({
         .query(async ({ input }) => {
           const db = await getDb();
           if (!db) return [];
-          return await db.select().from(cropCycles).where(eq(cropCycles.farmId, input.farmId));
+          const cycles = await db.select().from(cropCycles).where(eq(cropCycles.farmId, input.farmId));
+          // Join with crops to get variety and cultivar parameters
+          const cyclesWithCropInfo = await Promise.all(
+            cycles.map(async (cycle) => {
+              const [crop] = await db.select().from(crops).where(eq(crops.id, cycle.cropId));
+              return { ...cycle, crop };
+            })
+          );
+          return cyclesWithCropInfo;
         }),
 
       create: protectedProcedure

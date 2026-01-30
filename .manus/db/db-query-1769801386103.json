@@ -1,0 +1,28 @@
+{
+  "query": "SELECT id, cropName, variety, cultivarParameters FROM crops LIMIT 3;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2kNF22PapS9mysw.root --database WZQk4bD8DnsRHwYBkmh7FN --execute SELECT id, cropName, variety, cultivarParameters FROM crops LIMIT 3;",
+  "rows": [
+    {
+      "id": "9",
+      "cropName": "Maize",
+      "variety": "Golden Jubilee, Obatanpa",
+      "cultivarParameters": "Maturity: 90-120 days, Spacing: 75cm x 25cm, Yield: 4-6 tons/ha"
+    },
+    {
+      "id": "10",
+      "cropName": "Cassava",
+      "variety": "Afisiafi, Bankye Hemaa",
+      "cultivarParameters": "Maturity: 9-12 months, Spacing: 1m x 1m, Yield: 20-30 tons/ha"
+    },
+    {
+      "id": "11",
+      "cropName": "Cocoa",
+      "variety": "Amelonado, Trinitario",
+      "cultivarParameters": "Maturity: 3-5 years, Spacing: 3m x 3m, Yield: 400-800 kg/ha"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tcropName\tvariety\tcultivarParameters\n9\tMaize\tGolden Jubilee, Obatanpa\tMaturity: 90-120 days, Spacing: 75cm x 25cm, Yield: 4-6 tons/ha\n10\tCassava\tAfisiafi, Bankye Hemaa\tMaturity: 9-12 months, Spacing: 1m x 1m, Yield: 20-30 tons/ha\n11\tCocoa\tAmelonado, Trinitario\tMaturity: 3-5 years, Spacing: 3m x 3m, Yield: 400-800 kg/ha\n",
+  "stderr": "",
+  "execution_time_ms": 57
+}

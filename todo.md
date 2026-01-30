@@ -292,3 +292,17 @@
 - [x] Test multi-image upload and carousel functionality
 - [x] Create ProductCard and SellerProductCard components to avoid React hooks violations
 - [x] Add getProductImages query to fetch images for individual products
+
+
+## Current Issues and Enhancements
+- [x] Fix crop list dropdown - not loading crops properly
+- [x] Fix marketplace product details display
+- [x] Fix marketplace product pictures not showing correctly
+- [x] Add Variety field to crops table
+- [x] Add Cultivar_Parameters field to crops table
+- [x] Update crop creation form with new fields
+- [x] Update crop display with new fields
+- [x] Fix seed script column name mismatch for crops
+- [x] Update crops router to join crop data with cycles
+- [x] Display variety and cultivar parameters in crop dropdown
+- [x] Display cultivar parameters in crop cycle cards

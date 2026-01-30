@@ -1,0 +1,66 @@
+{
+  "query": "SELECT * FROM crops;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2kNF22PapS9mysw.root --database WZQk4bD8DnsRHwYBkmh7FN --execute SELECT * FROM crops;",
+  "rows": [
+    {
+      "id": "1",
+      "cropName": "Maize",
+      "scientificName": "NULL",
+      "description": "cereal crop, rainy season",
+      "createdAt": "2026-01-30 19:26:53"
+    },
+    {
+      "id": "2",
+      "cropName": "Cassava",
+      "scientificName": "NULL",
+      "description": "root crop, year-round season",
+      "createdAt": "2026-01-30 19:26:53"
+    },
+    {
+      "id": "3",
+      "cropName": "Cocoa",
+      "scientificName": "NULL",
+      "description": "cash crop, year-round season",
+      "createdAt": "2026-01-30 19:26:53"
+    },
+    {
+      "id": "4",
+      "cropName": "Groundnut",
+      "scientificName": "NULL",
+      "description": "legume crop, dry season",
+      "createdAt": "2026-01-30 19:26:53"
+    },
+    {
+      "id": "5",
+      "cropName": "Yam",
+      "scientificName": "NULL",
+      "description": "root crop, rainy season",
+      "createdAt": "2026-01-30 19:26:53"
+    },
+    {
+      "id": "6",
+      "cropName": "Plantain",
+      "scientificName": "NULL",
+      "description": "fruit crop, year-round season",
+      "createdAt": "2026-01-30 19:26:53"
+    },
+    {
+      "id": "7",
+      "cropName": "Rice",
+      "scientificName": "NULL",
+      "description": "cereal crop, rainy season",
+      "createdAt": "2026-01-30 19:26:53"
+    },
+    {
+      "id": "8",
+      "cropName": "Millet",
+      "scientificName": "NULL",
+      "description": "cereal crop, dry season",
+      "createdAt": "2026-01-30 19:26:53"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tcropName\tscientificName\tdescription\tcreatedAt\n1\tMaize\tNULL\tcereal crop, rainy season\t2026-01-30 19:26:53\n2\tCassava\tNULL\troot crop, year-round season\t2026-01-30 19:26:53\n3\tCocoa\tNULL\tcash crop, year-round season\t2026-01-30 19:26:53\n4\tGroundnut\tNULL\tlegume crop, dry season\t2026-01-30 19:26:53\n5\tYam\tNULL\troot crop, rainy season\t2026-01-30 19:26:53\n6\tPlantain\tNULL\tfruit crop, year-round season\t2026-01-30 19:26:53\n7\tRice\tNULL\tcereal crop, rainy season\t2026-01-30 19:26:53\n8\tMillet\tNULL\tcereal crop, dry season\t2026-01-30 19:26:53\n",
+  "stderr": "",
+  "execution_time_ms": 59
+}
