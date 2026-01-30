@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, Plus, Trash2, AlertCircle } from "lucide-react";
 import { format } from "date-fns";
 import BreedingRecords from "@/components/BreedingRecords";
+import { FeedingRecords } from "@/components/FeedingRecords";
 
 const ANIMAL_TYPES = [
   { id: 1, name: "Cattle" },
@@ -211,12 +212,13 @@ export default function Livestock() {
       </div>
 
       <Tabs value={tabValue} onValueChange={setTabValue}>
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="animals">Animals</TabsTrigger>
           <TabsTrigger value="health">Health Records</TabsTrigger>
           <TabsTrigger value="vaccinations">Vaccinations</TabsTrigger>
           <TabsTrigger value="performance">Performance</TabsTrigger>
           <TabsTrigger value="breeding">Breeding</TabsTrigger>
+          <TabsTrigger value="feeding">Feeding</TabsTrigger>
         </TabsList>
 
         <TabsContent value="animals" className="space-y-4">
@@ -670,6 +672,16 @@ export default function Livestock() {
                 )}
               </div>
             </>
+          )}
+        </TabsContent>
+
+        <TabsContent value="feeding" className="space-y-4">
+          {!selectedAnimalId ? (
+            <div className="text-center py-8 text-gray-500">
+              <p>Select an animal to manage feeding records</p>
+            </div>
+          ) : (
+            <FeedingRecords animalId={selectedAnimalId} />
           )}
         </TabsContent>
       </Tabs>

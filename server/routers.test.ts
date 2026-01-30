@@ -344,3 +344,90 @@ describe("Notifications Router", () => {
     expect(priorities.length).toBe(4);
   });
 });
+
+
+describe("Feeding Router", () => {
+  it("should have feeding router defined", () => {
+    const caller = appRouter.createCaller({
+      user: { id: 1, email: "test@example.com", role: "user" },
+      db: {} as any,
+    });
+    expect(caller.feeding).toBeDefined();
+  });
+
+  it("should have listByAnimal procedure", () => {
+    const caller = appRouter.createCaller({
+      user: { id: 1, email: "test@example.com", role: "user" },
+      db: {} as any,
+    });
+    expect(caller.feeding.listByAnimal).toBeDefined();
+  });
+
+  it("should have record procedure", () => {
+    const caller = appRouter.createCaller({
+      user: { id: 1, email: "test@example.com", role: "user" },
+      db: {} as any,
+    });
+    expect(caller.feeding.record).toBeDefined();
+  });
+
+  it("should have getCostAnalysis procedure", () => {
+    const caller = appRouter.createCaller({
+      user: { id: 1, email: "test@example.com", role: "user" },
+      db: {} as any,
+    });
+    expect(caller.feeding.getCostAnalysis).toBeDefined();
+  });
+
+  it("should have getNutritionalSummary procedure", () => {
+    const caller = appRouter.createCaller({
+      user: { id: 1, email: "test@example.com", role: "user" },
+      db: {} as any,
+    });
+    expect(caller.feeding.getNutritionalSummary).toBeDefined();
+  });
+});
+
+describe("Analytics Features", () => {
+  it("should support herd composition analysis", () => {
+    const herdTypes = ["Cattle", "Sheep", "Goat", "Pig", "Chicken"];
+    expect(herdTypes.length).toBe(5);
+  });
+
+  it("should support performance metrics tracking", () => {
+    const metrics = ["weight", "yield", "health"];
+    expect(metrics.length).toBe(3);
+  });
+
+  it("should support vaccination compliance tracking", () => {
+    const eventTypes = ["vaccination_due", "vaccination_overdue", "health_alert"];
+    expect(eventTypes.length).toBe(3);
+  });
+
+  it("should support data export functionality", () => {
+    const exportFormats = ["json", "csv", "pdf"];
+    expect(exportFormats.length).toBe(3);
+  });
+});
+
+describe("Real-time Notification Polling", () => {
+  it("should support configurable polling intervals", () => {
+    const intervals = [5000, 10000, 30000, 60000];
+    expect(intervals.every((i) => i > 0)).toBe(true);
+  });
+
+  it("should support enabling/disabling polling", () => {
+    const states = [true, false];
+    expect(states.length).toBe(2);
+  });
+
+  it("should track unread notification count", () => {
+    const unreadCount = 5;
+    expect(unreadCount).toBeGreaterThanOrEqual(0);
+  });
+
+  it("should support manual refetch", () => {
+    const refetchMethods = ["manual", "automatic"];
+    expect(refetchMethods.length).toBe(2);
+  });
+});

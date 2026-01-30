@@ -11,6 +11,7 @@ import FarmManagement from "./pages/FarmManagement";
 import CropTracking from "./pages/CropTracking";
 import Livestock from "./pages/Livestock";
 import ThemeAdmin from "./components/ThemeAdmin";
+import { Analytics } from "./pages/Analytics";
 
 function Router() {
   return (
@@ -34,6 +35,13 @@ function Router() {
         {() => (
           <DashboardLayout>
             <Livestock />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/analytics">
+        {() => (
+          <DashboardLayout>
+            <Analytics />
           </DashboardLayout>
         )}
       </Route>

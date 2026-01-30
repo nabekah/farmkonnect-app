@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
+import { useNotificationPolling } from "@/hooks/useNotificationPolling";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -30,8 +31,12 @@ export function NotificationCenter() {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState<string>("all");
 
+  const { unreadNotifications } = useNotificationPolling({ 
+    enabled: isOpen,
+    interval: 10000
+  });
+  
   const { data: allNotifications = [], refetch: refetchAll } = trpc.notifications.getAll.useQuery({ limit: 100 });
-  const { data: unreadNotifications = [] } = trpc.notifications.getUnread.useQuery();
   const markAsReadMutation = trpc.notifications.markAsRead.useMutation();
   const markAllAsReadMutation = trpc.notifications.markAllAsRead.useMutation();
   const deleteNotificationMutation = trpc.notifications.delete.useMutation();
