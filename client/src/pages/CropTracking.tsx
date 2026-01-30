@@ -12,6 +12,7 @@ import { Loader2, Plus } from "lucide-react";
 import { format } from "date-fns";
 import { Bar, Line } from "react-chartjs-2";
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend } from "chart.js";
+import { DatePickerPopover } from "@/components/DatePickerPopover";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend);
 
@@ -42,12 +43,12 @@ export default function CropTracking() {
 
   const [cycleForm, setCycleForm] = useState({
     cropId: "",
-    plantingDate: "",
-    expectedHarvestDate: "",
+    plantingDate: null as Date | null,
+    expectedHarvestDate: null as Date | null,
     areaPlantedHectares: "",
   });
   const [soilForm, setSoilForm] = useState({
-    testDate: "",
+    testDate: null as Date | null,
     phLevel: "",
     nitrogenLevel: "",
     phosphorusLevel: "",
@@ -64,25 +65,25 @@ export default function CropTracking() {
     await createCycleMutation.mutateAsync({
       farmId: selectedFarmId,
       cropId: parseInt(cycleForm.cropId),
-      plantingDate: new Date(cycleForm.plantingDate),
-      expectedHarvestDate: cycleForm.expectedHarvestDate ? new Date(cycleForm.expectedHarvestDate) : undefined,
+      plantingDate: cycleForm.plantingDate,
+      expectedHarvestDate: cycleForm.expectedHarvestDate || undefined,
       areaPlantedHectares: cycleForm.areaPlantedHectares,
     });
-    setCycleForm({ cropId: "", plantingDate: "", expectedHarvestDate: "", areaPlantedHectares: "" });
+    setCycleForm({ cropId: "", plantingDate: null, expectedHarvestDate: null, areaPlantedHectares: "" });
   };
 
   const handleCreateSoilTest = async () => {
     if (!selectedFarmId || !soilForm.testDate) return;
     await createSoilTestMutation.mutateAsync({
       farmId: selectedFarmId,
-      testDate: new Date(soilForm.testDate),
+      testDate: soilForm.testDate,
       phLevel: soilForm.phLevel,
       nitrogenLevel: soilForm.nitrogenLevel,
       phosphorusLevel: soilForm.phosphorusLevel,
       potassiumLevel: soilForm.potassiumLevel,
     });
     setSoilForm({
-      testDate: "",
+      testDate: null,
       phLevel: "",
       nitrogenLevel: "",
       phosphorusLevel: "",
@@ -223,18 +224,18 @@ export default function CropTracking() {
                 </div>
                 <div>
                   <Label>Planting Date</Label>
-                  <Input
-                    type="date"
+                  <DatePickerPopover
                     value={cycleForm.plantingDate}
-                    onChange={(e) => setCycleForm({ ...cycleForm, plantingDate: e.target.value })}
+                    onChange={(date) => setCycleForm({ ...cycleForm, plantingDate: date || null })}
+                    placeholder="Select planting date"
                   />
                 </div>
                 <div>
                   <Label>Expected Harvest Date</Label>
-                  <Input
-                    type="date"
+                  <DatePickerPopover
                     value={cycleForm.expectedHarvestDate}
-                    onChange={(e) => setCycleForm({ ...cycleForm, expectedHarvestDate: e.target.value })}
+                    onChange={(date) => setCycleForm({ ...cycleForm, expectedHarvestDate: date || null })}
+                    placeholder="Select harvest date"
                   />
                 </div>
                 <div>
@@ -291,10 +292,10 @@ export default function CropTracking() {
               <div className="space-y-4">
                 <div>
                   <Label>Test Date</Label>
-                  <Input
-                    type="date"
+                  <DatePickerPopover
                     value={soilForm.testDate}
-                    onChange={(e) => setSoilForm({ ...soilForm, testDate: e.target.value })}
+                    onChange={(date) => setSoilForm({ ...soilForm, testDate: date || null })}
+                    placeholder="Select test date"
                   />
                 </div>
                 <div>
@@ -315,6 +316,24 @@ export default function CropTracking() {
                     step="0.1"
                     value={soilForm.nitrogenLevel}
                     onChange={(e) => setSoilForm({ ...soilForm, nitrogenLevel: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <Label>Phosphorus (mg/kg)</Label>
+                  <Input
+                    type="number"
+                    step="0.1"
+                    value={soilForm.phosphorusLevel}
+                    onChange={(e) => setSoilForm({ ...soilForm, phosphorusLevel: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <Label>Potassium (mg/kg)</Label>
+                  <Input
+                    type="number"
+                    step="0.1"
+                    value={soilForm.potassiumLevel}
+                    onChange={(e) => setSoilForm({ ...soilForm, potassiumLevel: e.target.value })}
                   />
                 </div>
                 <Button onClick={handleCreateSoilTest} disabled={createSoilTestMutation.isPending}>
@@ -358,31 +377,54 @@ export default function CropTracking() {
         <TabsContent value="yields" className="space-y-4">
           <Dialog>
             <DialogTrigger asChild>
-              <Button disabled={!selectedCycleId}>
+              <Button>
                 <Plus className="mr-2 h-4 w-4" />
-                Record Harvest
+                Record Yield
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Record Harvest</DialogTitle>
+                <DialogTitle>Record Yield</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
                 <div>
-                  <Label>Quantity (kg)</Label>
+                  <Label>Cycle</Label>
+                  <Select value={selectedCycleId?.toString() || ""} onValueChange={(val) => setSelectedCycleId(parseInt(val))}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select cycle..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {cycles.map((cycle: any) => (
+                        <SelectItem key={cycle.id} value={cycle.id.toString()}>
+                          {cycle.varietyName || `Cycle ${cycle.id}`}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Yield (kg)</Label>
                   <Input
                     type="number"
-                    step="0.01"
+                    step="0.1"
                     value={yieldForm.yieldQuantityKg}
                     onChange={(e) => setYieldForm({ ...yieldForm, yieldQuantityKg: e.target.value })}
                   />
                 </div>
                 <div>
-                  <Label>Grade</Label>
+                  <Label>Quality Grade</Label>
                   <Input
+                    type="text"
                     value={yieldForm.qualityGrade}
                     onChange={(e) => setYieldForm({ ...yieldForm, qualityGrade: e.target.value })}
-                    placeholder="Grade A"
+                  />
+                </div>
+                <div>
+                  <Label>Notes</Label>
+                  <Input
+                    type="text"
+                    value={yieldForm.notes}
+                    onChange={(e) => setYieldForm({ ...yieldForm, notes: e.target.value })}
                   />
                 </div>
                 <Button onClick={handleCreateYield} disabled={createYieldMutation.isPending}>
@@ -396,47 +438,38 @@ export default function CropTracking() {
             {yields.map((y: any) => (
               <Card key={y.id}>
                 <CardHeader>
-                  <CardTitle className="text-sm">Harvest on {format(new Date(y.recordedDate), "MMM d, yyyy")}</CardTitle>
+                  <CardTitle className="text-sm">{y.yieldQuantityKg} kg - Grade {y.qualityGrade}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-xs text-gray-600">Quantity</p>
-                      <p className="font-semibold">{y.yieldQuantityKg} kg</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-600">Grade</p>
-                      <p className="font-semibold">{y.qualityGrade || "N/A"}</p>
-                    </div>
-                  </div>
+                  <p className="text-sm text-gray-600">{y.notes}</p>
                 </CardContent>
               </Card>
             ))}
           </div>
         </TabsContent>
 
-        <TabsContent value="analytics" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Yield Distribution</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div style={{ height: "300px" }}>
-                  <Bar data={yieldChartData} options={{ maintainAspectRatio: false }} />
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle>Soil pH Trends</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div style={{ height: "300px" }}>
-                  <Line data={phTrendData} options={{ maintainAspectRatio: false }} />
-                </div>
-              </CardContent>
-            </Card>
+        <TabsContent value="analytics" className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {yields.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Yield Trend</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Bar data={yieldChartData} options={{ responsive: true }} />
+                </CardContent>
+              </Card>
+            )}
+            {soilTests.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>pH Trend</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Line data={phTrendData} options={{ responsive: true }} />
+                </CardContent>
+              </Card>
+            )}
           </div>
         </TabsContent>
       </Tabs>

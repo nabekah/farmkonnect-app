@@ -571,7 +571,7 @@ describe("Marketplace Router", () => {
   });
 });
 
-
+describe("Marketplace Additional Tests", () => {
   it("should have removeFromCart procedure", () => {
     const caller = appRouter.createCaller({
       user: { id: 1, email: "test@example.com", role: "user" },
