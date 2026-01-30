@@ -2,6 +2,7 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
+import { notificationRouter } from "./notificationRouter";
 import { z } from "zod";
 import { getDb } from "./db";
 import { TRPCError } from "@trpc/server";
@@ -19,6 +20,7 @@ import {
   feedingRecords,
   performanceMetrics,
   themeConfigs,
+  notifications,
 } from "../drizzle/schema";
 import { eq } from "drizzle-orm";
 
@@ -475,6 +477,8 @@ export const appRouter = router({
         return await db.delete(themeConfigs).where(eq(themeConfigs.userId, ctx.user.id));
       }),
   }),
+
+  notifications: notificationRouter,
 });
 
 export type AppRouter = typeof appRouter;

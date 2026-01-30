@@ -480,3 +480,35 @@ export const themeConfigs = mysqlTable("themeConfigs", {
 
 export type ThemeConfig = typeof themeConfigs.$inferSelect;
 export type InsertThemeConfig = typeof themeConfigs.$inferInsert;
+
+// ============================================================================
+// NOTIFICATIONS
+// ============================================================================
+export const notifications = mysqlTable("notifications", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  type: mysqlEnum("type", [
+    "vaccination_due",
+    "vaccination_overdue",
+    "breeding_due",
+    "breeding_overdue",
+    "health_alert",
+    "performance_alert",
+    "feed_low",
+    "task_reminder",
+    "system_alert",
+  ]).notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  message: text("message").notNull(),
+  relatedAnimalId: int("relatedAnimalId"),
+  relatedBreedingId: int("relatedBreedingId"),
+  relatedVaccinationId: int("relatedVaccinationId"),
+  priority: mysqlEnum("priority", ["low", "medium", "high", "critical"]).default("medium").notNull(),
+  isRead: boolean("isRead").default(false).notNull(),
+  actionUrl: varchar("actionUrl", { length: 500 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  readAt: timestamp("readAt"),
+});
+
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = typeof notifications.$inferInsert;

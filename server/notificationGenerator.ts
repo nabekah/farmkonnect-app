@@ -1,0 +1,82 @@
+import { getDb } from "./db";
+import { notifications, breedingRecords } from "../drizzle/schema";
+import { eq, lt, gt, and } from "drizzle-orm";
+
+export async function generateBreedingNotifications(userId: number) {
+  const db = await getDb();
+  if (!db) return;
+
+  const today = new Date();
+  const thirtyDaysFromNow = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+  // Get breedings due within 30 days
+  const upcomingBreedings = await db.select().from(breedingRecords)
+    .where(and(
+      gt(breedingRecords.expectedDueDate, today),
+      lt(breedingRecords.expectedDueDate, thirtyDaysFromNow)
+    ));
+
+  for (const breeding of upcomingBreedings) {
+    // Check if notification already exists
+    const existing = await db.select().from(notifications)
+      .where(and(
+        eq(notifications.userId, userId),
+        eq(notifications.relatedBreedingId, breeding.id),
+        eq(notifications.type, "breeding_due")
+      ));
+
+    if (existing.length === 0 && breeding.expectedDueDate) {
+      const daysUntilDue = Math.ceil((breeding.expectedDueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+      await db.insert(notifications).values({
+        userId,
+        type: "breeding_due",
+        title: `Expected Birth Coming`,
+        message: `Animal expected to give birth in ${daysUntilDue} days`,
+        relatedBreedingId: breeding.id,
+        priority: daysUntilDue <= 7 ? "high" : "medium",
+        actionUrl: `/livestock#breeding`,
+      });
+    }
+  }
+
+  // Get overdue breedings
+  const overdueBreedings = await db.select().from(breedingRecords)
+    .where(lt(breedingRecords.expectedDueDate, today));
+
+  for (const breeding of overdueBreedings) {
+    // Check if overdue notification already exists
+    const existing = await db.select().from(notifications)
+      .where(and(
+        eq(notifications.userId, userId),
+        eq(notifications.relatedBreedingId, breeding.id),
+        eq(notifications.type, "breeding_overdue")
+      ));
+
+    if (existing.length === 0) {
+      await db.insert(notifications).values({
+        userId,
+        type: "breeding_overdue",
+        title: `Birth Overdue`,
+        message: `Animal is overdue for expected birth`,
+        relatedBreedingId: breeding.id,
+        priority: "critical",
+        actionUrl: `/livestock#breeding`,
+      });
+    }
+  }
+}
+
+export async function cleanupOldNotifications(userId: number, daysOld: number = 30) {
+  const db = await getDb();
+  if (!db) return;
+
+  const cutoffDate = new Date(Date.now() - daysOld * 24 * 60 * 60 * 1000);
+
+  await db.delete(notifications)
+    .where(and(
+      eq(notifications.userId, userId),
+      lt(notifications.createdAt, cutoffDate),
+      eq(notifications.isRead, true)
+    ));
+}

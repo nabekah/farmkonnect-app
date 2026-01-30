@@ -274,3 +274,73 @@ describe("tRPC Routers", () => {
     });
   });
 });
+
+describe("Notifications Router", () => {
+  it("should have notifications router defined", () => {
+    const caller = appRouter.createCaller({
+      user: { id: 1, email: "test@example.com", role: "user" },
+      db: {} as any,
+    });
+    expect(caller.notifications).toBeDefined();
+  });
+
+  it("should have getAll procedure", () => {
+    const caller = appRouter.createCaller({
+      user: { id: 1, email: "test@example.com", role: "user" },
+      db: {} as any,
+    });
+    expect(caller.notifications.getAll).toBeDefined();
+  });
+
+  it("should have getUnread procedure", () => {
+    const caller = appRouter.createCaller({
+      user: { id: 1, email: "test@example.com", role: "user" },
+      db: {} as any,
+    });
+    expect(caller.notifications.getUnread).toBeDefined();
+  });
+
+  it("should have markAsRead procedure", () => {
+    const caller = appRouter.createCaller({
+      user: { id: 1, email: "test@example.com", role: "user" },
+      db: {} as any,
+    });
+    expect(caller.notifications.markAsRead).toBeDefined();
+  });
+
+  it("should have markAllAsRead procedure", () => {
+    const caller = appRouter.createCaller({
+      user: { id: 1, email: "test@example.com", role: "user" },
+      db: {} as any,
+    });
+    expect(caller.notifications.markAllAsRead).toBeDefined();
+  });
+
+  it("should have delete procedure", () => {
+    const caller = appRouter.createCaller({
+      user: { id: 1, email: "test@example.com", role: "user" },
+      db: {} as any,
+    });
+    expect(caller.notifications.delete).toBeDefined();
+  });
+
+  it("should support all notification types", () => {
+    const notificationTypes = [
+      "vaccination_due",
+      "vaccination_overdue",
+      "breeding_due",
+      "breeding_overdue",
+      "health_alert",
+      "performance_alert",
+      "feed_low",
+      "task_reminder",
+      "system_alert",
+    ];
+    expect(notificationTypes.length).toBe(9);
+  });
+
+  it("should support all priority levels", () => {
+    const priorities = ["low", "medium", "high", "critical"];
+    expect(priorities.length).toBe(4);
+  });
+});

@@ -29,6 +29,7 @@ import { Button } from "./ui/button";
 
 import { Leaf, TrendingUp, BarChart3, ShoppingCart, Settings, Users, Moon, Sun } from 'lucide-react';
 import { useDarkMode } from '@/contexts/DarkModeContext';
+import { NotificationCenter } from './NotificationCenter';
 
 const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/" },
@@ -277,10 +278,18 @@ function DashboardLayoutContent({
                   </span>
                 </div>
               </div>
+              <NotificationCenter />
             </div>
           </div>
         )}
-        <main className="flex-1 p-4">{children}</main>
+        <main className="flex-1 p-4 flex flex-col">
+          {!isMobile && (
+            <div className="flex justify-end mb-4">
+              <NotificationCenter />
+            </div>
+          )}
+          {children}
+        </main>
       </SidebarInset>
     </>
   );
