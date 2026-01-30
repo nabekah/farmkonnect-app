@@ -32,7 +32,12 @@ export default function Marketplace() {
     price: "",
     quantity: "",
     unit: "kg",
+    imageUrl: "",
   });
+
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>("");
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   const [checkoutForm, setCheckoutForm] = useState({
     address: "",
@@ -54,6 +59,18 @@ export default function Marketplace() {
   const { data: orders = [] } = trpc.marketplace.listOrders.useQuery({ role: "buyer" });
 
   // Mutations
+  const uploadImageMutation = trpc.marketplace.uploadProductImage.useMutation({
+    onSuccess: (data) => {
+      setNewProduct({ ...newProduct, imageUrl: data.url });
+      toast.success("Image uploaded successfully!");
+      setIsUploadingImage(false);
+    },
+    onError: (error: any) => {
+      toast.error(error?.message || "Failed to upload image");
+      setIsUploadingImage(false);
+    },
+  });
+
   const createProductMutation = trpc.marketplace.createProduct.useMutation({
     onSuccess: () => {
       refetchProducts();
@@ -67,7 +84,10 @@ export default function Marketplace() {
         price: "",
         quantity: "",
         unit: "kg",
+        imageUrl: "",
       });
+      setSelectedImage(null);
+      setImagePreview("");
     },
     onError: (error: any) => {
       toast.error(error?.message || "Failed to add product");
@@ -108,6 +128,51 @@ export default function Marketplace() {
   });
 
   // Handlers
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image size must be less than 5MB');
+      return;
+    }
+
+    setSelectedImage(file);
+    
+    // Create preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleImageUpload = async () => {
+    if (!selectedImage) return;
+
+    setIsUploadingImage(true);
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      try {
+        await uploadImageMutation.mutateAsync({
+          imageData: reader.result as string,
+          fileName: selectedImage.name,
+          mimeType: selectedImage.type,
+        });
+      } catch (error) {
+        console.error('Upload error:', error);
+      }
+    };
+    reader.readAsDataURL(selectedImage);
+  };
+
   const handleCreateProduct = async () => {
     if (!newProduct.name || !newProduct.category || !newProduct.price || !newProduct.quantity) {
       toast.error("Please fill in all required fields");
@@ -123,6 +188,7 @@ export default function Marketplace() {
         price: parseFloat(newProduct.price),
         quantity: parseFloat(newProduct.quantity),
         unit: newProduct.unit,
+        imageUrl: newProduct.imageUrl || undefined,
       });
     } catch (error: any) {
       console.error("Error creating product:", error);
@@ -246,6 +312,18 @@ export default function Marketplace() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredProducts.map((product: any) => (
               <Card key={product.id}>
+                {product.imageUrl && (
+                  <div className="w-full h-48 overflow-hidden">
+                    <img 
+                      src={product.imageUrl} 
+                      alt={product.name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = 'none';
+                      }}
+                    />
+                  </div>
+                )}
                 <CardHeader>
                   <CardTitle className="line-clamp-2">{product.name}</CardTitle>
                   <CardDescription>{product.category}</CardDescription>
@@ -398,6 +476,36 @@ export default function Marketplace() {
                 </DialogHeader>
                 <div className="space-y-4">
                   <div>
+                    <Label>Product Image</Label>
+                    <div className="space-y-2">
+                      {imagePreview && (
+                        <div className="relative w-full h-48 border rounded-lg overflow-hidden">
+                          <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                        </div>
+                      )}
+                      <div className="flex gap-2">
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageSelect}
+                          className="flex-1"
+                        />
+                        {selectedImage && !newProduct.imageUrl && (
+                          <Button
+                            type="button"
+                            onClick={handleImageUpload}
+                            disabled={isUploadingImage}
+                          >
+                            {isUploadingImage ? "Uploading..." : "Upload"}
+                          </Button>
+                        )}
+                      </div>
+                      {newProduct.imageUrl && (
+                        <p className="text-sm text-green-600">✓ Image uploaded successfully</p>
+                      )}
+                    </div>
+                  </div>
+                  <div>
                     <Label>Product Name</Label>
                     <Input
                       value={newProduct.name}
@@ -509,6 +617,18 @@ export default function Marketplace() {
               .filter((p: any) => p.sellerId === user?.id)
               .map((product: any) => (
                 <Card key={product.id}>
+                  {product.imageUrl && (
+                    <div className="w-full h-48 overflow-hidden">
+                      <img 
+                        src={product.imageUrl} 
+                        alt={product.name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = 'none';
+                        }}
+                      />
+                    </div>
+                  )}
                   <CardHeader>
                     <CardTitle className="line-clamp-2">{product.name}</CardTitle>
                     <CardDescription>{product.category}</CardDescription>

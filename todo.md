@@ -273,3 +273,11 @@
 - [x] Fix seed script column name mismatch (productName -> name)
 - [x] Fix price type handling in Marketplace component (decimal strings to numbers)
 - [x] Populate 8 sample products from Ghana and West Africa
+
+
+## S3 Product Image Integration (Current)
+- [x] Review existing S3 storage setup and marketplace schema
+- [x] Add image upload endpoint in marketplace router
+- [x] Implement image upload UI in product creation dialog
+- [x] Display product images in marketplace cards with fallback
+- [x] Test image upload and display functionality

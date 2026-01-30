@@ -11,8 +11,40 @@ import {
   marketplaceReviews,
 } from "../drizzle/schema";
 import { eq, and, desc, like } from "drizzle-orm";
+import { storagePut } from "./storage";
 
 export const marketplaceRouter = router({
+  // ========== IMAGE UPLOAD ==========
+  uploadProductImage: protectedProcedure
+    .input(z.object({ 
+      productId: z.number().optional(),
+      imageData: z.string(), // base64 encoded image
+      fileName: z.string(),
+      mimeType: z.string(),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      try {
+        // Decode base64 image
+        const base64Data = input.imageData.split(',')[1] || input.imageData;
+        const buffer = Buffer.from(base64Data, 'base64');
+        
+        // Generate unique file key
+        const timestamp = Date.now();
+        const randomSuffix = Math.random().toString(36).substring(2, 8);
+        const fileExtension = input.fileName.split('.').pop() || 'jpg';
+        const fileKey = `marketplace/products/${ctx.user.id}/${timestamp}-${randomSuffix}.${fileExtension}`;
+        
+        // Upload to S3
+        const { url } = await storagePut(fileKey, buffer, input.mimeType);
+        
+        return { url, key: fileKey };
+      } catch (error: any) {
+        throw new TRPCError({ 
+          code: "INTERNAL_SERVER_ERROR", 
+          message: error?.message || "Failed to upload image" 
+        });
+      }
+    }),
   // ========== PRODUCTS ==========
   listProducts: protectedProcedure
     .input(z.object({ category: z.string().optional(), search: z.string().optional(), limit: z.number().default(20) }))
