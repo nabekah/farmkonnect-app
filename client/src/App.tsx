@@ -16,6 +16,7 @@ import Marketplace from "./pages/Marketplace";
 import Training from "./pages/Training";
 import MERL from "./pages/MERL";
 import IoTManagement from "./pages/IoTManagement";
+import TransportManagement from "./pages/TransportManagement";
 
 function Router() {
   return (
@@ -81,6 +82,13 @@ function Router() {
         {() => (
           <DashboardLayout>
             <IoTManagement />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/transport">
+        {() => (
+          <DashboardLayout>
+            <TransportManagement />
           </DashboardLayout>
         )}
       </Route>

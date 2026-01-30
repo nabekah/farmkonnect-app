@@ -27,7 +27,7 @@ import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
 import { Button } from "./ui/button";
 
-import { Leaf, TrendingUp, BarChart3, ShoppingCart, Settings, Users, Moon, Sun, BookOpen, Target, Cpu } from 'lucide-react';
+import { Leaf, TrendingUp, BarChart3, ShoppingCart, Settings, Users, Moon, Sun, BookOpen, Target, Cpu, Truck } from 'lucide-react';
 import { useDarkMode } from '@/contexts/DarkModeContext';
 import { NotificationCenter } from './NotificationCenter';
 
@@ -40,6 +40,7 @@ const menuItems = [
   { icon: BookOpen, label: "Training", path: "/training" },
   { icon: Target, label: "MERL", path: "/merl" },
   { icon: Cpu, label: "IoT", path: "/iot" },
+  { icon: Truck, label: "Transport", path: "/transport" },
   { icon: BarChart3, label: "Analytics", path: "/analytics" },
   { icon: Settings, label: "Settings", path: "/settings" },
 ];
