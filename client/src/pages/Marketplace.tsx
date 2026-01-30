@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { ShoppingCart, Plus, Trash2, Search, Package } from "lucide-react";
+import { ShoppingCart, Plus, Trash2, Search, Package, Truck } from "lucide-react";
 import { toast } from "sonner";
 import { ProductImageCarousel } from "@/components/ProductImageCarousel";
 import { ProductCard } from "@/components/ProductCard";
@@ -26,6 +26,8 @@ export default function Marketplace() {
   const [sortBy, setSortBy] = useState("newest");
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
+  const [isTransportDialogOpen, setIsTransportDialogOpen] = useState(false);
+  const [selectedOrderForTransport, setSelectedOrderForTransport] = useState<any>(null);
 
   const [newProduct, setNewProduct] = useState({
     name: "",
@@ -394,8 +396,22 @@ export default function Marketplace() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-lg font-semibold">₹{parseFloat(order.totalAmount).toFixed(2)}</p>
-                  <p className="text-sm text-muted-foreground mt-2">{order.deliveryAddress}</p>
+                  <div className="space-y-3">
+                    <p className="text-lg font-semibold">₹{parseFloat(order.totalAmount).toFixed(2)}</p>
+                    <p className="text-sm text-muted-foreground">{order.deliveryAddress}</p>
+                    {order.status === "confirmed" && (
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          setSelectedOrderForTransport(order);
+                          setIsTransportDialogOpen(true);
+                        }}
+                      >
+                        <Truck className="mr-2 h-4 w-4" />
+                        Request Transport
+                      </Button>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
             ))
@@ -677,6 +693,45 @@ export default function Marketplace() {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Transport Request Dialog */}
+      <Dialog open={isTransportDialogOpen} onOpenChange={setIsTransportDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Request Transport for Order</DialogTitle>
+          </DialogHeader>
+          {selectedOrderForTransport && (
+            <div className="space-y-4">
+              <div className="grid gap-2">
+                <Label>Order Number</Label>
+                <Input value={selectedOrderForTransport.orderNumber} disabled />
+              </div>
+              <div className="grid gap-2">
+                <Label>Delivery Address</Label>
+                <Textarea value={selectedOrderForTransport.deliveryAddress} disabled rows={2} />
+              </div>
+              <div className="grid gap-2">
+                <Label>Total Amount</Label>
+                <Input value={`₹${parseFloat(selectedOrderForTransport.totalAmount).toFixed(2)}`} disabled />
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setIsTransportDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => {
+                    // Navigate to transport page with pre-filled order details
+                    window.location.href = `/transport?orderId=${selectedOrderForTransport.id}`;
+                  }}
+                >
+                  <Truck className="mr-2 h-4 w-4" />
+                  Create Transport Request
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { WeatherWidget } from "@/components/WeatherWidget";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, Leaf, TrendingUp, Users, BarChart3, Zap, Settings, Cloud, Droplets, ShoppingCart } from "lucide-react";
@@ -90,6 +91,15 @@ export default function Home() {
       <div className="space-y-2">
         <h1 className="text-4xl font-bold">Welcome back, {user?.name}!</h1>
         <p className="text-lg text-muted-foreground">Manage your agricultural operations efficiently with FarmKonnect</p>
+      </div>
+
+      {/* Weather Widget */}
+      <div className="mb-8">
+        <WeatherWidget
+          latitude={5.6037}
+          longitude={-0.1870}
+          showForecast={true}
+        />
       </div>
 
       {/* Quick Actions */}

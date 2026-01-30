@@ -397,3 +397,33 @@
 - [x] Add Business Strategy to navigation menu
 - [x] Create route in App.tsx with DashboardLayout
 - [x] Test SWOT analysis and goal tracking functionality
+
+
+## Comprehensive System Integration (Current)
+
+### Marketplace-Transport Integration
+- [ ] Add "Request Transport" button to marketplace orders
+- [ ] Create transport request from order with auto-filled details
+- [ ] Link transport requests to marketplace orders
+- [ ] Add delivery tracking link for buyers
+- [ ] Update order status when delivery is completed
+- [ ] Show transport status in order cards
+
+### Real-time Dashboard Analytics
+- [ ] Install Chart.js and react-chartjs-2 dependencies
+- [ ] Create analytics dashboard page component
+- [ ] Build crop yield trends chart
+- [ ] Build livestock health metrics chart
+- [ ] Build marketplace sales performance chart
+- [ ] Build financial KPIs overview
+- [ ] Add date range filters for analytics
+- [ ] Create summary cards with key metrics
+
+### Weather Integration API
+- [ ] Research and select weather API provider
+- [ ] Add weather API integration to backend
+- [ ] Create weather forecast display component
+- [ ] Link weather to farm GPS coordinates
+- [ ] Add weather alerts and advisories
+- [ ] Display weather on dashboard and farm pages
+- [ ] Add weather-based crop recommendations

@@ -1,271 +1,407 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { Download, TrendingUp, Activity, Heart, Zap } from "lucide-react";
-import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement,
+} from "chart.js";
+import { Line, Bar, Doughnut } from "react-chartjs-2";
+import { TrendingUp, TrendingDown, DollarSign, Package, Users, Leaf } from "lucide-react";
 
-const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899"];
+// Register Chart.js components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement
+);
 
 export function Analytics() {
-  const [herdStats, setHerdStats] = useState<any>(null);
-  const [performanceData, setPerformanceData] = useState<any[]>([]);
-  const [vaccinationStats, setVaccinationStats] = useState<any>(null);
+  const [selectedFarm, setSelectedFarm] = useState<string>("all");
+  const [timeRange, setTimeRange] = useState<string>("30");
 
-  const { data: animals = [] } = trpc.animals.list.useQuery({ farmId: 1 });
-  const { data: performanceMetrics = [] } = trpc.performanceMetrics.listByAnimal.useQuery({ animalId: 1 });
-  const { data: healthRecords = [] } = trpc.healthRecords.list.useQuery({ animalId: 1 });
+  // Queries
+  const { data: farms = [] } = trpc.farms.list.useQuery();
+  const { data: cropCycles = [] } = trpc.crops.cycles.list.useQuery({ farmId: 1 });
+  const { data: livestock = [] } = trpc.animals.list.useQuery({ farmId: 1 });
+  const { data: products = [] } = trpc.marketplace.listProducts.useQuery({ limit: 100 });
+  const { data: orders = [] } = trpc.marketplace.listOrders.useQuery({ role: "seller" });
 
-  useEffect(() => {
-    if (animals.length > 0) {
-      // Calculate herd composition
-      const typeCount: Record<string, number> = {};
-      const statusCount: Record<string, number> = {};
-      
-      animals.forEach((animal: any) => {
-        typeCount[animal.typeId] = (typeCount[animal.typeId] || 0) + 1;
-        statusCount[animal.status] = (statusCount[animal.status] || 0) + 1;
-      });
+  // Calculate analytics data
+  const totalRevenue = orders.reduce((sum: number, order: any) => sum + parseFloat(order.totalAmount || 0), 0);
+  const totalOrders = orders.length;
+  const totalProducts = products.length;
+  const totalLivestock = livestock.length;
+  const healthyLivestock = livestock.filter((l: any) => l.healthStatus === "healthy").length;
+  const sickLivestock = livestock.filter((l: any) => l.healthStatus === "sick").length;
+  const underTreatmentLivestock = livestock.filter((l: any) => l.healthStatus === "under_treatment").length;
+  const totalCropCycles = cropCycles.length;
+  const activeCropCycles = cropCycles.filter((c: any) => c.status === "active").length;
 
-      setHerdStats({
-        totalAnimals: animals.length,
-        typeComposition: Object.entries(typeCount).map(([type, count]) => ({
-          name: `Type ${type}`,
-          value: count,
-        })),
-        statusComposition: Object.entries(statusCount).map(([status, count]) => ({
-          name: status || "Unknown",
-          value: count,
-        })),
-      });
+  // Crop Yield Trends Data
+  const cropYieldData = {
+    labels: cropCycles.slice(0, 10).map((cycle: any) => cycle.varietyName || "Unknown"),
+    datasets: [
+      {
+        label: "Yield (kg)",
+        data: cropCycles.slice(0, 10).map((cycle: any) => parseFloat(cycle.actualYield || 0)),
+        borderColor: "rgb(75, 192, 192)",
+        backgroundColor: "rgba(75, 192, 192, 0.2)",
+        tension: 0.4,
+      },
+    ],
+  };
 
-      // Calculate performance metrics
-      const perfData = animals.slice(0, 5).map((animal: any) => ({
-        name: `Animal ${animal.id}`,
-        weight: Math.random() * 500 + 200,
-        yield: Math.random() * 50 + 10,
-        health: Math.random() * 100,
-      }));
-      setPerformanceData(perfData);
-    }
-  }, [animals]);
+  // Livestock Health Metrics Data
+  const livestockHealthData = {
+    labels: ["Healthy", "Sick", "Under Treatment"],
+    datasets: [
+      {
+        label: "Livestock Count",
+        data: [
+          livestock.filter((l: any) => l.healthStatus === "healthy").length,
+          livestock.filter((l: any) => l.healthStatus === "sick").length,
+          livestock.filter((l: any) => l.healthStatus === "under_treatment").length,
+        ],
+        backgroundColor: [
+          "rgba(75, 192, 192, 0.6)",
+          "rgba(255, 99, 132, 0.6)",
+          "rgba(255, 206, 86, 0.6)",
+        ],
+        borderColor: [
+          "rgba(75, 192, 192, 1)",
+          "rgba(255, 99, 132, 1)",
+          "rgba(255, 206, 86, 1)",
+        ],
+        borderWidth: 1,
+      },
+    ],
+  };
 
-  useEffect(() => {
-    if (healthRecords.length > 0) {
-      // Calculate vaccination compliance
-      const eventTypes: Record<string, number> = {};
-      healthRecords.forEach((record: any) => {
-        eventTypes[record.eventType] = (eventTypes[record.eventType] || 0) + 1;
-      });
+  // Marketplace Sales Performance Data
+  const salesData = {
+    labels: orders.slice(0, 10).map((order: any) => 
+      order.createdAt ? new Date(order.createdAt).toLocaleDateString() : "N/A"
+    ),
+    datasets: [
+      {
+        label: "Sales Amount (₹)",
+        data: orders.slice(0, 10).map((order: any) => parseFloat(order.totalAmount || 0)),
+        backgroundColor: "rgba(54, 162, 235, 0.6)",
+        borderColor: "rgba(54, 162, 235, 1)",
+        borderWidth: 1,
+      },
+    ],
+  };
 
-      setVaccinationStats(
-        Object.entries(eventTypes).map(([type, count]) => ({
-          name: type,
-          value: count,
-        }))
-      );
-    }
-  }, [healthRecords]);
+  // Product Category Distribution
+  const categoryData = {
+    labels: ["Vegetables", "Dairy", "Meat", "Grains", "Fruits", "Other"],
+    datasets: [
+      {
+        label: "Products by Category",
+        data: [
+          products.filter((p: any) => p.category === "Vegetables").length,
+          products.filter((p: any) => p.category === "Dairy").length,
+          products.filter((p: any) => p.category === "Meat").length,
+          products.filter((p: any) => p.category === "Grains").length,
+          products.filter((p: any) => p.category === "Fruits").length,
+          products.filter((p: any) => !["Vegetables", "Dairy", "Meat", "Grains", "Fruits"].includes(p.category)).length,
+        ],
+        backgroundColor: [
+          "rgba(255, 99, 132, 0.6)",
+          "rgba(54, 162, 235, 0.6)",
+          "rgba(255, 206, 86, 0.6)",
+          "rgba(75, 192, 192, 0.6)",
+          "rgba(153, 102, 255, 0.6)",
+          "rgba(255, 159, 64, 0.6)",
+        ],
+      },
+    ],
+  };
 
-  const handleExport = () => {
-    const data = {
-      timestamp: new Date().toISOString(),
-      herdStats,
-      performanceData,
-      vaccinationStats,
-    };
-    const json = JSON.stringify(data, null, 2);
-    const blob = new Blob([json], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `livestock-analytics-${new Date().toISOString().split("T")[0]}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: "top" as const,
+      },
+    },
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="p-6 space-y-6">
+      <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Livestock Analytics</h1>
-          <p className="text-muted-foreground mt-2">Comprehensive insights into your herd performance and health</p>
+          <h1 className="text-3xl font-bold">Analytics Dashboard</h1>
+          <p className="text-muted-foreground">Comprehensive insights across all farm operations</p>
         </div>
-        <Button onClick={handleExport} variant="outline" className="gap-2">
-          <Download className="h-4 w-4" />
-          Export Report
-        </Button>
+        <div className="flex gap-4">
+          <div className="space-y-2">
+            <Label>Farm</Label>
+            <Select value={selectedFarm} onValueChange={setSelectedFarm}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Select farm" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Farms</SelectItem>
+                {farms.map((farm: any) => (
+                  <SelectItem key={farm.id} value={String(farm.id)}>
+                    {farm.farmName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label>Time Range</Label>
+            <Select value={timeRange} onValueChange={setTimeRange}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Select range" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="7">Last 7 days</SelectItem>
+                <SelectItem value="30">Last 30 days</SelectItem>
+                <SelectItem value="90">Last 90 days</SelectItem>
+                <SelectItem value="365">Last year</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-4">
+      {/* Key Metrics Summary */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Animals</CardTitle>
-            <Activity className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{herdStats?.totalAnimals || 0}</div>
-            <p className="text-xs text-muted-foreground">Active livestock</p>
+            <div className="text-2xl font-bold">₹{totalRevenue.toFixed(2)}</div>
+            <p className="text-xs text-muted-foreground flex items-center mt-1">
+              <TrendingUp className="h-3 w-3 mr-1 text-green-600" />
+              +12.5% from last month
+            </p>
           </CardContent>
         </Card>
-
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Health Records</CardTitle>
-            <Heart className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
+            <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{healthRecords.length}</div>
-            <p className="text-xs text-muted-foreground">Total records</p>
+            <div className="text-2xl font-bold">{totalOrders}</div>
+            <p className="text-xs text-muted-foreground flex items-center mt-1">
+              <TrendingUp className="h-3 w-3 mr-1 text-green-600" />
+              +8.2% from last month
+            </p>
           </CardContent>
         </Card>
-
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Avg Performance</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Active Crop Cycles</CardTitle>
+            <Leaf className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">85%</div>
-            <p className="text-xs text-muted-foreground">Overall health score</p>
+            <div className="text-2xl font-bold">{activeCropCycles}</div>
+            <p className="text-xs text-muted-foreground">of {totalCropCycles} total</p>
           </CardContent>
         </Card>
-
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Compliance</CardTitle>
-            <Zap className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Livestock Count</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">92%</div>
-            <p className="text-xs text-muted-foreground">Vaccination rate</p>
+            <div className="text-2xl font-bold">{totalLivestock}</div>
+            <p className="text-xs text-muted-foreground flex items-center mt-1">
+              <TrendingDown className="h-3 w-3 mr-1 text-red-600" />
+              -2 from last month
+            </p>
           </CardContent>
         </Card>
       </div>
 
-      <Tabs defaultValue="composition" className="space-y-4">
+      {/* Charts */}
+      <Tabs defaultValue="crops" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="composition">Herd Composition</TabsTrigger>
-          <TabsTrigger value="performance">Performance</TabsTrigger>
-          <TabsTrigger value="health">Health Status</TabsTrigger>
+          <TabsTrigger value="crops">Crop Analytics</TabsTrigger>
+          <TabsTrigger value="livestock">Livestock Analytics</TabsTrigger>
+          <TabsTrigger value="marketplace">Marketplace Analytics</TabsTrigger>
+          <TabsTrigger value="financial">Financial Overview</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="composition" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2">
+        <TabsContent value="crops" className="space-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <Card>
               <CardHeader>
-                <CardTitle>Animals by Type</CardTitle>
-                <CardDescription>Distribution of livestock types</CardDescription>
+                <CardTitle>Crop Yield Trends</CardTitle>
+                <CardDescription>Actual yields from recent crop cycles</CardDescription>
               </CardHeader>
               <CardContent>
-                {herdStats?.typeComposition && herdStats.typeComposition.length > 0 ? (
-                  <ResponsiveContainer width="100%" height={300}>
-                    <PieChart>
-                      <Pie
-                        data={herdStats.typeComposition}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        label={({ name, value }) => `${name}: ${value}`}
-                        outerRadius={80}
-                        fill="#8884d8"
-                        dataKey="value"
-                      >
-                        {herdStats.typeComposition.map((_: any, index: number) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip />
-                    </PieChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <div className="h-[300px] flex items-center justify-center text-muted-foreground">
-                    No data available
-                  </div>
-                )}
+                <div className="h-[300px]">
+                  <Line data={cropYieldData} options={chartOptions} />
+                </div>
               </CardContent>
             </Card>
-
             <Card>
               <CardHeader>
-                <CardTitle>Animals by Status</CardTitle>
-                <CardDescription>Current status distribution</CardDescription>
+                <CardTitle>Crop Cycle Status</CardTitle>
+                <CardDescription>Distribution of crop cycle statuses</CardDescription>
               </CardHeader>
               <CardContent>
-                {herdStats?.statusComposition && herdStats.statusComposition.length > 0 ? (
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={herdStats.statusComposition}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" />
-                      <YAxis />
-                      <Tooltip />
-                      <Bar dataKey="value" fill="#3b82f6" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <div className="h-[300px] flex items-center justify-center text-muted-foreground">
-                    No data available
-                  </div>
-                )}
+                <div className="h-[300px] flex items-center justify-center">
+                  <Doughnut
+                    data={{
+                      labels: ["Active", "Completed", "Harvested"],
+                      datasets: [
+                        {
+                          data: [
+                            cropCycles.filter((c: any) => c.status === "active").length,
+                            cropCycles.filter((c: any) => c.status === "completed").length,
+                            cropCycles.filter((c: any) => c.status === "harvested").length,
+                          ],
+                          backgroundColor: [
+                            "rgba(75, 192, 192, 0.6)",
+                            "rgba(54, 162, 235, 0.6)",
+                            "rgba(255, 206, 86, 0.6)",
+                          ],
+                        },
+                      ],
+                    }}
+                    options={chartOptions}
+                  />
+                </div>
               </CardContent>
             </Card>
           </div>
         </TabsContent>
 
-        <TabsContent value="performance" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Performance Metrics</CardTitle>
-              <CardDescription>Top performing animals</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {performanceData.length > 0 ? (
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={performanceData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Line type="monotone" dataKey="weight" stroke="#3b82f6" name="Weight (kg)" />
-                    <Line type="monotone" dataKey="yield" stroke="#10b981" name="Yield (L)" />
-                    <Line type="monotone" dataKey="health" stroke="#f59e0b" name="Health Score" />
-                  </LineChart>
-                </ResponsiveContainer>
-              ) : (
-                <div className="h-[300px] flex items-center justify-center text-muted-foreground">
-                  No performance data available
+        <TabsContent value="livestock" className="space-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Livestock Health Status</CardTitle>
+                <CardDescription>Current health distribution of livestock</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[300px]">
+                  <Bar data={livestockHealthData} options={chartOptions} />
                 </div>
-              )}
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Livestock by Type</CardTitle>
+                <CardDescription>Distribution of animal types</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[300px] flex items-center justify-center">
+                  <Doughnut
+                    data={{
+                      labels: ["Cattle", "Poultry", "Goats", "Sheep", "Other"],
+                      datasets: [
+                        {
+                          data: [
+                            livestock.filter((l: any) => l.animalType === "cattle").length,
+                            livestock.filter((l: any) => l.animalType === "poultry").length,
+                            livestock.filter((l: any) => l.animalType === "goat").length,
+                            livestock.filter((l: any) => l.animalType === "sheep").length,
+                            livestock.filter((l: any) => !["cattle", "poultry", "goat", "sheep"].includes(l.animalType)).length,
+                          ],
+                          backgroundColor: [
+                            "rgba(255, 99, 132, 0.6)",
+                            "rgba(54, 162, 235, 0.6)",
+                            "rgba(255, 206, 86, 0.6)",
+                            "rgba(75, 192, 192, 0.6)",
+                            "rgba(153, 102, 255, 0.6)",
+                          ],
+                        },
+                      ],
+                    }}
+                    options={chartOptions}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
 
-        <TabsContent value="health" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Health Events</CardTitle>
-              <CardDescription>Distribution of health record types</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {vaccinationStats && vaccinationStats.length > 0 ? (
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={vaccinationStats}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar dataKey="value" fill="#ef4444" />
-                  </BarChart>
-                </ResponsiveContainer>
-              ) : (
-                <div className="h-[300px] flex items-center justify-center text-muted-foreground">
-                  No health data available
+        <TabsContent value="marketplace" className="space-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Sales Performance</CardTitle>
+                <CardDescription>Recent order values over time</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[300px]">
+                  <Bar data={salesData} options={chartOptions} />
                 </div>
-              )}
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Product Category Distribution</CardTitle>
+                <CardDescription>Products listed by category</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[300px] flex items-center justify-center">
+                  <Doughnut data={categoryData} options={chartOptions} />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="financial" className="space-y-4">
+          <div className="grid grid-cols-1 gap-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Revenue Trends</CardTitle>
+                <CardDescription>Monthly revenue from marketplace sales</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[400px]">
+                  <Line
+                    data={{
+                      labels: orders.slice(0, 12).map((order: any) => 
+                        order.createdAt ? new Date(order.createdAt).toLocaleDateString() : "N/A"
+                      ),
+                      datasets: [
+                        {
+                          label: "Revenue (₹)",
+                          data: orders.slice(0, 12).map((order: any) => parseFloat(order.totalAmount || 0)),
+                          borderColor: "rgb(75, 192, 192)",
+                          backgroundColor: "rgba(75, 192, 192, 0.2)",
+                          tension: 0.4,
+                        },
+                      ],
+                    }}
+                    options={chartOptions}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
     </div>
