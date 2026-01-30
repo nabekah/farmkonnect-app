@@ -7,6 +7,7 @@ import { feedingRouter } from "./feedingRouter";
 import { marketplaceRouter } from "./marketplaceRouter";
 import { iotRouter } from "./iotRouter";
 import { weatherRouter } from "./weatherRouter";
+import { weatherNotificationRouter } from "./weatherNotificationRouter";
 import { inventoryRouter } from "./inventoryRouter";
 import { trainingRouter } from "./trainingRouter";
 import { merlRouter } from "./merlRouter";
@@ -500,6 +501,7 @@ export const appRouter = router({
   marketplace: marketplaceRouter,
   iot: iotRouter,
   weather: weatherRouter,
+  weatherNotifications: weatherNotificationRouter,
   inventory: inventoryRouter,
   training: trainingRouter,
   merl: merlRouter,

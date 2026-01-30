@@ -437,3 +437,17 @@
 - [x] Add user-friendly message indicating mock data is being used
 - [x] Create mock data generators for weather and forecast
 - [x] All 105 tests passing with graceful fallback
+
+
+## Weather System Enhancements (Current)
+- [x] Request OpenWeatherMap API key from user via webdev_request_secrets
+- [x] Add setup instructions for obtaining free API key
+- [x] Create farm detail page with weather widget
+- [x] Add farm-specific weather based on GPS coordinates
+- [x] Implement weather-based notification system
+- [x] Create notification triggers for frost warnings
+- [x] Create notification triggers for heat stress alerts
+- [x] Create notification triggers for heavy rain warnings
+- [x] Add weatherNotificationRouter with checkAllFarmsWeather mutation
+- [x] Add getWeatherAlerts query for real-time alert display
+- [x] Test weather notifications with OpenWeatherMap API

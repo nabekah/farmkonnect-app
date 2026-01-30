@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2, Plus, MapPin, Leaf, Map } from "lucide-react";
 import { toast } from "sonner";
+import { WeatherWidget } from "@/components/WeatherWidget";
 
 export default function FarmManagement() {
   const { user } = useAuth();
@@ -420,6 +421,14 @@ export default function FarmManagement() {
                       {new Date(farm.createdAt).toLocaleDateString()}
                     </p>
                   </div>
+                  {farm.gpsLatitude && farm.gpsLongitude && (
+                    <div className="pt-3 border-t">
+                      <WeatherWidget 
+                        latitude={parseFloat(farm.gpsLatitude)} 
+                        longitude={parseFloat(farm.gpsLongitude)}
+                      />
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
