@@ -212,3 +212,14 @@
 - [ ] Build crop tracking screens
 - [ ] Implement real-time notifications
 - [ ] Add offline data sync
+
+
+## Automated Irrigation Scheduling
+- [x] Design irrigation automation schema with 6 database tables
+- [x] Create irrigation scheduling calculation engine with crop water requirements
+- [ ] Build tRPC procedures for irrigation management
+- [ ] Create Irrigation Dashboard UI component
+- [ ] Implement soil moisture monitoring and alerts
+- [ ] Add weather-based irrigation recommendations
+- [ ] Create unit tests for irrigation system
+- [x] TypeScript compilation: 0 errors

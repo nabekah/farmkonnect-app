@@ -625,3 +625,108 @@ export type InsertMarketplaceCart = typeof marketplaceCart.$inferInsert;
 
 
 // IoT Devices and Sensors
+
+// Irrigation Automation System
+export const irrigationZones = mysqlTable("irrigation_zones", {
+  id: int("id").primaryKey().autoincrement(),
+  farmId: int("farm_id").notNull().references(() => farms.id, { onDelete: "cascade" }),
+  zoneName: varchar("zone_name", { length: 255 }).notNull(),
+  cropType: varchar("crop_type", { length: 100 }).notNull(), // wheat, corn, rice, etc.
+  areaHectares: decimal("area_hectares", { precision: 10, scale: 2 }),
+  soilType: varchar("soil_type", { length: 100 }), // clay, sandy, loam, etc.
+  fieldCapacity: decimal("field_capacity", { precision: 5, scale: 2 }), // % water holding capacity
+  wiltingPoint: decimal("wilting_point", { precision: 5, scale: 2 }), // % water stress point
+  targetMoisture: decimal("target_moisture", { precision: 5, scale: 2 }), // optimal % moisture
+  minMoisture: decimal("min_moisture", { precision: 5, scale: 2 }), // trigger irrigation threshold
+  maxMoisture: decimal("max_moisture", { precision: 5, scale: 2 }), // prevent overwatering
+  status: varchar("status", { length: 50 }).default("active"), // active, inactive, maintenance
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+});
+export type IrrigationZone = typeof irrigationZones.$inferSelect;
+export type InsertIrrigationZone = typeof irrigationZones.$inferInsert;
+
+export const irrigationSchedules = mysqlTable("irrigation_schedules", {
+  id: int("id").primaryKey().autoincrement(),
+  zoneId: int("zone_id").notNull().references(() => irrigationZones.id, { onDelete: "cascade" }),
+  scheduleName: varchar("schedule_name", { length: 255 }).notNull(),
+  scheduleType: varchar("schedule_type", { length: 50 }).notNull(), // manual, automatic, weather-based
+  durationMinutes: int("duration_minutes").notNull(), // irrigation duration in minutes
+  flowRateLitersPerMin: decimal("flow_rate_liters_per_min", { precision: 10, scale: 2 }),
+  frequency: varchar("frequency", { length: 50 }), // daily, every_2_days, weekly, etc.
+  startTime: varchar("start_time", { length: 8 }), // HH:MM:SS format
+  endTime: varchar("end_time", { length: 8 }),
+  daysOfWeek: varchar("days_of_week", { length: 100 }), // 0-6 for Sun-Sat (comma-separated)
+  weatherAdjustment: boolean("weather_adjustment").default(true), // adjust based on rainfall
+  enabled: boolean("enabled").default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+});
+export type IrrigationSchedule = typeof irrigationSchedules.$inferSelect;
+export type InsertIrrigationSchedule = typeof irrigationSchedules.$inferInsert;
+
+export const irrigationEvents = mysqlTable("irrigation_events", {
+  id: int("id").primaryKey().autoincrement(),
+  scheduleId: int("schedule_id").notNull().references(() => irrigationSchedules.id, { onDelete: "cascade" }),
+  zoneId: int("zone_id").notNull().references(() => irrigationZones.id, { onDelete: "cascade" }),
+  eventType: varchar("event_type", { length: 50 }).notNull(), // scheduled, manual, emergency, skipped
+  startTime: timestamp("start_time").notNull(),
+  endTime: timestamp("end_time"),
+  durationMinutes: int("duration_minutes"),
+  waterAppliedLiters: decimal("water_applied_liters", { precision: 15, scale: 2 }),
+  reason: varchar("reason", { length: 500 }), // why irrigation was triggered/skipped
+  status: varchar("status", { length: 50 }).notNull(), // completed, in_progress, failed, skipped
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+export type IrrigationEvent = typeof irrigationEvents.$inferSelect;
+export type InsertIrrigationEvent = typeof irrigationEvents.$inferInsert;
+
+export const soilMoistureReadings = mysqlTable("soil_moisture_readings", {
+  id: int("id").primaryKey().autoincrement(),
+  zoneId: int("zone_id").notNull().references(() => irrigationZones.id, { onDelete: "cascade" }),
+  sensorId: int("sensor_id").references(() => iotDevices.id, { onDelete: "set null" }),
+  moisturePercentage: decimal("moisture_percentage", { precision: 5, scale: 2 }).notNull(),
+  temperature: decimal("temperature", { precision: 5, scale: 2 }), // soil temperature
+  conductivity: decimal("conductivity", { precision: 10, scale: 2 }), // soil EC value
+  ph: decimal("ph", { precision: 3, scale: 1 }), // soil pH
+  readingTime: timestamp("reading_time").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+export type SoilMoistureReading = typeof soilMoistureReadings.$inferSelect;
+export type InsertSoilMoistureReading = typeof soilMoistureReadings.$inferInsert;
+
+export const irrigationRecommendations = mysqlTable("irrigation_recommendations", {
+  id: int("id").primaryKey().autoincrement(),
+  zoneId: int("zone_id").notNull().references(() => irrigationZones.id, { onDelete: "cascade" }),
+  recommendationType: varchar("recommendation_type", { length: 50 }).notNull(), // irrigate_now, delay, skip, increase, decrease
+  priority: varchar("priority", { length: 50 }).notNull(), // critical, high, medium, low
+  reason: varchar("reason", { length: 500 }).notNull(),
+  recommendedDurationMinutes: int("recommended_duration_minutes"),
+  estimatedWaterNeeded: decimal("estimated_water_needed", { precision: 15, scale: 2 }), // liters
+  weatherFactor: decimal("weather_factor", { precision: 5, scale: 2 }), // rainfall adjustment %
+  soilMoistureFactor: decimal("soil_moisture_factor", { precision: 5, scale: 2 }), // current moisture %
+  cropWaterRequirement: decimal("crop_water_requirement", { precision: 10, scale: 2 }), // mm/day
+  acknowledged: boolean("acknowledged").default(false),
+  acknowledgedAt: timestamp("acknowledged_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+});
+export type IrrigationRecommendation = typeof irrigationRecommendations.$inferSelect;
+export type InsertIrrigationRecommendation = typeof irrigationRecommendations.$inferInsert;
+
+export const irrigationStatistics = mysqlTable("irrigation_statistics", {
+  id: int("id").primaryKey().autoincrement(),
+  zoneId: int("zone_id").notNull().references(() => irrigationZones.id, { onDelete: "cascade" }),
+  dateStart: date("date_start").notNull(),
+  dateEnd: date("date_end").notNull(),
+  totalWaterAppliedLiters: decimal("total_water_applied_liters", { precision: 15, scale: 2 }).default("0"),
+  totalDurationMinutes: int("total_duration_minutes").default(0),
+  irrigationEventCount: int("irrigation_event_count").default(0),
+  averageMoisture: decimal("average_moisture", { precision: 5, scale: 2 }),
+  rainfallMm: decimal("rainfall_mm", { precision: 10, scale: 2 }), // total rainfall in period
+  waterEfficiency: decimal("water_efficiency", { precision: 5, scale: 2 }), // % efficiency score
+  costEstimate: decimal("cost_estimate", { precision: 10, scale: 2 }), // estimated water cost
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+export type IrrigationStatistics = typeof irrigationStatistics.$inferSelect;
+export type InsertIrrigationStatistics = typeof irrigationStatistics.$inferInsert;
