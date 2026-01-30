@@ -7,6 +7,7 @@ import { feedingRouter } from "./feedingRouter";
 import { marketplaceRouter } from "./marketplaceRouter";
 import { iotRouter } from "./iotRouter";
 import { weatherRouter } from "./weatherRouter";
+import { inventoryRouter } from "./inventoryRouter";
 import { z } from "zod";
 import { getDb } from "./db";
 import { TRPCError } from "@trpc/server";
@@ -487,6 +488,7 @@ export const appRouter = router({
   marketplace: marketplaceRouter,
   iot: iotRouter,
   weather: weatherRouter,
+  inventory: inventoryRouter,
 });
 
 export type AppRouter = typeof appRouter;

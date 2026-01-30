@@ -730,3 +730,73 @@ export const irrigationStatistics = mysqlTable("irrigation_statistics", {
 });
 export type IrrigationStatistics = typeof irrigationStatistics.$inferSelect;
 export type InsertIrrigationStatistics = typeof irrigationStatistics.$inferInsert;
+
+
+// Inventory Management System
+export const inventoryItems = mysqlTable("inventory_items", {
+  id: int("id").primaryKey().autoincrement(),
+  productId: int("product_id").notNull().references(() => marketplaceProducts.id, { onDelete: "cascade" }),
+  currentStock: decimal("current_stock", { precision: 15, scale: 2 }).notNull().default("0"),
+  reservedStock: decimal("reserved_stock", { precision: 15, scale: 2 }).default("0"), // stock in pending orders
+  availableStock: decimal("available_stock", { precision: 15, scale: 2 }).default("0"), // current - reserved
+  minimumThreshold: decimal("minimum_threshold", { precision: 15, scale: 2 }).notNull(), // low stock alert level
+  reorderQuantity: decimal("reorder_quantity", { precision: 15, scale: 2 }), // suggested reorder amount
+  lastRestockedAt: timestamp("last_restocked_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+});
+export type InventoryItem = typeof inventoryItems.$inferSelect;
+export type InsertInventoryItem = typeof inventoryItems.$inferInsert;
+
+export const inventoryTransactions = mysqlTable("inventory_transactions", {
+  id: int("id").primaryKey().autoincrement(),
+  productId: int("product_id").notNull().references(() => marketplaceProducts.id, { onDelete: "cascade" }),
+  transactionType: varchar("transaction_type", { length: 50 }).notNull(), // purchase, sale, adjustment, restock, damage, return
+  quantity: decimal("quantity", { precision: 15, scale: 2 }).notNull(),
+  notes: varchar("notes", { length: 500 }),
+  referenceId: int("reference_id"), // order ID, return ID, etc.
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+export type InventoryTransaction = typeof inventoryTransactions.$inferSelect;
+export type InsertInventoryTransaction = typeof inventoryTransactions.$inferInsert;
+
+export const lowStockAlerts = mysqlTable("low_stock_alerts", {
+  id: int("id").primaryKey().autoincrement(),
+  productId: int("product_id").notNull().references(() => marketplaceProducts.id, { onDelete: "cascade" }),
+  sellerId: int("seller_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  alertType: varchar("alert_type", { length: 50 }).notNull(), // low_stock, out_of_stock, critical
+  currentStock: decimal("current_stock", { precision: 15, scale: 2 }).notNull(),
+  minimumThreshold: decimal("minimum_threshold", { precision: 15, scale: 2 }).notNull(),
+  acknowledged: boolean("acknowledged").default(false),
+  acknowledgedAt: timestamp("acknowledged_at"),
+  acknowledgedBy: int("acknowledged_by").references(() => users.id, { onDelete: "set null" }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+export type LowStockAlert = typeof lowStockAlerts.$inferSelect;
+export type InsertLowStockAlert = typeof lowStockAlerts.$inferInsert;
+
+export const inventoryForecasts = mysqlTable("inventory_forecasts", {
+  id: int("id").primaryKey().autoincrement(),
+  productId: int("product_id").notNull().references(() => marketplaceProducts.id, { onDelete: "cascade" }),
+  forecastDate: date("forecast_date").notNull(),
+  projectedStock: decimal("projected_stock", { precision: 15, scale: 2 }).notNull(),
+  projectedSales: decimal("projected_sales", { precision: 15, scale: 2 }), // estimated sales for period
+  forecastMethod: varchar("forecast_method", { length: 50 }), // moving_average, trend, seasonal
+  confidence: decimal("confidence", { precision: 3, scale: 0 }), // 0-100 confidence %
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+export type InventoryForecast = typeof inventoryForecasts.$inferSelect;
+export type InsertInventoryForecast = typeof inventoryForecasts.$inferInsert;
+
+export const inventoryAuditLogs = mysqlTable("inventory_audit_logs", {
+  id: int("id").primaryKey().autoincrement(),
+  productId: int("product_id").notNull().references(() => marketplaceProducts.id, { onDelete: "cascade" }),
+  userId: int("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  action: varchar("action", { length: 100 }).notNull(), // update_stock, set_threshold, acknowledge_alert, etc.
+  oldValue: varchar("old_value", { length: 500 }),
+  newValue: varchar("new_value", { length: 500 }),
+  reason: varchar("reason", { length: 500 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+export type InventoryAuditLog = typeof inventoryAuditLogs.$inferSelect;
+export type InsertInventoryAuditLog = typeof inventoryAuditLogs.$inferInsert;
