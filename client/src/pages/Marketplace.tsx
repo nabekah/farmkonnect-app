@@ -254,7 +254,7 @@ export default function Marketplace() {
                   <p className="text-sm text-muted-foreground line-clamp-2">{product.description}</p>
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-2xl font-bold">₹{(product.price as unknown as number).toFixed(2)}</p>
+                      <p className="text-2xl font-bold">₹{parseFloat(product.price).toFixed(2)}</p>
                       <p className="text-xs text-muted-foreground">{product.quantity} {product.unit} available</p>
                     </div>
                   </div>
@@ -289,7 +289,7 @@ export default function Marketplace() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-lg font-semibold">₹{(order.totalAmount as unknown as number).toFixed(2)}</p>
+                  <p className="text-lg font-semibold">₹{parseFloat(order.totalAmount).toFixed(2)}</p>
                   <p className="text-sm text-muted-foreground mt-2">{order.deliveryAddress}</p>
                 </CardContent>
               </Card>
@@ -312,7 +312,7 @@ export default function Marketplace() {
                         <p className="text-sm text-muted-foreground">Qty: {item.quantity}</p>
                       </div>
                       <div className="flex items-center gap-2">
-                        <p>₹{((product?.price as unknown as number || 0) * parseFloat(item.quantity)).toFixed(2)}</p>
+                        <p>₹{(parseFloat(product?.price || "0") * parseFloat(item.quantity)).toFixed(2)}</p>
                         <Button
                           variant="ghost"
                           size="sm"
@@ -481,7 +481,7 @@ export default function Marketplace() {
                   <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-2xl font-bold">₹{(sellerStats.totalRevenue as unknown as number).toFixed(2)}</p>
+                  <p className="text-2xl font-bold">₹{parseFloat(String(sellerStats.totalRevenue)).toFixed(2)}</p>
                 </CardContent>
               </Card>
               <Card>
@@ -514,7 +514,7 @@ export default function Marketplace() {
                     <CardDescription>{product.category}</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-2">
-                    <p className="text-2xl font-bold">₹{(product.price as unknown as number).toFixed(2)}</p>
+                    <p className="text-2xl font-bold">₹{parseFloat(product.price).toFixed(2)}</p>
                     <p className="text-sm text-muted-foreground">{product.quantity} {product.unit} available</p>
                     <Badge variant={product.status === "active" ? "default" : "secondary"}>{product.status}</Badge>
                   </CardContent>

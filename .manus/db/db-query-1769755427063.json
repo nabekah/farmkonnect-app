@@ -1,0 +1,82 @@
+{
+  "query": "SELECT id, name, category, price, quantity, unit, status FROM marketplaceProducts LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2kNF22PapS9mysw.root --database WZQk4bD8DnsRHwYBkmh7FN --execute SELECT id, name, category, price, quantity, unit, status FROM marketplaceProducts LIMIT 10;",
+  "rows": [
+    {
+      "id": "1",
+      "name": "Organic Cocoa Beans",
+      "category": "cash_crops",
+      "price": "45.00",
+      "quantity": "250.00",
+      "unit": "kg",
+      "status": "active"
+    },
+    {
+      "id": "2",
+      "name": "Fresh Cassava Roots",
+      "category": "root_crops",
+      "price": "8.50",
+      "quantity": "500.00",
+      "unit": "kg",
+      "status": "active"
+    },
+    {
+      "id": "3",
+      "name": "Groundnut Paste",
+      "category": "processed",
+      "price": "12.00",
+      "quantity": "150.00",
+      "unit": "kg",
+      "status": "active"
+    },
+    {
+      "id": "4",
+      "name": "Organic Maize Flour",
+      "category": "cereals",
+      "price": "6.50",
+      "quantity": "300.00",
+      "unit": "kg",
+      "status": "active"
+    },
+    {
+      "id": "5",
+      "name": "Fresh Plantains",
+      "category": "fruits",
+      "price": "4.00",
+      "quantity": "400.00",
+      "unit": "kg",
+      "status": "active"
+    },
+    {
+      "id": "6",
+      "name": "Shea Butter",
+      "category": "processed",
+      "price": "18.00",
+      "quantity": "100.00",
+      "unit": "kg",
+      "status": "active"
+    },
+    {
+      "id": "7",
+      "name": "Free-Range Chicken Eggs",
+      "category": "poultry",
+      "price": "3.50",
+      "quantity": "600.00",
+      "unit": "kg",
+      "status": "active"
+    },
+    {
+      "id": "8",
+      "name": "Dried Chili Peppers",
+      "category": "spices",
+      "price": "9.00",
+      "quantity": "200.00",
+      "unit": "kg",
+      "status": "active"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\tcategory\tprice\tquantity\tunit\tstatus\n1\tOrganic Cocoa Beans\tcash_crops\t45.00\t250.00\tkg\tactive\n2\tFresh Cassava Roots\troot_crops\t8.50\t500.00\tkg\tactive\n3\tGroundnut Paste\tprocessed\t12.00\t150.00\tkg\tactive\n4\tOrganic Maize Flour\tcereals\t6.50\t300.00\tkg\tactive\n5\tFresh Plantains\tfruits\t4.00\t400.00\tkg\tactive\n6\tShea Butter\tprocessed\t18.00\t100.00\tkg\tactive\n7\tFree-Range Chicken Eggs\tpoultry\t3.50\t600.00\tkg\tactive\n8\tDried Chili Peppers\tspices\t9.00\t200.00\tkg\tactive\n",
+  "stderr": "",
+  "execution_time_ms": 52
+}

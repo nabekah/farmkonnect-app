@@ -312,14 +312,16 @@ async function seedData() {
     for (const product of products) {
       try {
         await connection.execute(
-          `INSERT INTO marketplaceProducts (productName, description, price, category, quantity, sellerId, status, createdAt, updatedAt) 
-           VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
+          `INSERT INTO marketplaceProducts (name, description, price, category, productType, quantity, unit, sellerId, status, createdAt, updatedAt) 
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
           [
             product.productName,
             product.description,
             product.price.toString(),
             product.category,
+            product.category, // productType
             product.quantity.toString(),
+            "kg", // default unit
             product.sellerId,
             "active",
           ]

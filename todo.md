@@ -263,3 +263,13 @@
 - [ ] Create sample orders and transactions
 - [ ] Add breeding and feeding records
 - [ ] Populate IoT devices and sensor readings
+
+
+## Database and Marketplace Issues (Current)
+- [x] Fix database schema mismatches with project specifications
+- [x] Fix marketplace product visibility issue - products not showing
+- [x] Verify all database tables match expected structure
+- [x] Test marketplace product listing and filtering
+- [x] Fix seed script column name mismatch (productName -> name)
+- [x] Fix price type handling in Marketplace component (decimal strings to numbers)
+- [x] Populate 8 sample products from Ghana and West Africa
