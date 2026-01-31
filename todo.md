@@ -1230,3 +1230,7 @@
 - [x] Display health history timeline for each crop cycle
 - [x] Add health status indicators to crop cycle cards
 - [x] Implement health alerts for severe issues
+
+## Crops Page Bug Fix
+- [x] Fix TypeError when accessing health records with undefined cycles array
+- [x] Add proper null/undefined checks before mapping cycles for health indicators

@@ -38,7 +38,7 @@ export default function CropTracking() {
   );
 
   // Fetch health records for all cycles to show indicators
-  const cycleHealthRecords = cycles.map((cycle: any) => {
+  const cycleHealthRecords = (cycles || []).map((cycle: any) => {
     const { data: healthRecords = [] } = trpc.crops.health.list.useQuery({ cycleId: cycle.id });
     return { cycleId: cycle.id, healthRecords };
   });
