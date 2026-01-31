@@ -1044,3 +1044,84 @@
 - [ ] Add push notification preferences
 - [ ] Add notification sound preferences
 - [ ] Save preferences to database
+
+
+## COMPREHENSIVE DATA TABLE CRUD SYSTEM - IN PROGRESS
+
+### Universal DataTable Component
+- [ ] Create reusable DataTable component with TanStack Table
+- [ ] Implement column sorting (ascending/descending)
+- [ ] Add column filtering with search inputs
+- [ ] Implement pagination with page size selection
+- [ ] Add row selection with checkboxes
+- [ ] Create column visibility toggle
+- [ ] Add export to CSV/Excel functionality
+- [ ] Implement responsive mobile view
+
+### Core Module Data Tables
+- [ ] Farms data table with location, size, type columns
+- [ ] Crops data table with variety, cycle status, yield columns
+- [ ] Livestock data table with breed, health status, age columns
+- [ ] Soil Tests data table with pH, nutrients, date columns
+- [ ] Fertilizer Applications data table with type, amount, date columns
+- [ ] Yield Records data table with quantity, quality, date columns
+
+### Business Module Data Tables
+- [ ] Marketplace Products data table with price, stock, status columns
+- [ ] Orders data table with buyer, seller, amount, status columns
+- [ ] Training Programs data table with title, duration, enrollment columns
+- [ ] Training Sessions data table with date, location, attendance columns
+- [ ] MERL KPIs data table with indicator, target, actual columns
+- [ ] Monitoring Visits data table with date, findings, actions columns
+
+### Technical Module Data Tables
+- [ ] IoT Devices data table with type, status, last reading columns
+- [ ] Sensor Readings data table with device, value, timestamp columns
+- [ ] Transport Requests data table with origin, destination, status columns
+- [ ] Weather History data table with temperature, conditions, date columns
+- [ ] Notifications data table with type, priority, read status columns
+
+### CRUD Operations
+- [ ] Inline cell editing with click-to-edit
+- [ ] Row-level edit dialog with full form
+- [ ] Single record delete with confirmation
+- [ ] Bulk delete with multi-select
+- [ ] Bulk status update operations
+- [ ] Duplicate record functionality
+- [ ] Record detail view modal
+
+### Advanced Features
+- [ ] Global search across all columns
+- [ ] Date range filters for temporal data
+- [ ] Status/category dropdown filters
+- [ ] Column reordering with drag-and-drop
+- [ ] Saved filter presets
+- [ ] Data refresh button
+- [ ] Loading states and error handling
+
+### Data Management Dashboard
+- [ ] Create central Data Management page
+- [ ] Add module selector with icons
+- [ ] Display record counts and statistics
+- [ ] Quick actions for each module
+- [ ] Recent activity feed
+- [ ] Data quality indicators
+- [ ] Bulk import/export tools
+
+
+## COMPREHENSIVE DATA TABLE CRUD SYSTEM - COMPLETE ✅
+- [x] Install TanStack Table for advanced data table functionality
+- [x] Create universal DataTable component with sorting, filtering, pagination
+- [x] Build Farms data table with view/edit/delete actions
+- [x] Build Crops data table with status badges and filtering
+- [x] Build Livestock data table with health status indicators
+- [x] Build Marketplace Products data table with stock management
+- [x] Build Training Programs data table with category filtering
+- [x] Build IoT Devices data table with status monitoring
+- [x] Create Data Management page as central hub
+- [x] Add module stats cards with record counts
+- [x] Implement details dialog for viewing complete record information
+- [x] Add export to CSV functionality for all tables
+- [x] Integrate Data Management into sidebar navigation
+- [x] TypeScript compilation: 0 errors
+- [x] All tests passing: 107 tests

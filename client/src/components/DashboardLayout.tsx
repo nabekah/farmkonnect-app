@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/sidebar";
 import { getLoginUrl } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
-import { LayoutDashboard, LogOut, PanelLeft } from "lucide-react";
+import { LayoutDashboard, LogOut, PanelLeft, Database } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
@@ -46,6 +46,7 @@ const menuItems = [
   { icon: LineChart, label: "Weather Trends", path: "/weather-trends" },
   { icon: Sprout, label: "Crop Planning", path: "/crop-planning" },
   { icon: BarChart3, label: "Analytics", path: "/analytics" },
+  { icon: Database, label: "Data Management", path: "/data-management" },
   { icon: Shield, label: "Security Dashboard", path: "/security", adminOnly: true },
   { icon: Shield, label: "Role Management", path: "/role-management", adminOnly: true },
   { icon: Settings, label: "Settings", path: "/settings" },

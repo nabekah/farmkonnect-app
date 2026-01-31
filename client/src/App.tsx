@@ -27,6 +27,7 @@ import SecurityDashboard from "./pages/SecurityDashboard";
 import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+import DataManagement from "./pages/DataManagement";
 
 function Router() {
   return (
@@ -35,6 +36,13 @@ function Router() {
       <Route path="/register" component={Register} />
       <Route path="/forgot-password" component={ForgotPassword} />
       <Route path="/reset-password" component={ResetPassword} />
+      <Route path="/data-management">
+        {() => (
+          <DashboardLayout>
+            <DataManagement />
+          </DashboardLayout>
+        )}
+      </Route>
       <Route path="/farms">
         {() => (
           <DashboardLayout>
