@@ -1146,3 +1146,15 @@
   - [ ] Add text search across multiple columns
   - [ ] Create saved filter presets system
   - [ ] Add filter reset functionality
+
+
+## DATA MANAGEMENT UI FIXES & ENHANCEMENTS - IN PROGRESS
+- [ ] Fix table visibility issues in DataManagement page
+- [ ] Ensure all table controls (select, edit, delete) are visible
+- [ ] Integrate update handlers for inline editing (farms, crops, livestock, products)
+- [ ] Integrate bulk delete handlers for all modules
+- [ ] Add filter presets (Active Farms, Sick Animals, Low Stock Products, etc.)
+- [ ] Implement CSV import functionality with validation
+- [ ] Add duplicate detection for imports
+- [ ] Create error reporting for failed imports
+- [ ] Test all CRUD operations end-to-end
