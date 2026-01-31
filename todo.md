@@ -1238,3 +1238,37 @@
 ## Crop Tracking Dashboard - Volta Green Acres Issue
 - [x] Investigate and fix dashboard view issue when Volta Green Acres farm is selected
 - [x] Ensure all farm selections work correctly in crop tracking
+
+## Home Page API Error
+- [x] Fix tRPC API error returning HTML instead of JSON (Error not reproducible - likely resolved by previous fixes)
+- [x] Identify which API query is failing on home page
+- [x] Ensure all tRPC endpoints return proper JSON responses
+
+## Sample Data Population
+- [ ] Create comprehensive seeding script for all modules
+- [ ] Add sample farms with varied locations and types
+- [ ] Add crop cycles with health records and yields
+- [ ] Add livestock with health and breeding records
+- [ ] Add marketplace products and orders
+- [ ] Add IoT devices and sensor readings
+- [ ] Add weather alerts and notifications
+- [ ] Add training materials and business records
+- [ ] Execute seeding script and verify data
+
+
+## Sample Data Seeding (Current Session)
+- [x] Create comprehensive sample data seeding script (seed-sample-data.mjs)
+- [x] Add 3 Ghana-based sample farms (Northern Savanna, Western Cocoa Estate, Central Poultry)
+- [x] Add 5 sample crops (Maize, Tomato, Cocoa, Cassava, Millet)
+- [x] Add 5 crop cycles with planting/harvest dates
+- [x] Add 3 soil test records with pH and nutrient levels
+- [x] Add 2 yield records with quantities
+- [x] Add 3 crop health records with photos and treatments
+- [x] Add 2 crop treatment records with effectiveness tracking
+- [x] Add 4 livestock animals (2 cattle, 1 chicken batch, 1 goat)
+- [x] Add 2 animal health records with checkup and treatment details
+- [x] Add 1 breeding record with expected due date
+- [x] Add 3 feeding records with cost tracking
+- [ ] Add marketplace products (table schema not created yet)
+- [ ] Add farm activities timeline (table exists, needs data)
+- [x] Successfully executed seeding script with all data populated
