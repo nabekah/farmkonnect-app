@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
@@ -16,6 +16,9 @@ import {
   CheckCircle2,
   Loader2,
   Leaf,
+  MapPin,
+  Play,
+  X,
 } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
@@ -136,7 +139,7 @@ export default function Home() {
             <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-10 max-w-3xl mx-auto">
               Manage your farms, track crops, monitor livestock, and boost productivity with real-time weather insights and IoT integration.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
               <a href={getLoginUrl()}>
                 <Button size="lg" className="text-lg px-8 py-6 bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600">
                   Get Started
@@ -149,6 +152,9 @@ export default function Home() {
                 </Button>
               </Link>
             </div>
+            
+            {/* Demo Video Player */}
+            <DemoVideoPlayer />
           </div>
         </div>
       </section>
@@ -243,6 +249,47 @@ export default function Home() {
                 "Performance metrics",
                 "Revenue tracking",
               ]}
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="py-20 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+              Trusted by Farmers Across Ghana
+            </h2>
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+              See how FarmKonnect is transforming agricultural operations
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <TestimonialCard
+              name="Kwame Mensah"
+              role="Crop Farmer"
+              location="Ashanti Region, Ghana"
+              image="👨🏿‍🌾"
+              quote="FarmKonnect has transformed how I manage my 20-hectare maize farm. The weather alerts help me plan irrigation perfectly, and I've increased my yields by 35% in just one season!"
+              rating={5}
+            />
+            <TestimonialCard
+              name="Ama Boateng"
+              role="Livestock Manager"
+              location="Greater Accra, Ghana"
+              image="👩🏿‍🌾"
+              quote="Managing 150 cattle was overwhelming until I found FarmKonnect. The breeding tracker and health records keep everything organized. I can't imagine farming without it now."
+              rating={5}
+            />
+            <TestimonialCard
+              name="Kofi Asante"
+              role="Mixed Farm Owner"
+              location="Eastern Region, Ghana"
+              image="👨🏿‍🌾"
+              quote="The marketplace feature helped me connect directly with buyers. I'm now selling my vegetables at better prices without middlemen. My revenue increased by 40% this year!"
+              rating={5}
             />
           </div>
         </div>
@@ -403,6 +450,116 @@ function FeatureCard({
             </li>
           ))}
         </ul>
+      </CardContent>
+    </Card>
+  );
+}
+
+// Component: Demo Video Player
+function DemoVideoPlayer() {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <>
+      <div className="max-w-4xl mx-auto">
+        <div 
+          className="relative rounded-2xl overflow-hidden shadow-2xl cursor-pointer group"
+          onClick={() => setIsOpen(true)}
+        >
+          {/* Video Thumbnail */}
+          <div className="aspect-video bg-gradient-to-br from-green-900 to-emerald-900 flex items-center justify-center">
+            <div className="text-center">
+              <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                <Play className="w-10 h-10 text-white ml-1" />
+              </div>
+              <p className="text-white text-lg font-semibold">Watch 2-Minute Demo</p>
+              <p className="text-green-100 text-sm mt-2">See FarmKonnect in Action</p>
+            </div>
+          </div>
+          
+          {/* Hover Overlay */}
+          <div className="absolute inset-0 bg-green-600/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+        </div>
+      </div>
+
+      {/* Video Modal */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
+          onClick={() => setIsOpen(false)}
+        >
+          <div className="relative w-full max-w-5xl">
+            <button 
+              className="absolute -top-12 right-0 text-white hover:text-gray-300 transition-colors"
+              onClick={() => setIsOpen(false)}
+            >
+              <X className="w-8 h-8" />
+            </button>
+            <div className="aspect-video bg-gray-900 rounded-lg overflow-hidden">
+              {/* Placeholder for video - replace with actual video URL */}
+              <div className="w-full h-full flex items-center justify-center text-white">
+                <div className="text-center">
+                  <p className="text-2xl font-bold mb-4">Demo Video Coming Soon</p>
+                  <p className="text-gray-400 mb-6">Replace this with your actual video URL</p>
+                  <p className="text-sm text-gray-500">Suggested: Upload video to YouTube/Vimeo and embed here</p>
+                </div>
+              </div>
+              {/* 
+              Uncomment and replace with your video URL:
+              <iframe
+                className="w-full h-full"
+                src="https://www.youtube.com/embed/YOUR_VIDEO_ID"
+                title="FarmKonnect Demo"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+              */}
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+// Component: Testimonial Card
+function TestimonialCard({
+  name,
+  role,
+  location,
+  image,
+  quote,
+  rating,
+}: {
+  name: string;
+  role: string;
+  location: string;
+  image: string;
+  quote: string;
+  rating: number;
+}) {
+  return (
+    <Card className="hover:shadow-xl transition-all duration-300">
+      <CardHeader>
+        <div className="flex items-center gap-4 mb-4">
+          <div className="text-5xl">{image}</div>
+          <div>
+            <CardTitle className="text-lg mb-1">{name}</CardTitle>
+            <p className="text-sm text-muted-foreground">{role}</p>
+            <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+              <MapPin className="w-3 h-3" />
+              {location}
+            </p>
+          </div>
+        </div>
+        <div className="flex gap-1 mb-3">
+          {Array.from({ length: rating }).map((_, i) => (
+            <span key={i} className="text-yellow-500 text-lg">★</span>
+          ))}
+        </div>
+      </CardHeader>
+      <CardContent>
+        <p className="text-gray-600 dark:text-gray-300 italic">"{quote}"</p>
       </CardContent>
     </Card>
   );
