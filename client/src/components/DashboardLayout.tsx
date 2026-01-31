@@ -46,6 +46,7 @@ const menuItems = [
   { icon: LineChart, label: "Weather Trends", path: "/weather-trends" },
   { icon: Sprout, label: "Crop Planning", path: "/crop-planning" },
   { icon: BarChart3, label: "Analytics", path: "/analytics" },
+  { icon: Shield, label: "Security Dashboard", path: "/security", adminOnly: true },
   { icon: Shield, label: "Role Management", path: "/role-management", adminOnly: true },
   { icon: Settings, label: "Settings", path: "/settings" },
 ];

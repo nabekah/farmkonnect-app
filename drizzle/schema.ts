@@ -19,6 +19,16 @@ export const users = mysqlTable("users", {
   phone: varchar("phone", { length: 20 }),
   loginMethod: varchar("loginMethod", { length: 64 }),
   role: mysqlEnum("role", ["farmer", "agent", "veterinarian", "buyer", "transporter", "admin", "user"]).default("user").notNull(),
+  // Security fields
+  approvalStatus: mysqlEnum("approvalStatus", ["pending", "approved", "rejected"]).default("pending").notNull(),
+  accountStatus: mysqlEnum("accountStatus", ["active", "disabled", "suspended"]).default("active").notNull(),
+  accountStatusReason: text("accountStatusReason"),
+  mfaEnabled: boolean("mfaEnabled").default(false).notNull(),
+  mfaSecret: varchar("mfaSecret", { length: 255 }),
+  mfaBackupCodes: text("mfaBackupCodes"), // JSON array of backup codes
+  failedLoginAttempts: int("failedLoginAttempts").default(0).notNull(),
+  lastFailedLoginAt: timestamp("lastFailedLoginAt"),
+  accountLockedUntil: timestamp("accountLockedUntil"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
@@ -842,3 +852,173 @@ export const weatherHistory = mysqlTable("weatherHistory", {
 
 export type WeatherHistory = typeof weatherHistory.$inferSelect;
 export type InsertWeatherHistory = typeof weatherHistory.$inferInsert;
+
+// ============================================================================
+// ENTERPRISE SECURITY SYSTEM
+// ============================================================================
+
+// Dynamic Roles with Custom Permissions
+export const customRoles = mysqlTable("customRoles", {
+  id: int("id").autoincrement().primaryKey(),
+  roleName: varchar("roleName", { length: 100 }).notNull().unique(),
+  displayName: varchar("displayName", { length: 255 }).notNull(),
+  description: text("description"),
+  isSystemRole: boolean("isSystemRole").default(false).notNull(), // Cannot be deleted if true
+  createdBy: int("createdBy").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type CustomRole = typeof customRoles.$inferSelect;
+export type InsertCustomRole = typeof customRoles.$inferInsert;
+
+// Module Permissions
+export const modulePermissions = mysqlTable("modulePermissions", {
+  id: int("id").autoincrement().primaryKey(),
+  moduleName: varchar("moduleName", { length: 100 }).notNull(), // e.g., "farms", "crops", "livestock", "marketplace"
+  displayName: varchar("displayName", { length: 255 }).notNull(),
+  description: text("description"),
+  category: varchar("category", { length: 100 }), // e.g., "Agriculture", "Business", "Administration"
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type ModulePermission = typeof modulePermissions.$inferSelect;
+export type InsertModulePermission = typeof modulePermissions.$inferInsert;
+
+// Role-Permission Mapping (Many-to-Many)
+export const rolePermissions = mysqlTable("rolePermissions", {
+  id: int("id").autoincrement().primaryKey(),
+  roleId: int("roleId").notNull(),
+  permissionId: int("permissionId").notNull(),
+  canView: boolean("canView").default(false).notNull(),
+  canCreate: boolean("canCreate").default(false).notNull(),
+  canEdit: boolean("canEdit").default(false).notNull(),
+  canDelete: boolean("canDelete").default(false).notNull(),
+  canExport: boolean("canExport").default(false).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type RolePermission = typeof rolePermissions.$inferSelect;
+export type InsertRolePermission = typeof rolePermissions.$inferInsert;
+
+// User-Role Assignment (supports multiple roles per user)
+export const userRoles = mysqlTable("userRoles", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  roleId: int("roleId").notNull(),
+  assignedBy: int("assignedBy").notNull(),
+  assignedAt: timestamp("assignedAt").defaultNow().notNull(),
+});
+
+export type UserRole = typeof userRoles.$inferSelect;
+export type InsertUserRole = typeof userRoles.$inferInsert;
+
+// Security Audit Logs
+export const securityAuditLogs = mysqlTable("securityAuditLogs", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId"), // Null for system events
+  eventType: mysqlEnum("eventType", [
+    "login_success",
+    "login_failed",
+    "logout",
+    "mfa_enabled",
+    "mfa_disabled",
+    "mfa_verified",
+    "mfa_failed",
+    "password_changed",
+    "role_assigned",
+    "role_removed",
+    "permission_changed",
+    "account_approved",
+    "account_rejected",
+    "account_disabled",
+    "account_enabled",
+    "account_suspended",
+    "session_created",
+    "session_terminated",
+    "security_alert",
+  ]).notNull(),
+  eventDescription: text("eventDescription"),
+  ipAddress: varchar("ipAddress", { length: 45 }), // IPv6 support
+  userAgent: text("userAgent"),
+  deviceFingerprint: varchar("deviceFingerprint", { length: 255 }),
+  metadata: text("metadata"), // JSON for additional context
+  severity: mysqlEnum("severity", ["low", "medium", "high", "critical"]).default("low"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type SecurityAuditLog = typeof securityAuditLogs.$inferSelect;
+export type InsertSecurityAuditLog = typeof securityAuditLogs.$inferInsert;
+
+// Active Sessions
+export const userSessions = mysqlTable("userSessions", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  sessionToken: varchar("sessionToken", { length: 255 }).notNull().unique(),
+  ipAddress: varchar("ipAddress", { length: 45 }),
+  userAgent: text("userAgent"),
+  deviceFingerprint: varchar("deviceFingerprint", { length: 255 }),
+  deviceName: varchar("deviceName", { length: 255 }), // e.g., "Chrome on Windows"
+  lastActivity: timestamp("lastActivity").defaultNow().notNull(),
+  expiresAt: timestamp("expiresAt").notNull(),
+  isActive: boolean("isActive").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type UserSession = typeof userSessions.$inferSelect;
+export type InsertUserSession = typeof userSessions.$inferInsert;
+
+// User Approval Requests
+export const userApprovalRequests = mysqlTable("userApprovalRequests", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  requestedRole: varchar("requestedRole", { length: 100 }),
+  justification: text("justification"),
+  reviewedBy: int("reviewedBy"),
+  reviewedAt: timestamp("reviewedAt"),
+  reviewNotes: text("reviewNotes"),
+  status: mysqlEnum("status", ["pending", "approved", "rejected"]).default("pending").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type UserApprovalRequest = typeof userApprovalRequests.$inferSelect;
+export type InsertUserApprovalRequest = typeof userApprovalRequests.$inferInsert;
+
+// Account Status Change History
+export const accountStatusHistory = mysqlTable("accountStatusHistory", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  previousStatus: mysqlEnum("previousStatus", ["active", "disabled", "suspended"]).notNull(),
+  newStatus: mysqlEnum("newStatus", ["active", "disabled", "suspended"]).notNull(),
+  reason: text("reason"),
+  changedBy: int("changedBy").notNull(),
+  changedAt: timestamp("changedAt").defaultNow().notNull(),
+});
+
+export type AccountStatusHistory = typeof accountStatusHistory.$inferSelect;
+export type InsertAccountStatusHistory = typeof accountStatusHistory.$inferInsert;
+
+// MFA Backup Codes Usage Tracking
+export const mfaBackupCodeUsage = mysqlTable("mfaBackupCodeUsage", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  codeHash: varchar("codeHash", { length: 255 }).notNull(), // Hashed backup code
+  usedAt: timestamp("usedAt").defaultNow().notNull(),
+  ipAddress: varchar("ipAddress", { length: 45 }),
+});
+
+export type MfaBackupCodeUsage = typeof mfaBackupCodeUsage.$inferSelect;
+export type InsertMfaBackupCodeUsage = typeof mfaBackupCodeUsage.$inferInsert;
+
+// Security Settings (System-wide)
+export const securitySettings = mysqlTable("securitySettings", {
+  id: int("id").autoincrement().primaryKey(),
+  settingKey: varchar("settingKey", { length: 100 }).notNull().unique(),
+  settingValue: text("settingValue").notNull(),
+  description: text("description"),
+  updatedBy: int("updatedBy"),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type SecuritySetting = typeof securitySettings.$inferSelect;
+export type InsertSecuritySetting = typeof securitySettings.$inferInsert;

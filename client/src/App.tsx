@@ -23,6 +23,7 @@ import WeatherTrends from "./pages/WeatherTrends";
 import Settings from "./pages/Settings";
 import CropPlanning from "./pages/CropPlanning";
 import RoleManagement from "./pages/RoleManagement";
+import SecurityDashboard from "./pages/SecurityDashboard";
 
 function Router() {
   return (
@@ -130,6 +131,13 @@ function Router() {
         {() => (
           <DashboardLayout>
             <CropPlanning />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/security">
+        {() => (
+          <DashboardLayout>
+            <SecurityDashboard />
           </DashboardLayout>
         )}
       </Route>
