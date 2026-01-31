@@ -1234,3 +1234,7 @@
 ## Crops Page Bug Fix
 - [x] Fix TypeError when accessing health records with undefined cycles array
 - [x] Add proper null/undefined checks before mapping cycles for health indicators
+
+## Crop Tracking Dashboard - Volta Green Acres Issue
+- [x] Investigate and fix dashboard view issue when Volta Green Acres farm is selected
+- [x] Ensure all farm selections work correctly in crop tracking

@@ -323,6 +323,21 @@ export const appRouter = router({
           return await db.select().from(cropHealthRecords).where(eq(cropHealthRecords.cycleId, input.cycleId));
         }),
 
+      listByFarm: protectedProcedure
+        .input(z.object({ farmId: z.number() }))
+        .query(async ({ input }) => {
+          const db = await getDb();
+          if (!db) return [];
+          // Get all cycles for the farm first
+          const farmCycles = await db.select().from(cropCycles).where(eq(cropCycles.farmId, input.farmId));
+          const cycleIds = farmCycles.map(c => c.id);
+          
+          // Get all health records for those cycles
+          if (cycleIds.length === 0) return [];
+          const records = await db.select().from(cropHealthRecords);
+          return records.filter(r => cycleIds.includes(r.cycleId));
+        }),
+
       create: protectedProcedure
         .input(z.object({
           cycleId: z.number(),

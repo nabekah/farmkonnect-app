@@ -37,9 +37,16 @@ export default function CropTracking() {
     { enabled: !!selectedCycleId }
   );
 
-  // Fetch health records for all cycles to show indicators
+  // Fetch health records for selected farm to show indicators
+  // Note: We fetch all health records for the farm and group by cycle to avoid Rules of Hooks violation
+  const { data: allHealthRecords = [] } = trpc.crops.health.listByFarm.useQuery(
+    { farmId: selectedFarmId! },
+    { enabled: !!selectedFarmId }
+  );
+  
+  // Group health records by cycle
   const cycleHealthRecords = (cycles || []).map((cycle: any) => {
-    const { data: healthRecords = [] } = trpc.crops.health.list.useQuery({ cycleId: cycle.id });
+    const healthRecords = allHealthRecords.filter((record: any) => record.cycleId === cycle.id);
     return { cycleId: cycle.id, healthRecords };
   });
   const { data: crops = [], isLoading: cropsLoading } = trpc.crops.list.useQuery();
