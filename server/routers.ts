@@ -18,6 +18,7 @@ import { businessRouter } from "./businessRouter";
 import { paymentRouter } from "./paymentRouter";
 import { smsRouter } from "./smsRouter";
 import { securityRouter } from "./securityRouter";
+import { passwordResetRouter } from "./passwordResetRouter";
 import { z } from "zod";
 import { getDb } from "./db";
 import { TRPCError } from "@trpc/server";
@@ -517,6 +518,7 @@ export const appRouter = router({
   payment: paymentRouter,
   sms: smsRouter,
   security: securityRouter,
+  passwordReset: passwordResetRouter,
 });
 
 export type AppRouter = typeof appRouter;

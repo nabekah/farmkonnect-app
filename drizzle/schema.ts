@@ -1026,3 +1026,21 @@ export const securitySettings = mysqlTable("securitySettings", {
 
 export type SecuritySetting = typeof securitySettings.$inferSelect;
 export type InsertSecuritySetting = typeof securitySettings.$inferInsert;
+
+
+// Password Reset Requests
+export const passwordResetRequests = mysqlTable("passwordResetRequests", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  email: varchar("email", { length: 320 }).notNull(),
+  token: varchar("token", { length: 255 }).notNull().unique(),
+  expiresAt: timestamp("expiresAt").notNull(),
+  used: boolean("used").default(false).notNull(),
+  usedAt: timestamp("usedAt"),
+  ipAddress: varchar("ipAddress", { length: 45 }),
+  userAgent: text("userAgent"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type PasswordResetRequest = typeof passwordResetRequests.$inferSelect;
+export type InsertPasswordResetRequest = typeof passwordResetRequests.$inferInsert;

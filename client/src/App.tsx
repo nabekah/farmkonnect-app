@@ -25,12 +25,16 @@ import CropPlanning from "./pages/CropPlanning";
 import RoleManagement from "./pages/RoleManagement";
 import SecurityDashboard from "./pages/SecurityDashboard";
 import Register from "./pages/Register";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 function Router() {
   return (
     <Switch>
-      <Route path={"/"} component={Home} />
+       <Route path="/" component={Home} />
       <Route path="/register" component={Register} />
+      <Route path="/forgot-password" component={ForgotPassword} />
+      <Route path="/reset-password" component={ResetPassword} />
       <Route path="/farms">
         {() => (
           <DashboardLayout>

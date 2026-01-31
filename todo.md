@@ -916,3 +916,46 @@
 - [ ] Create role management guide
 - [ ] Add permission system documentation
 - [ ] Include troubleshooting section
+
+
+## EMAIL NOTIFICATIONS & PASSWORD RESET - IN PROGRESS
+
+### SMTP Email Notification System
+- [ ] Create email service module with SMTP configuration
+- [ ] Add email templates for registration approval/rejection
+- [ ] Add email templates for MFA enrollment confirmation
+- [ ] Add email templates for password reset
+- [ ] Add email templates for security alerts
+- [ ] Implement email sending in registration approval workflow
+- [ ] Implement email sending in registration rejection workflow
+- [ ] Implement email sending in MFA enrollment workflow
+- [ ] Add email notification preferences to user settings
+- [ ] Create email delivery logging and tracking
+- [ ] Add email queue system for reliable delivery
+- [ ] Write unit tests for email service
+
+### Password Reset Flow
+- [ ] Create password reset request schema and table
+- [ ] Add password reset request procedures to security router
+- [ ] Create forgot password page with email input
+- [ ] Implement password reset token generation
+- [ ] Create password reset email template with verification link
+- [ ] Build password reset verification page
+- [ ] Add new password form with strength validation
+- [ ] Implement token expiration (1 hour default)
+- [ ] Add rate limiting for reset requests
+- [ ] Create password reset success confirmation
+- [ ] Add password reset to login page
+- [ ] Write unit tests for password reset flow
+
+### Registration Flow Testing
+- [ ] Create automated tests for user registration
+- [ ] Test registration with approval required
+- [ ] Test registration with auto-approval
+- [ ] Test admin approval workflow
+- [ ] Test admin rejection workflow
+- [ ] Test email notifications for all scenarios
+- [ ] Test MFA enrollment after registration
+- [ ] Test permission inheritance with multiple roles
+- [ ] Test account enable/disable functionality
+- [ ] Test session management and timeout

@@ -1151,6 +1151,12 @@ export const securityRouter = router({
           severity: "medium",
         });
 
+        // Send approval email
+        const { sendEmail, registrationApprovedEmail } = await import("./_core/email");
+        const loginUrl = process.env.VITE_OAUTH_PORTAL_URL || "https://app.manus.im";
+        const emailOptions = registrationApprovedEmail(req.name || "User", req.email, loginUrl);
+        await sendEmail(emailOptions);
+
         return { success: true, message: "User approved and account created" };
       }),
 
@@ -1201,6 +1207,11 @@ export const securityRouter = router({
           metadata: { requestId: input.requestId, email: req.email, reason: input.adminNotes },
           severity: "medium",
         });
+
+        // Send rejection email
+        const { sendEmail, registrationRejectedEmail } = await import("./_core/email");
+        const emailOptions = registrationRejectedEmail(req.name || "User", req.email, input.adminNotes);
+        await sendEmail(emailOptions);
 
         return { success: true, message: "Registration request rejected" };
       }),
