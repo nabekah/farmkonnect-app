@@ -1,0 +1,14 @@
+// Add to drizzle/schema.ts after farms table
+
+export const farmActivities = mysqlTable("farmActivities", {
+  id: int("id").autoincrement().primaryKey(),
+  farmId: int("farmId").notNull(),
+  activityType: mysqlEnum("activityType", ["crop_planting", "livestock_addition", "weather_alert", "harvest", "feeding", "health_check", "other"]).notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  metadata: text("metadata"), // JSON string for additional data
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type FarmActivity = typeof farmActivities.$inferSelect;
+export type InsertFarmActivity = typeof farmActivities.$inferInsert;

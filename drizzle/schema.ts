@@ -66,12 +66,27 @@ export const farms = mysqlTable("farms", {
   gpsLongitude: decimal("gpsLongitude", { precision: 11, scale: 8 }),
   sizeHectares: decimal("sizeHectares", { precision: 10, scale: 2 }),
   farmType: mysqlEnum("farmType", ["crop", "livestock", "mixed"]).default("mixed"),
+  description: text("description"),
+  photoUrl: varchar("photoUrl", { length: 500 }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 
 export type Farm = typeof farms.$inferSelect;
 export type InsertFarm = typeof farms.$inferInsert;
+
+export const farmActivities = mysqlTable("farmActivities", {
+  id: int("id").autoincrement().primaryKey(),
+  farmId: int("farmId").notNull(),
+  activityType: mysqlEnum("activityType", ["crop_planting", "livestock_addition", "weather_alert", "harvest", "feeding", "health_check", "other"]).notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  metadata: text("metadata"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type FarmActivity = typeof farmActivities.$inferSelect;
+export type InsertFarmActivity = typeof farmActivities.$inferInsert;
 
 // ============================================================================
 // CROP MANAGEMENT

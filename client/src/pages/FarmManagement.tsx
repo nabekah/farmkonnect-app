@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Loader2, Plus, MapPin, Leaf, Map } from "lucide-react";
 import { toast } from "sonner";
 import { WeatherWidget } from "@/components/WeatherWidget";
+import { FarmActivityTimeline } from "@/components/FarmActivityTimeline";
 
 export default function FarmManagement() {
   const { user } = useAuth();
@@ -33,7 +34,10 @@ export default function FarmManagement() {
     sizeHectares: "",
     farmType: "mixed",
     description: "",
+    photoUrl: "",
   });
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
   const { data: farms = [], isLoading } = trpc.farms.list.useQuery();
 
@@ -63,6 +67,16 @@ export default function FarmManagement() {
     },
     onError: (error) => {
       toast.error(error.message || "Failed to update farm");
+    },
+  });
+
+  const deleteFarmMutation = trpc.farms.delete.useMutation({
+    onSuccess: () => {
+      setEditDialog({ open: false, farm: null });
+      toast.success("Farm deleted successfully!");
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to delete farm");
     },
   });
 
@@ -107,8 +121,40 @@ export default function FarmManagement() {
       sizeHectares: farm.sizeHectares || "",
       farmType: farm.farmType || "mixed",
       description: farm.description || "",
+      photoUrl: farm.photoUrl || "",
     });
     setEditDialog({ open: true, farm });
+  };
+
+  const uploadPhotoMutation = trpc.upload.farmPhoto.useMutation({
+    onSuccess: (data) => {
+      setEditFormData({ ...editFormData, photoUrl: data.url });
+      toast.success("Photo uploaded successfully!");
+      setUploadingPhoto(false);
+    },
+    onError: () => {
+      toast.error("Failed to upload photo");
+      setUploadingPhoto(false);
+    },
+  });
+
+  const handlePhotoUpload = async (file: File) => {
+    setUploadingPhoto(true);
+    try {
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64 = (reader.result as string).split(",")[1];
+        await uploadPhotoMutation.mutateAsync({
+          fileName: file.name,
+          fileData: base64,
+          mimeType: file.type,
+        });
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      toast.error("Failed to upload photo");
+      setUploadingPhoto(false);
+    }
   };
 
   const handleUpdateFarm = async () => {
@@ -123,8 +169,24 @@ export default function FarmManagement() {
       id: editDialog.farm.id,
       farmName: editFormData.farmName,
       location: editFormData.location,
+      gpsLatitude: editFormData.latitude,
+      gpsLongitude: editFormData.longitude,
       sizeHectares: editFormData.sizeHectares,
       farmType: editFormData.farmType as "crop" | "livestock" | "mixed",
+      description: editFormData.description,
+      photoUrl: editFormData.photoUrl,
+    });
+  };
+
+  const handleDeleteFarm = async () => {
+    if (!editDialog.farm) return;
+    
+    if (!confirm("Are you sure you want to delete this farm? This action cannot be undone.")) {
+      return;
+    }
+
+    await deleteFarmMutation.mutateAsync({
+      id: editDialog.farm.id,
     });
   };
 
@@ -447,6 +509,11 @@ export default function FarmManagement() {
               className="hover:shadow-lg transition-shadow cursor-pointer"
               onDoubleClick={() => handleFarmDoubleClick(farm)}
             >
+              {farm.photoUrl && (
+                <div className="w-full h-40 overflow-hidden rounded-t-lg">
+                  <img src={farm.photoUrl} alt={farm.farmName} className="w-full h-full object-cover" />
+                </div>
+              )}
               <CardHeader>
                 <CardTitle className="flex items-start justify-between">
                   <span className="flex-1">{farm.farmName}</span>
@@ -548,10 +615,86 @@ export default function FarmManagement() {
               />
             </div>
 
-            <Button onClick={handleUpdateFarm} disabled={updateFarmMutation.isPending} className="w-full">
-              {updateFarmMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-              Update Farm
-            </Button>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="edit-latitude">GPS Latitude</Label>
+                <Input
+                  id="edit-latitude"
+                  type="number"
+                  step="0.000001"
+                  placeholder="e.g., 6.6885"
+                  value={editFormData.latitude}
+                  onChange={(e) => setEditFormData({ ...editFormData, latitude: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-longitude">GPS Longitude</Label>
+                <Input
+                  id="edit-longitude"
+                  type="number"
+                  step="0.000001"
+                  placeholder="e.g., -1.6244"
+                  value={editFormData.longitude}
+                  onChange={(e) => setEditFormData({ ...editFormData, longitude: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="edit-description">Description</Label>
+              <Textarea
+                id="edit-description"
+                placeholder="Additional details about your farm..."
+                value={editFormData.description}
+                onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
+                rows={3}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="edit-photo">Farm Photo</Label>
+              <div className="space-y-2">
+                {editFormData.photoUrl && (
+                  <div className="relative w-full h-48 rounded-lg overflow-hidden border">
+                    <img src={editFormData.photoUrl} alt="Farm" className="w-full h-full object-cover" />
+                  </div>
+                )}
+                <Input
+                  id="edit-photo"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handlePhotoUpload(file);
+                  }}
+                  disabled={uploadingPhoto}
+                />
+                {uploadingPhoto && <p className="text-sm text-muted-foreground">Uploading...</p>}
+              </div>
+            </div>
+
+            {/* Activity Timeline */}
+            {editDialog.farm && (
+              <div className="border-t pt-4">
+                <h3 className="font-semibold mb-3">Recent Activity</h3>
+                <FarmActivityTimeline farmId={editDialog.farm.id} />
+              </div>
+            )}
+
+            <div className="flex gap-2">
+              <Button onClick={handleUpdateFarm} disabled={updateFarmMutation.isPending} className="flex-1">
+                {updateFarmMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                Update Farm
+              </Button>
+              <Button 
+                onClick={handleDeleteFarm} 
+                disabled={deleteFarmMutation.isPending} 
+                variant="destructive"
+              >
+                {deleteFarmMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                Delete
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>

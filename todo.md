@@ -1194,3 +1194,12 @@
 - [x] Create farm details edit dialog with all farm fields
 - [x] Implement farm update functionality with validation
 - [x] Fix Agricultural Recommendations header to display on one horizontal line
+
+## Farm Management Enhancements
+- [x] Fix edit dialog to show all farm fields (GPS coordinates, description)
+- [x] Add delete farm functionality with confirmation dialog
+- [x] Implement farm photo upload with S3 storage
+- [x] Add photo thumbnail display in farm cards
+- [x] Create farm activity timeline showing recent events
+- [x] Add activity types: crop plantings, livestock additions, weather alerts
+- [x] Display timeline in edit dialog or separate tab

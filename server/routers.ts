@@ -19,11 +19,13 @@ import { paymentRouter } from "./paymentRouter";
 import { smsRouter } from "./smsRouter";
 import { securityRouter } from "./securityRouter";
 import { passwordResetRouter } from "./passwordResetRouter";
+import { uploadRouter } from "./uploadRouter";
 import { z } from "zod";
 import { getDb } from "./db";
 import { TRPCError } from "@trpc/server";
 import {
   farms,
+  farmActivities,
   crops,
   cropCycles,
   soilTests,
@@ -42,6 +44,7 @@ import { eq } from "drizzle-orm";
 
 export const appRouter = router({
   system: systemRouter,
+  upload: uploadRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {
@@ -86,8 +89,12 @@ export const appRouter = router({
         id: z.number(),
         farmName: z.string().min(1),
         location: z.string().optional(),
+        gpsLatitude: z.string().optional(),
+        gpsLongitude: z.string().optional(),
         sizeHectares: z.string().optional(),
         farmType: z.enum(["crop", "livestock", "mixed"]).optional(),
+        description: z.string().optional(),
+        photoUrl: z.string().optional(),
       }))
       .mutation(async ({ ctx, input }) => {
         const db = await getDb();
@@ -103,10 +110,51 @@ export const appRouter = router({
           .set({
             farmName: input.farmName,
             location: input.location,
+            gpsLatitude: input.gpsLatitude as any,
+            gpsLongitude: input.gpsLongitude as any,
             sizeHectares: input.sizeHectares as any,
             farmType: input.farmType || "mixed",
+            description: input.description,
+            photoUrl: input.photoUrl,
           })
           .where(eq(farms.id, input.id));
+      }),
+
+    delete: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+
+        // Verify ownership
+        const [farm] = await db.select().from(farms).where(eq(farms.id, input.id));
+        if (!farm || farm.farmerUserId !== ctx.user.id) {
+          throw new TRPCError({ code: "FORBIDDEN", message: "You can only delete your own farms" });
+        }
+
+        return await db.delete(farms).where(eq(farms.id, input.id));
+      }),
+
+    getActivities: protectedProcedure
+      .input(z.object({
+        farmId: z.number(),
+      }))
+      .query(async ({ ctx, input }) => {
+        const db = await getDb();
+        if (!db) return [];
+
+        // Verify ownership
+        const [farm] = await db.select().from(farms).where(eq(farms.id, input.farmId));
+        if (!farm || farm.farmerUserId !== ctx.user.id) {
+          throw new TRPCError({ code: "FORBIDDEN", message: "You can only view activities for your own farms" });
+        }
+
+        return await db.select()
+          .from(farmActivities)
+          .where(eq(farmActivities.farmId, input.farmId))
+          .orderBy(farmActivities.createdAt);
       }),
   }),
 
