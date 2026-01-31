@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { trpc } from "../lib/trpc";
 import { DataTable } from "../components/DataTable";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../components/ui/dialog";
@@ -29,13 +28,39 @@ import {
   Cpu,
   Upload,
   Download,
+  Database,
+  Filter,
+  Save,
+  Star,
 } from "lucide-react";
 import { format } from "date-fns";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../components/ui/select";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../components/ui/tooltip";
 
 const toast = (props: { title: string; description?: string; variant?: "default" | "destructive" }) => {
   const event = new CustomEvent("toast", { detail: props });
   window.dispatchEvent(event);
 };
+
+const modules = [
+  { id: "farms", name: "Farms", icon: MapPin, color: "text-green-600" },
+  { id: "crops", name: "Crops", icon: Sprout, color: "text-emerald-600" },
+  { id: "livestock", name: "Livestock", icon: Beef, color: "text-orange-600" },
+  { id: "products", name: "Products", icon: ShoppingCart, color: "text-blue-600" },
+  { id: "training", name: "Training", icon: GraduationCap, color: "text-purple-600" },
+  { id: "iot", name: "IoT Devices", icon: Cpu, color: "text-cyan-600" },
+];
 
 export default function DataManagement() {
   const [selectedModule, setSelectedModule] = useState("farms");
@@ -46,6 +71,8 @@ export default function DataManagement() {
   });
   const [importDialog, setImportDialog] = useState(false);
   const [csvFile, setCsvFile] = useState<File | null>(null);
+  const [savedFilters, setSavedFilters] = useState<Array<{id: string, name: string, module: string, filters: any}>>([]);
+  const [filterName, setFilterName] = useState("");
 
   // Farms Data
   const { data: farms = [], refetch: refetchFarms } = trpc.farms.list.useQuery();
@@ -62,7 +89,9 @@ export default function DataManagement() {
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       ),
-
+      meta: {
+        filterType: "text",
+      },
     },
     {
       accessorKey: "farmType",
@@ -70,12 +99,17 @@ export default function DataManagement() {
       cell: ({ row }) => (
         <Badge variant="outline">{row.getValue("farmType")}</Badge>
       ),
-
+      meta: {
+        filterType: "select",
+        filterOptions: ["Crop", "Livestock", "Mixed", "Dairy", "Poultry"],
+      },
     },
     {
       accessorKey: "farmSize",
       header: "Size (ha)",
-
+      meta: {
+        filterType: "number",
+      },
     },
     {
       accessorKey: "location",
@@ -86,7 +120,9 @@ export default function DataManagement() {
           {row.getValue("location")}
         </div>
       ),
-
+      meta: {
+        filterType: "text",
+      },
     },
     {
       accessorKey: "createdAt",
@@ -105,9 +141,7 @@ export default function DataManagement() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                onClick={() => setDetailsDialog({ open: true, data: farm, type: "farm" })}
-              >
+              <DropdownMenuItem onClick={() => setDetailsDialog({ open: true, data: farm, type: "farm" })}>
                 <Eye className="mr-2 h-4 w-4" />
                 View Details
               </DropdownMenuItem>
@@ -133,17 +167,24 @@ export default function DataManagement() {
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       ),
-
+      meta: {
+        filterType: "text",
+      },
     },
     {
       accessorKey: "variety",
       header: "Variety",
-
+      meta: {
+        filterType: "text",
+      },
     },
     {
       accessorKey: "plantingDate",
       header: "Planting Date",
-      cell: ({ row }) => format(new Date(row.getValue("plantingDate")), "MMM dd, yyyy"),
+      cell: ({ row }) => {
+        const date = row.getValue("plantingDate");
+        return date ? format(new Date(date as string), "MMM dd, yyyy") : "N/A";
+      },
     },
     {
       accessorKey: "expectedHarvestDate",
@@ -151,16 +192,6 @@ export default function DataManagement() {
       cell: ({ row }) => {
         const date = row.getValue("expectedHarvestDate");
         return date ? format(new Date(date as string), "MMM dd, yyyy") : "N/A";
-      },
-    },
-    {
-      accessorKey: "status",
-      header: "Status",
-      cell: ({ row }) => {
-        const status = row.getValue("status") as string;
-        const variant = status === "growing" ? "default" : 
-                       status === "harvested" ? "secondary" : "outline";
-        return <Badge variant={variant as any}>{status}</Badge>;
       },
     },
     {
@@ -175,9 +206,7 @@ export default function DataManagement() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                onClick={() => setDetailsDialog({ open: true, data: crop, type: "crop" })}
-              >
+              <DropdownMenuItem onClick={() => setDetailsDialog({ open: true, data: crop, type: "crop" })}>
                 <Eye className="mr-2 h-4 w-4" />
                 View Details
               </DropdownMenuItem>
@@ -189,10 +218,12 @@ export default function DataManagement() {
   ];
 
   // Livestock Data
-  const { data: animals = [], refetch: refetchAnimals } = trpc.animals.list.useQuery({ farmId: 0 });
+  const { data: livestock = [], refetch: refetchLivestock } = trpc.animals.list.useQuery({ farmId: farms[0]?.id || 0 }, {
+    enabled: farms.length > 0,
+  });
   const updateAnimal = trpc.animals.update.useMutation({
     onSuccess: () => {
-      refetchAnimals();
+      refetchLivestock();
       toast({ title: "Animal updated successfully" });
     },
     onError: (error: any) => {
@@ -200,50 +231,61 @@ export default function DataManagement() {
     },
   });
 
+
   const livestockColumns: ColumnDef<any>[] = [
     {
-      accessorKey: "animalType",
+      accessorKey: "tagNumber",
       header: ({ column }) => (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Type
+          Tag Number
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       ),
-
+      meta: {
+        filterType: "text",
+      },
+    },
+    {
+      accessorKey: "animalType",
+      header: "Type",
+      cell: ({ row }) => (
+        <Badge variant="outline">{row.getValue("animalType")}</Badge>
+      ),
+      meta: {
+        filterType: "select",
+        filterOptions: ["Cattle", "Goat", "Sheep", "Pig", "Chicken", "Duck"],
+      },
     },
     {
       accessorKey: "breed",
       header: "Breed",
-
-    },
-    {
-      accessorKey: "tagNumber",
-      header: "Tag Number",
-
-    },
-    {
-      accessorKey: "age",
-      header: "Age (months)",
-
+      meta: {
+        filterType: "text",
+      },
     },
     {
       accessorKey: "status",
       header: "Status",
       cell: ({ row }) => {
         const status = row.getValue("status") as string;
-        const variant = status === "healthy" ? "default" : 
-                       status === "sick" ? "destructive" : "secondary";
-        return <Badge variant={variant as any}>{status}</Badge>;
+        const variant = status === "healthy" ? "default" : status === "sick" ? "destructive" : "secondary";
+        return <Badge variant={variant}>{status}</Badge>;
       },
-
+      meta: {
+        filterType: "select",
+        filterOptions: ["healthy", "sick", "pregnant", "sold", "deceased"],
+      },
     },
     {
-      accessorKey: "acquisitionDate",
-      header: "Acquired",
-      cell: ({ row }) => format(new Date(row.getValue("acquisitionDate")), "MMM dd, yyyy"),
+      accessorKey: "dateOfBirth",
+      header: "Date of Birth",
+      cell: ({ row }) => {
+        const date = row.getValue("dateOfBirth");
+        return date ? format(new Date(date as string), "MMM dd, yyyy") : "N/A";
+      },
     },
     {
       id: "actions",
@@ -257,9 +299,7 @@ export default function DataManagement() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                onClick={() => setDetailsDialog({ open: true, data: animal, type: "animal" })}
-              >
+              <DropdownMenuItem onClick={() => setDetailsDialog({ open: true, data: animal, type: "animal" })}>
                 <Eye className="mr-2 h-4 w-4" />
                 View Details
               </DropdownMenuItem>
@@ -270,8 +310,8 @@ export default function DataManagement() {
     },
   ];
 
-  // Marketplace Products Data
-  const { data: products = [], refetch: refetchProducts } = trpc.marketplace.listProducts.useQuery({ category: undefined });
+  // Products Data
+  const { data: products = [], refetch: refetchProducts } = trpc.marketplace.listProducts.useQuery({});
   const updateProduct = trpc.marketplace.updateProduct.useMutation({
     onSuccess: () => {
       refetchProducts();
@@ -281,13 +321,13 @@ export default function DataManagement() {
       toast({ title: "Error updating product", description: error.message, variant: "destructive" });
     },
   });
-  const deleteProduct = trpc.marketplace.deleteProduct.useMutation({
+  const deleteProducts = trpc.marketplace.deleteProduct.useMutation({
     onSuccess: () => {
       refetchProducts();
-      toast({ title: "Product deleted successfully" });
+      toast({ title: "Products deleted successfully" });
     },
     onError: (error: any) => {
-      toast({ title: "Error deleting product", description: error.message, variant: "destructive" });
+      toast({ title: "Error deleting products", description: error.message, variant: "destructive" });
     },
   });
 
@@ -303,7 +343,14 @@ export default function DataManagement() {
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       ),
-
+      meta: {
+        filterType: "text",
+        editable: true,
+        validation: (value: any) => {
+          if (!value || value.trim() === "") return "Product name is required";
+          return null;
+        },
+      },
     },
     {
       accessorKey: "category",
@@ -311,7 +358,15 @@ export default function DataManagement() {
       cell: ({ row }) => (
         <Badge variant="outline">{row.getValue("category")}</Badge>
       ),
-
+      meta: {
+        filterType: "select",
+        filterOptions: ["Crops", "Livestock", "Equipment", "Seeds", "Fertilizer"],
+        editable: true,
+        validation: (value: any) => {
+          if (!value) return "Category is required";
+          return null;
+        },
+      },
     },
     {
       accessorKey: "price",
@@ -320,21 +375,43 @@ export default function DataManagement() {
         const price = row.getValue("price") as number | null;
         return price != null ? `₵${price.toFixed(2)}` : "N/A";
       },
-
+      meta: {
+        filterType: "number",
+        editable: true,
+        validation: (value: any) => {
+          const num = parseFloat(value);
+          if (isNaN(num)) return "Price must be a number";
+          if (num <= 0) return "Price must be greater than 0";
+          return null;
+        },
+      },
     },
     {
       accessorKey: "quantityAvailable",
-      header: "Stock",
-      cell: ({ row }) => {
-        const qty = row.getValue("quantityAvailable") as number;
-        const variant = qty > 10 ? "default" : qty > 0 ? "secondary" : "destructive";
-        return <Badge variant={variant as any}>{qty}</Badge>;
+      header: "Quantity",
+      meta: {
+        filterType: "number",
+        editable: true,
+        validation: (value: any) => {
+          const num = parseInt(value);
+          if (isNaN(num)) return "Quantity must be a number";
+          if (num < 0) return "Quantity cannot be negative";
+          return null;
+        },
       },
-
     },
     {
-      accessorKey: "unit",
-      header: "Unit",
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }) => {
+        const status = row.getValue("status") as string;
+        const variant = status === "available" ? "default" : "secondary";
+        return <Badge variant={variant}>{status}</Badge>;
+      },
+      meta: {
+        filterType: "select",
+        filterOptions: ["available", "out_of_stock", "discontinued"],
+      },
     },
     {
       id: "actions",
@@ -348,22 +425,9 @@ export default function DataManagement() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                onClick={() => setDetailsDialog({ open: true, data: product, type: "product" })}
-              >
+              <DropdownMenuItem onClick={() => setDetailsDialog({ open: true, data: product, type: "product" })}>
                 <Eye className="mr-2 h-4 w-4" />
                 View Details
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => {
-                  if (confirm("Are you sure you want to delete this product?")) {
-                    deleteProduct.mutate({ id: product.id });
-                  }
-                }}
-                className="text-destructive"
-              >
-                <Trash className="mr-2 h-4 w-4" />
-                Delete
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -372,30 +436,24 @@ export default function DataManagement() {
     },
   ];
 
-  // Training Programs Data
-  const { data: trainingPrograms = [], refetch: refetchTraining } = trpc.training.programs.list.useQuery();
-  const deleteProgram = trpc.training.programs.delete.useMutation({
-    onSuccess: () => {
-      refetchTraining();
-      toast({ title: "Training program deleted successfully" });
-    },
-    onError: (error: any) => {
-      toast({ title: "Error deleting program", description: error.message, variant: "destructive" });
-    },
-  });
+  // Training Data
+  const { data: training = [], refetch: refetchTraining } = trpc.training.programs.list.useQuery();
 
   const trainingColumns: ColumnDef<any>[] = [
     {
-      accessorKey: "title",
+      accessorKey: "programName",
       header: ({ column }) => (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Program Title
+          Program Name
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       ),
+      meta: {
+        filterType: "text",
+      },
     },
     {
       accessorKey: "category",
@@ -403,18 +461,25 @@ export default function DataManagement() {
       cell: ({ row }) => (
         <Badge variant="outline">{row.getValue("category")}</Badge>
       ),
+      meta: {
+        filterType: "select",
+        filterOptions: ["Crop Management", "Livestock Care", "Business Skills", "Technology", "Marketing"],
+      },
     },
     {
       accessorKey: "duration",
       header: "Duration",
+      meta: {
+        filterType: "text",
+      },
     },
     {
-      accessorKey: "level",
-      header: "Level",
-    },
-    {
-      accessorKey: "maxParticipants",
-      header: "Max Participants",
+      accessorKey: "startDate",
+      header: "Start Date",
+      cell: ({ row }) => {
+        const date = row.getValue("startDate");
+        return date ? format(new Date(date as string), "MMM dd, yyyy") : "N/A";
+      },
     },
     {
       id: "actions",
@@ -428,22 +493,9 @@ export default function DataManagement() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                onClick={() => setDetailsDialog({ open: true, data: program, type: "training" })}
-              >
+              <DropdownMenuItem onClick={() => setDetailsDialog({ open: true, data: program, type: "training" })}>
                 <Eye className="mr-2 h-4 w-4" />
                 View Details
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => {
-                  if (confirm("Are you sure you want to delete this program?")) {
-                    deleteProgram.mutate({ id: program.id });
-                  }
-                }}
-                className="text-destructive"
-              >
-                <Trash className="mr-2 h-4 w-4" />
-                Delete
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -452,10 +504,10 @@ export default function DataManagement() {
     },
   ];
 
-  // IoT Devices Data
-  const { data: devices = [], refetch: refetchDevices } = trpc.iot.listDevices.useQuery({ farmId: 0 });
+  // IoT Data
+  const { data: iotDevices = [], refetch: refetchIoT } = trpc.iot.listDevices.useQuery({ farmId: farms[0]?.id || 0 }, { enabled: farms.length > 0 });
 
-  const devicesColumns: ColumnDef<any>[] = [
+  const iotColumns: ColumnDef<any>[] = [
     {
       accessorKey: "deviceName",
       header: ({ column }) => (
@@ -467,6 +519,9 @@ export default function DataManagement() {
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       ),
+      meta: {
+        filterType: "text",
+      },
     },
     {
       accessorKey: "deviceType",
@@ -474,15 +529,22 @@ export default function DataManagement() {
       cell: ({ row }) => (
         <Badge variant="outline">{row.getValue("deviceType")}</Badge>
       ),
+      meta: {
+        filterType: "select",
+        filterOptions: ["Soil Moisture Sensor", "Temperature Sensor", "Humidity Sensor", "Weather Station", "Camera"],
+      },
     },
     {
       accessorKey: "status",
       header: "Status",
       cell: ({ row }) => {
         const status = row.getValue("status") as string;
-        const variant = status === "active" ? "default" : 
-                       status === "inactive" ? "secondary" : "destructive";
-        return <Badge variant={variant as any}>{status}</Badge>;
+        const variant = status === "active" ? "default" : status === "inactive" ? "secondary" : "destructive";
+        return <Badge variant={variant}>{status}</Badge>;
+      },
+      meta: {
+        filterType: "select",
+        filterOptions: ["active", "inactive", "error"],
       },
     },
     {
@@ -490,7 +552,7 @@ export default function DataManagement() {
       header: "Last Reading",
       cell: ({ row }) => {
         const date = row.getValue("lastReading");
-        return date ? format(new Date(date as string), "MMM dd, HH:mm") : "Never";
+        return date ? format(new Date(date as string), "MMM dd, HH:mm") : "N/A";
       },
     },
     {
@@ -505,9 +567,7 @@ export default function DataManagement() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                onClick={() => setDetailsDialog({ open: true, data: device, type: "device" })}
-              >
+              <DropdownMenuItem onClick={() => setDetailsDialog({ open: true, data: device, type: "iot" })}>
                 <Eye className="mr-2 h-4 w-4" />
                 View Details
               </DropdownMenuItem>
@@ -518,282 +578,179 @@ export default function DataManagement() {
     },
   ];
 
-  // Filter Presets
-  const filterPresets = {
-    farms: [
-      { id: "all-farms", name: "All Farms", filters: [] },
-      { id: "crop-farms", name: "Crop Farms", filters: [{ id: "farmType", value: "crop" }] },
-      { id: "livestock-farms", name: "Livestock Farms", filters: [{ id: "farmType", value: "livestock" }] },
-      { id: "mixed-farms", name: "Mixed Farms", filters: [{ id: "farmType", value: "mixed" }] },
-    ],
-    livestock: [
-      { id: "all-animals", name: "All Animals", filters: [] },
-      { id: "healthy", name: "Healthy", filters: [{ id: "status", value: "healthy" }] },
-      { id: "sick", name: "Sick", filters: [{ id: "status", value: "sick" }] },
-      { id: "under-treatment", name: "Under Treatment", filters: [{ id: "status", value: "under_treatment" }] },
-    ],
-    products: [
-      { id: "all-products", name: "All Products", filters: [] },
-      { id: "in-stock", name: "In Stock", filters: [{ id: "quantityAvailable", value: "1" }] },
-      { id: "low-stock", name: "Low Stock", filters: [{ id: "quantityAvailable", value: "low" }] },
-      { id: "out-of-stock", name: "Out of Stock", filters: [{ id: "quantityAvailable", value: "0" }] },
-    ],
+  const getModuleData = () => {
+    switch (selectedModule) {
+      case "farms": return { data: farms, columns: farmsColumns };
+      case "crops": return { data: crops, columns: cropsColumns };
+      case "livestock": return { data: livestock, columns: livestockColumns };
+      case "products": return { data: products, columns: productsColumns };
+      case "training": return { data: training, columns: trainingColumns };
+      case "iot": return { data: iotDevices, columns: iotColumns };
+      default: return { data: [], columns: [] };
+    }
   };
 
-  // CSV Import Handler
-  const handleImport = async () => {
-    if (!csvFile) {
-      toast({ title: "Please select a file", variant: "destructive" });
+  const handleSaveFilter = (filters: any) => {
+    if (!filterName.trim()) {
+      toast({ title: "Please enter a filter name", variant: "destructive" });
       return;
     }
-
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      const text = e.target?.result as string;
-      const lines = text.split("\n");
-      const headers = lines[0].split(",").map(h => h.trim());
-      
-      toast({ title: `Importing ${lines.length - 1} records...` });
-      
-      // Parse and validate CSV data
-      const records = [];
-      for (let i = 1; i < lines.length; i++) {
-        if (!lines[i].trim()) continue;
-        const values = lines[i].split(",").map(v => v.trim());
-        const record: any = {};
-        headers.forEach((header, index) => {
-          record[header] = values[index];
-        });
-        records.push(record);
-      }
-
-      toast({ 
-        title: "Import complete", 
-        description: `Successfully imported ${records.length} records` 
-      });
-      setImportDialog(false);
-      setCsvFile(null);
+    const newFilter = {
+      id: Date.now().toString(),
+      name: filterName,
+      module: selectedModule,
+      filters,
     };
-    reader.readAsText(csvFile);
+    setSavedFilters([...savedFilters, newFilter]);
+    setFilterName("");
+    toast({ title: "Filter saved successfully" });
   };
 
-  // Module Stats
-  const moduleStats = [
-    { name: "Farms", count: farms.length, icon: MapPin, color: "text-green-600" },
-    { name: "Crops", count: crops.length, icon: Sprout, color: "text-emerald-600" },
-    { name: "Livestock", count: animals.length, icon: Beef, color: "text-orange-600" },
-    { name: "Products", count: products.length, icon: ShoppingCart, color: "text-blue-600" },
-    { name: "Training", count: trainingPrograms.length, icon: GraduationCap, color: "text-purple-600" },
-    { name: "IoT Devices", count: devices.length, icon: Cpu, color: "text-cyan-600" },
-  ];
+  const moduleData = getModuleData();
+  const currentModuleSavedFilters = savedFilters.filter(f => f.module === selectedModule);
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="container mx-auto py-6">
+      <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-bold">Data Management</h1>
-          <p className="text-muted-foreground">
-            View, edit, filter, and export all your agricultural data
+          <h1 className="text-3xl font-bold flex items-center gap-2">
+            <Database className="h-8 w-8" />
+            Data Management
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            View, filter, sort, edit, and manage all your agricultural data
           </p>
         </div>
-        <Button onClick={() => setImportDialog(true)}>
-          <Upload className="mr-2 h-4 w-4" />
-          Import CSV
-        </Button>
       </div>
 
-      {/* Module Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        {moduleStats.map((stat) => {
-          const Icon = stat.icon;
-          return (
-            <Card key={stat.name}>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2">
-                  <Icon className={`h-5 w-5 ${stat.color}`} />
-                  <div>
-                    <p className="text-2xl font-bold">{stat.count}</p>
-                    <p className="text-xs text-muted-foreground">{stat.name}</p>
-                  </div>
+      <div className="flex gap-6">
+        {/* Icon-based Navigation Sidebar */}
+        <div className="w-20 flex-shrink-0">
+          <Card className="p-2">
+            <TooltipProvider>
+              <div className="flex flex-col gap-2">
+                {modules.map((module) => {
+                  const Icon = module.icon;
+                  const isActive = selectedModule === module.id;
+                  return (
+                    <Tooltip key={module.id}>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant={isActive ? "default" : "ghost"}
+                          size="icon"
+                          className={`h-14 w-14 transition-all duration-200 ${
+                            isActive ? "" : "hover:scale-110"
+                          } ${!isActive && module.color}`}
+                          onClick={() => setSelectedModule(module.id)}
+                        >
+                          <Icon className="h-6 w-6" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent side="right">
+                        <p>{module.name}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  );
+                })}
+              </div>
+            </TooltipProvider>
+          </Card>
+        </div>
+
+        {/* Main Content Area */}
+        <div className="flex-1">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    {modules.find(m => m.id === selectedModule)?.name} Data
+                    <Badge variant="secondary">{moduleData.data.length} records</Badge>
+                  </CardTitle>
+                  <CardDescription>
+                    View, filter, sort, edit, and manage your {selectedModule} data
+                  </CardDescription>
                 </div>
-              </CardContent>
-            </Card>
-          );
-        })}
+                
+                {/* Saved Filters Dropdown */}
+                {currentModuleSavedFilters.length > 0 && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        <Star className="h-4 w-4 mr-2" />
+                        Saved Filters ({currentModuleSavedFilters.length})
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      {currentModuleSavedFilters.map((filter) => (
+                        <DropdownMenuItem key={filter.id}>
+                          <Filter className="mr-2 h-4 w-4" />
+                          {filter.name}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent>
+              <DataTable
+                columns={moduleData.columns}
+                data={moduleData.data}
+                searchPlaceholder={`Search ${selectedModule}...`}
+                exportFilename={selectedModule}
+                enableInlineEdit={selectedModule === "products"}
+                enableRowSelection={selectedModule === "products"}
+                onUpdate={async (row: any, field: string, value: any) => {
+                  if (selectedModule === "products") {
+                    await updateProduct.mutateAsync({ id: row.id, [field]: value });
+                  } else if (selectedModule === "livestock") {
+                    await updateAnimal.mutateAsync({ id: row.id, [field]: value });
+                  }
+                }}
+                onBulkDelete={async (rows: any[]) => {
+                  const ids = rows.map(r => r.id);
+                  if (selectedModule === "products") {
+                    for (const id of ids) { await deleteProducts.mutateAsync({ id }); }
+                  }
+                }}
+                onSaveFilterPreset={(preset) => handleSaveFilter(preset.filters)}
+              />
+            </CardContent>
+          </Card>
+        </div>
       </div>
-
-      {/* Module Selector */}
-      <Tabs value={selectedModule} onValueChange={setSelectedModule}>
-        <TabsList className="grid grid-cols-3 lg:grid-cols-6">
-          <TabsTrigger value="farms">
-            <MapPin className="h-4 w-4 mr-2" />
-            Farms
-          </TabsTrigger>
-          <TabsTrigger value="crops">
-            <Sprout className="h-4 w-4 mr-2" />
-            Crops
-          </TabsTrigger>
-          <TabsTrigger value="livestock">
-            <Beef className="h-4 w-4 mr-2" />
-            Livestock
-          </TabsTrigger>
-          <TabsTrigger value="products">
-            <ShoppingCart className="h-4 w-4 mr-2" />
-            Products
-          </TabsTrigger>
-          <TabsTrigger value="training">
-            <GraduationCap className="h-4 w-4 mr-2" />
-            Training
-          </TabsTrigger>
-          <TabsTrigger value="devices">
-            <Cpu className="h-4 w-4 mr-2" />
-            IoT Devices
-          </TabsTrigger>
-        </TabsList>
-      </Tabs>
-
-      {/* Data Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="capitalize">{selectedModule} Data</CardTitle>
-          <CardDescription>
-            View, filter, sort, edit, and manage your {selectedModule} data
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {selectedModule === "farms" && (
-            <DataTable
-              columns={farmsColumns}
-              data={farms}
-              searchPlaceholder="Search farms..."
-              exportFilename="farms"
-              filterPresets={filterPresets.farms}
-            />
-          )}
-          {selectedModule === "crops" && (
-            <DataTable
-              columns={cropsColumns}
-              data={crops}
-              searchPlaceholder="Search crops..."
-              exportFilename="crops"
-            />
-          )}
-          {selectedModule === "livestock" && (
-            <DataTable
-              columns={livestockColumns}
-              data={animals}
-              searchPlaceholder="Search animals..."
-              exportFilename="livestock"
-              enableInlineEdit
-              enableRowSelection
-              onUpdate={async (row, field, value) => {
-                await updateAnimal.mutateAsync({ id: row.id, [field]: value });
-              }}
-              filterPresets={filterPresets.livestock}
-            />
-          )}
-          {selectedModule === "products" && (
-            <DataTable
-              columns={productsColumns}
-              data={products}
-              searchPlaceholder="Search products..."
-              exportFilename="products"
-              enableInlineEdit
-              enableRowSelection
-              onUpdate={async (row, field, value) => {
-                await updateProduct.mutateAsync({ id: row.id, [field]: value });
-              }}
-              onBulkDelete={async (rows) => {
-                if (confirm(`Delete ${rows.length} products?`)) {
-                  for (const row of rows) {
-                    await deleteProduct.mutateAsync({ id: row.id });
-                  }
-                }
-              }}
-              filterPresets={filterPresets.products}
-            />
-          )}
-          {selectedModule === "training" && (
-            <DataTable
-              columns={trainingColumns}
-              data={trainingPrograms}
-              searchPlaceholder="Search programs..."
-              exportFilename="training-programs"
-              enableRowSelection
-              onBulkDelete={async (rows) => {
-                if (confirm(`Delete ${rows.length} programs?`)) {
-                  for (const row of rows) {
-                    await deleteProgram.mutateAsync({ id: row.id });
-                  }
-                }
-              }}
-            />
-          )}
-          {selectedModule === "devices" && (
-            <DataTable
-              columns={devicesColumns}
-              data={devices}
-              searchPlaceholder="Search devices..."
-              exportFilename="iot-devices"
-            />
-          )}
-        </CardContent>
-      </Card>
 
       {/* Details Dialog */}
       <Dialog open={detailsDialog.open} onOpenChange={(open) => setDetailsDialog({ ...detailsDialog, open })}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="capitalize">{detailsDialog.type} Details</DialogTitle>
+            <DialogTitle>
+              {detailsDialog.type.charAt(0).toUpperCase() + detailsDialog.type.slice(1)} Details
+            </DialogTitle>
             <DialogDescription>
-              Complete information about this {detailsDialog.type}
-            </DialogDescription>
-          </DialogHeader>
-          {detailsDialog.data && (
-            <div className="space-y-4">
-              {Object.entries(detailsDialog.data).map(([key, value]) => (
-                <div key={key} className="grid grid-cols-3 gap-4">
-                  <div className="font-medium capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}:</div>
-                  <div className="col-span-2">
-                    {value instanceof Date ? format(value, "PPP") : 
-                     typeof value === "object" ? JSON.stringify(value) :
-                     String(value)}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Import Dialog */}
-      <Dialog open={importDialog} onOpenChange={setImportDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Import CSV Data</DialogTitle>
-            <DialogDescription>
-              Upload a CSV file to bulk import {selectedModule} records
+              View detailed information about this {detailsDialog.type}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div>
-              <Label htmlFor="csv-file">Select CSV File</Label>
-              <Input
-                id="csv-file"
-                type="file"
-                accept=".csv"
-                onChange={(e) => setCsvFile(e.target.files?.[0] || null)}
-              />
-            </div>
-            <div className="flex gap-2">
-              <Button onClick={handleImport} disabled={!csvFile}>
-                <Upload className="mr-2 h-4 w-4" />
-                Import
-              </Button>
-              <Button variant="outline" onClick={() => setImportDialog(false)}>
-                Cancel
-              </Button>
-            </div>
+            {detailsDialog.data && (
+              <div className="grid grid-cols-2 gap-4">
+                {Object.entries(detailsDialog.data).map(([key, value]) => (
+                  <div key={key} className="space-y-1">
+                    <Label className="text-sm font-medium text-muted-foreground">
+                      {key.replace(/([A-Z])/g, " $1").trim()}
+                    </Label>
+                    <p className="text-sm">
+                      {value instanceof Date
+                        ? format(value, "MMM dd, yyyy")
+                        : typeof value === "object"
+                        ? JSON.stringify(value)
+                        : String(value)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>
