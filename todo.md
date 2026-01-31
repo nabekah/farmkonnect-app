@@ -1203,3 +1203,9 @@
 - [x] Create farm activity timeline showing recent events
 - [x] Add activity types: crop plantings, livestock additions, weather alerts
 - [x] Display timeline in edit dialog or separate tab
+
+## Currency Localization
+- [x] Change all currency symbols from $ to GH₵ (Ghana Cedis)
+- [x] Update currency formatting throughout the application
+- [x] Update marketplace product prices to use Ghana Cedis
+- [x] Update payment and transaction displays to use Ghana Cedis

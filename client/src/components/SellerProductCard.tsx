@@ -28,7 +28,7 @@ export function SellerProductCard({ product }: SellerProductCardProps) {
         <CardDescription>{product.category}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-2">
-        <p className="text-2xl font-bold">₹{parseFloat(product.price).toFixed(2)}</p>
+        <p className="text-2xl font-bold">GH₵{parseFloat(product.price).toFixed(2)}</p>
         <p className="text-sm text-muted-foreground">{product.quantity} {product.unit} available</p>
         <Badge variant={product.status === "active" ? "default" : "secondary"}>{product.status}</Badge>
       </CardContent>

@@ -148,11 +148,11 @@ export function FeedingRecords({ animalId }: { animalId: number }) {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Total Cost</p>
-                <p className="text-2xl font-bold">${costAnalysis.totalCost.toFixed(2)}</p>
+                <p className="text-2xl font-bold">GH₵{costAnalysis.totalCost.toFixed(2)}</p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Cost per Day</p>
-                <p className="text-2xl font-bold">${costAnalysis.costPerDay.toFixed(2)}</p>
+                <p className="text-2xl font-bold">GH₵{costAnalysis.costPerDay.toFixed(2)}</p>
               </div>
             </div>
           </CardContent>

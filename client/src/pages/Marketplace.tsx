@@ -397,7 +397,7 @@ export default function Marketplace() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    <p className="text-lg font-semibold">₹{parseFloat(order.totalAmount).toFixed(2)}</p>
+                    <p className="text-lg font-semibold">GH₵{parseFloat(order.totalAmount).toFixed(2)}</p>
                     <p className="text-sm text-muted-foreground">{order.deliveryAddress}</p>
                     {order.status === "confirmed" && (
                       <Button
@@ -433,7 +433,7 @@ export default function Marketplace() {
                         <p className="text-sm text-muted-foreground">Qty: {item.quantity}</p>
                       </div>
                       <div className="flex items-center gap-2">
-                        <p>₹{(parseFloat(product?.price || "0") * parseFloat(item.quantity)).toFixed(2)}</p>
+                        <p>GH₵{(parseFloat(product?.price || "0") * parseFloat(item.quantity)).toFixed(2)}</p>
                         <Button
                           variant="ghost"
                           size="sm"
@@ -446,7 +446,7 @@ export default function Marketplace() {
                   );
                 })}
                 <div className="border-t pt-4">
-                  <p className="text-lg font-bold mb-4">Total: ₹{cartTotal.toFixed(2)}</p>
+                  <p className="text-lg font-bold mb-4">Total: GH₵{cartTotal.toFixed(2)}</p>
                   <Dialog open={isCheckoutOpen} onOpenChange={setIsCheckoutOpen}>
                     <DialogTrigger asChild>
                       <Button className="w-full">Proceed to Checkout</Button>
@@ -661,7 +661,7 @@ export default function Marketplace() {
                   <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-2xl font-bold">₹{parseFloat(String(sellerStats.totalRevenue)).toFixed(2)}</p>
+                  <p className="text-2xl font-bold">GH₵{parseFloat(String(sellerStats.totalRevenue)).toFixed(2)}</p>
                 </CardContent>
               </Card>
               <Card>
@@ -712,7 +712,7 @@ export default function Marketplace() {
               </div>
               <div className="grid gap-2">
                 <Label>Total Amount</Label>
-                <Input value={`₹${parseFloat(selectedOrderForTransport.totalAmount).toFixed(2)}`} disabled />
+                <Input value={`GH₵${parseFloat(selectedOrderForTransport.totalAmount).toFixed(2)}`} disabled />
               </div>
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setIsTransportDialogOpen(false)}>

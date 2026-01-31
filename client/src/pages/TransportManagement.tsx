@@ -143,7 +143,7 @@ export default function TransportManagement() {
                     <SelectContent>
                       {orders.map((order: any) => (
                         <SelectItem key={order.id} value={order.id.toString()}>
-                          Order #{order.id} - ${order.totalAmount}
+                          Order #{order.id} - GH₵{order.totalAmount}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -427,7 +427,7 @@ export default function TransportManagement() {
                     <div className="space-y-4">
                       <div>
                         <p className="text-sm font-medium">Total Amount</p>
-                        <p className="text-2xl font-bold">${order.totalAmount}</p>
+                        <p className="text-2xl font-bold">GH₵{order.totalAmount}</p>
                       </div>
                       <div className="flex gap-2">
                         {order.status === "pending" && (

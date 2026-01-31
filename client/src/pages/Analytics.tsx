@@ -195,7 +195,7 @@ export function Analytics() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">₹{totalRevenue.toFixed(2)}</div>
+            <div className="text-2xl font-bold">GH₵{totalRevenue.toFixed(2)}</div>
             <p className="text-xs text-muted-foreground flex items-center mt-1">
               <TrendingUp className="h-3 w-3 mr-1 text-green-600" />
               +12.5% from last month
