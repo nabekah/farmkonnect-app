@@ -988,6 +988,224 @@ export const securityRouter = router({
   // ============================================================================
   // SYSTEM INITIALIZATION
   // ============================================================================
+  // ============================================================================
+  // USER REGISTRATION & APPROVAL
+  // ============================================================================
+  registration: router({
+    // Public registration (no auth required)
+    register: publicProcedure
+      .input(
+        z.object({
+          email: z.string().email(),
+          name: z.string().min(2),
+          phone: z.string().optional(),
+          requestedRole: z.enum(["farmer", "agent", "veterinarian", "buyer", "transporter"]).default("farmer"),
+          justification: z.string().min(10).max(500),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+
+        // Check if email already exists
+        const existing = await db.select().from(users).where(eq(users.email, input.email)).limit(1);
+        if (existing.length > 0) {
+          throw new TRPCError({ code: "CONFLICT", message: "Email already registered" });
+        }
+
+        // Check if approval is required
+        const settings = await db.select().from(securitySettings).where(eq(securitySettings.settingKey, "require_approval_for_new_users"));
+        const requireApproval = settings[0]?.settingValue === "true";
+
+        if (requireApproval) {
+          // Create approval request
+          const result = await db.insert(userApprovalRequests).values({
+            email: input.email,
+            name: input.name,
+            phone: input.phone,
+            requestedRole: input.requestedRole,
+            justification: input.justification,
+            status: "pending",
+          });
+
+          await logSecurityEvent({
+            eventType: "user_registration",
+            eventDescription: `New registration request from ${input.email}`,
+            metadata: { email: input.email, role: input.requestedRole },
+            severity: "low",
+          });
+
+          return {
+            success: true,
+            requiresApproval: true,
+            message: "Registration submitted for approval. You will be notified once approved.",
+          };
+        } else {
+          // Auto-approve and create user
+          const userResult = await db.insert(users).values({
+            openId: `local_${input.email}_${Date.now()}`, // Generate temporary openId for local auth
+            email: input.email,
+            name: input.name,
+            phone: input.phone,
+            role: input.requestedRole,
+            accountStatus: "active",
+            approvalStatus: "approved",
+            loginMethod: "email",
+          });
+
+          await logSecurityEvent({
+            eventType: "user_registration",
+            eventDescription: `New user auto-approved: ${input.email}`,
+            metadata: { email: input.email, role: input.requestedRole },
+            severity: "low",
+          });
+
+          return {
+            success: true,
+            requiresApproval: false,
+            message: "Registration successful! You can now log in.",
+          };
+        }
+      }),
+
+    // Get pending approval requests (admin only)
+    getPendingRequests: adminProcedure.query(async () => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+
+      return await db
+        .select()
+        .from(userApprovalRequests)
+        .where(eq(userApprovalRequests.status, "pending"))
+        .orderBy(desc(userApprovalRequests.requestedAt));
+    }),
+
+    // Get all approval requests (admin only)
+    getAllRequests: adminProcedure.query(async () => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+
+      return await db
+        .select()
+        .from(userApprovalRequests)
+        .orderBy(desc(userApprovalRequests.requestedAt));
+    }),
+
+    // Approve registration request
+    approveRequest: adminProcedure
+      .input(
+        z.object({
+          requestId: z.number(),
+          adminNotes: z.string().optional(),
+        })
+      )
+      .mutation(async ({ input, ctx }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+
+        // Get request
+        const request = await db
+          .select()
+          .from(userApprovalRequests)
+          .where(eq(userApprovalRequests.id, input.requestId))
+          .limit(1);
+
+        if (request.length === 0) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Request not found" });
+        }
+
+        const req = request[0];
+
+        if (req.status !== "pending") {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Request already processed" });
+        }
+
+        // Create user
+          const userResult = await db.insert(users).values({
+            openId: `local_${req.email}_${Date.now()}`, // Generate temporary openId for local auth
+            email: req.email,
+            name: req.name,
+            phone: req.phone,
+            role: (req.requestedRole as "farmer" | "agent" | "veterinarian" | "buyer" | "transporter") || "farmer",
+            accountStatus: "active",
+            approvalStatus: "approved",
+            loginMethod: "email",
+          });
+
+        // Update request
+        await db
+          .update(userApprovalRequests)
+          .set({
+            status: "approved",
+            reviewedBy: ctx.user.id,
+            reviewedAt: new Date(),
+            reviewNotes: input.adminNotes,
+          })
+          .where(eq(userApprovalRequests.id, input.requestId));
+
+        await logSecurityEvent({
+          userId: ctx.user.id,
+          eventType: "user_approved",
+          eventDescription: `Approved registration for ${req.email}`,
+          metadata: { requestId: input.requestId, email: req.email },
+          severity: "medium",
+        });
+
+        return { success: true, message: "User approved and account created" };
+      }),
+
+    // Reject registration request
+    rejectRequest: adminProcedure
+      .input(
+        z.object({
+          requestId: z.number(),
+          adminNotes: z.string().min(10),
+        })
+      )
+      .mutation(async ({ input, ctx }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+
+        // Get request
+        const request = await db
+          .select()
+          .from(userApprovalRequests)
+          .where(eq(userApprovalRequests.id, input.requestId))
+          .limit(1);
+
+        if (request.length === 0) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Request not found" });
+        }
+
+        const req = request[0];
+
+        if (req.status !== "pending") {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Request already processed" });
+        }
+
+        // Update request
+        await db
+          .update(userApprovalRequests)
+          .set({
+            status: "rejected",
+            reviewedBy: ctx.user.id,
+            reviewedAt: new Date(),
+            reviewNotes: input.adminNotes,
+          })
+          .where(eq(userApprovalRequests.id, input.requestId));
+
+        await logSecurityEvent({
+          userId: ctx.user.id,
+          eventType: "user_rejected",
+          eventDescription: `Rejected registration for ${req.email}`,
+          metadata: { requestId: input.requestId, email: req.email, reason: input.adminNotes },
+          severity: "medium",
+        });
+
+        return { success: true, message: "Registration request rejected" };
+      }),
+  }),
+
   system: router({
     // Seed security system (one-time setup)
     seedSecuritySystem: adminProcedure.mutation(async ({ ctx }) => {

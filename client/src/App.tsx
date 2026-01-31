@@ -24,11 +24,13 @@ import Settings from "./pages/Settings";
 import CropPlanning from "./pages/CropPlanning";
 import RoleManagement from "./pages/RoleManagement";
 import SecurityDashboard from "./pages/SecurityDashboard";
+import Register from "./pages/Register";
 
 function Router() {
   return (
     <Switch>
       <Route path={"/"} component={Home} />
+      <Route path="/register" component={Register} />
       <Route path="/farms">
         {() => (
           <DashboardLayout>

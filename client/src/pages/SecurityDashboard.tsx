@@ -31,7 +31,7 @@ export default function SecurityDashboard() {
   // OVERVIEW TAB
   // ============================================================================
   const { data: auditStats } = trpc.security.auditLogs.getStatistics.useQuery();
-  const { data: pendingApprovals } = trpc.security.approval.listPendingApprovals.useQuery();
+  const { data: pendingApprovals } = trpc.security.registration.getPendingRequests.useQuery();
   const { data: activeSessions } = trpc.security.sessions.listAllSessions.useQuery({});
 
   const seedSystem = trpc.security.system.seedSecuritySystem.useMutation({
@@ -60,22 +60,29 @@ export default function SecurityDashboard() {
   // ============================================================================
   // USER APPROVAL TAB
   // ============================================================================
-  const approveUser = trpc.security.approval.approveUser.useMutation({
+  const approveRequest = trpc.security.registration.approveRequest.useMutation({
     onSuccess: () => {
-      toast({ title: "User Approved", description: "User account has been activated" });
-      utils.security.approval.listPendingApprovals.invalidate();
+      toast({ title: "Request Approved", description: "User account has been created" });
+      utils.security.registration.getPendingRequests.invalidate();
+    },
+    onError: (error) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
     },
   });
 
-  const rejectUser = trpc.security.approval.rejectUser.useMutation({
+  const rejectRequest = trpc.security.registration.rejectRequest.useMutation({
     onSuccess: () => {
-      toast({ title: "User Rejected", description: "User account has been rejected" });
-      utils.security.approval.listPendingApprovals.invalidate();
+      toast({ title: "Request Rejected", description: "Registration request has been rejected" });
+      utils.security.registration.getPendingRequests.invalidate();
+    },
+    onError: (error) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
     },
   });
 
   const [rejectionReason, setRejectionReason] = useState("");
-  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+  const [selectedRequestId, setSelectedRequestId] = useState<number | null>(null);
+  const [approvalNotes, setApprovalNotes] = useState("");
 
   // ============================================================================
   // ACCOUNT MANAGEMENT TAB
@@ -321,52 +328,81 @@ export default function SecurityDashboard() {
                   {pendingApprovals.map((request: any) => (
                     <div key={request.id} className="flex items-center justify-between border-b pb-4">
                       <div>
-                        <p className="font-medium">User ID: {request.userId}</p>
+                        <p className="font-medium">{request.name} ({request.email})</p>
                         <p className="text-sm text-muted-foreground">Requested Role: {request.requestedRole || "N/A"}</p>
+                        <p className="text-sm text-muted-foreground">Phone: {request.phone || "N/A"}</p>
                         <p className="text-sm text-muted-foreground">Justification: {request.justification || "None provided"}</p>
                         <p className="text-xs text-muted-foreground">
-                          Requested: {new Date(request.createdAt).toLocaleString()}
+                          Requested: {new Date(request.requestedAt || request.createdAt).toLocaleString()}
                         </p>
                       </div>
                       <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          onClick={() => approveUser.mutate({ userId: request.userId })}
-                          disabled={approveUser.isPending}
-                        >
-                          <CheckCircle className="mr-1 h-4 w-4" />
-                          Approve
-                        </Button>
                         <Dialog>
                           <DialogTrigger asChild>
-                            <Button size="sm" variant="destructive" onClick={() => setSelectedUserId(request.userId)}>
+                            <Button size="sm" onClick={() => setSelectedRequestId(request.id)}>
+                              <CheckCircle className="mr-1 h-4 w-4" />
+                              Approve
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Approve Registration</DialogTitle>
+                              <DialogDescription>Approve {request.name}'s registration request</DialogDescription>
+                            </DialogHeader>
+                            <div className="space-y-4">
+                              <div>
+                                <Label>Admin Notes (Optional)</Label>
+                                <Textarea
+                                  value={approvalNotes}
+                                  onChange={(e) => setApprovalNotes(e.target.value)}
+                                  placeholder="Add any notes about this approval..."
+                                />
+                              </div>
+                              <Button
+                                onClick={() => {
+                                  if (selectedRequestId) {
+                                    approveRequest.mutate({ requestId: selectedRequestId, adminNotes: approvalNotes });
+                                    setApprovalNotes("");
+                                    setSelectedRequestId(null);
+                                  }
+                                }}
+                                disabled={approveRequest.isPending}
+                              >
+                                Confirm Approval
+                              </Button>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button size="sm" variant="destructive" onClick={() => setSelectedRequestId(request.id)}>
                               <XCircle className="mr-1 h-4 w-4" />
                               Reject
                             </Button>
                           </DialogTrigger>
                           <DialogContent>
                             <DialogHeader>
-                              <DialogTitle>Reject User</DialogTitle>
-                              <DialogDescription>Provide a reason for rejection</DialogDescription>
+                              <DialogTitle>Reject Registration</DialogTitle>
+                              <DialogDescription>Provide a reason for rejecting {request.name}'s request</DialogDescription>
                             </DialogHeader>
                             <div className="space-y-4">
                               <div>
-                                <Label>Rejection Reason</Label>
+                                <Label>Rejection Reason (Required)</Label>
                                 <Textarea
                                   value={rejectionReason}
                                   onChange={(e) => setRejectionReason(e.target.value)}
-                                  placeholder="Enter reason for rejection..."
+                                  placeholder="Enter reason for rejection (minimum 10 characters)..."
                                 />
                               </div>
                               <Button
                                 onClick={() => {
-                                  if (selectedUserId && rejectionReason) {
-                                    rejectUser.mutate({ userId: selectedUserId, reviewNotes: rejectionReason });
+                                  if (rejectionReason && selectedRequestId && rejectionReason.length >= 10) {
+                                    rejectRequest.mutate({ requestId: selectedRequestId, adminNotes: rejectionReason });
                                     setRejectionReason("");
-                                    setSelectedUserId(null);
+                                    setSelectedRequestId(null);
                                   }
                                 }}
-                                disabled={!rejectionReason || rejectUser.isPending}
+                                disabled={rejectRequest.isPending || !rejectionReason || rejectionReason.length < 10}
                               >
                                 Confirm Rejection
                               </Button>

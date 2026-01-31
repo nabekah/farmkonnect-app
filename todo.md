@@ -882,3 +882,37 @@
 - [x] Add visual feedback for permission changes
 - [x] Add role assignment history tracking
 - [x] Implement MFA setup wizard with step-by-step instructions
+
+
+## USER REGISTRATION & APPROVAL WORKFLOW - IN PROGRESS
+
+### User Registration System
+- [ ] Create public registration page (/register)
+- [ ] Build registration form with validation
+- [ ] Add registration tRPC procedure
+- [ ] Implement email verification (optional)
+- [ ] Create pending user dashboard
+- [ ] Add registration success page
+
+### Approval Settings & UI
+- [ ] Add approval settings toggle in Security Dashboard
+- [ ] Create approval settings management UI
+- [ ] Implement settings persistence in database
+- [ ] Add approval notification system
+- [ ] Create approval history tracking
+
+### Permission Inheritance System
+- [ ] Build permission checking middleware
+- [ ] Implement multi-role permission aggregation
+- [ ] Create permission testing utilities
+- [ ] Add permission debugging tools
+- [ ] Document permission precedence rules
+
+### Documentation & User Guide
+- [ ] Create SECURITY_GUIDE.md with complete workflows
+- [ ] Document user registration process
+- [ ] Explain approval workflow steps
+- [ ] Document MFA setup process
+- [ ] Create role management guide
+- [ ] Add permission system documentation
+- [ ] Include troubleshooting section

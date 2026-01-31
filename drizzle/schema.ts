@@ -971,13 +971,17 @@ export type InsertUserSession = typeof userSessions.$inferInsert;
 // User Approval Requests
 export const userApprovalRequests = mysqlTable("userApprovalRequests", {
   id: int("id").autoincrement().primaryKey(),
-  userId: int("userId").notNull(),
+  userId: int("userId"), // Nullable - will be set after approval
+  email: varchar("email", { length: 320 }).notNull(),
+  name: text("name").notNull(),
+  phone: varchar("phone", { length: 20 }),
   requestedRole: varchar("requestedRole", { length: 100 }),
   justification: text("justification"),
   reviewedBy: int("reviewedBy"),
   reviewedAt: timestamp("reviewedAt"),
   reviewNotes: text("reviewNotes"),
   status: mysqlEnum("status", ["pending", "approved", "rejected"]).default("pending").notNull(),
+  requestedAt: timestamp("requestedAt").defaultNow().notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 
