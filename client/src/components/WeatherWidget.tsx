@@ -80,8 +80,8 @@ export function WeatherWidget({ farmId, latitude, longitude, showForecast = fals
           <CardDescription>Real-time conditions for your farm location</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="space-y-1">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+            <div className="space-y-1 min-w-0">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <ThermometerSun className="h-4 w-4" />
                 <span className="text-sm">Temperature</span>
@@ -89,7 +89,7 @@ export function WeatherWidget({ farmId, latitude, longitude, showForecast = fals
               <p className="text-2xl font-bold">{currentWeather.temperature.toFixed(1)}°C</p>
               <p className="text-xs text-muted-foreground">Feels like {currentWeather.feelsLike.toFixed(1)}°C</p>
             </div>
-            <div className="space-y-1">
+            <div className="space-y-1 min-w-0">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Droplets className="h-4 w-4" />
                 <span className="text-sm">Humidity</span>
@@ -97,7 +97,7 @@ export function WeatherWidget({ farmId, latitude, longitude, showForecast = fals
               <p className="text-2xl font-bold">{currentWeather.humidity}%</p>
               <p className="text-xs text-muted-foreground">{currentWeather.pressure} hPa</p>
             </div>
-            <div className="space-y-1">
+            <div className="space-y-1 min-w-0">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Wind className="h-4 w-4" />
                 <span className="text-sm">Wind Speed</span>
@@ -105,7 +105,7 @@ export function WeatherWidget({ farmId, latitude, longitude, showForecast = fals
               <p className="text-2xl font-bold">{currentWeather.windSpeed.toFixed(1)} m/s</p>
               <p className="text-xs text-muted-foreground">{currentWeather.cloudiness}% clouds</p>
             </div>
-            <div className="space-y-1">
+            <div className="space-y-1 min-w-0">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Eye className="h-4 w-4" />
                 <span className="text-sm">Conditions</span>
@@ -130,7 +130,7 @@ export function WeatherWidget({ farmId, latitude, longitude, showForecast = fals
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
+            <div className="space-y-2 max-h-[400px] overflow-y-auto">
               {alerts.map((alert: any, index: number) => (
                 <div
                   key={index}
@@ -168,7 +168,7 @@ export function WeatherWidget({ farmId, latitude, longitude, showForecast = fals
             <CardDescription>Weather-based farming advice</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
+            <div className="space-y-2 max-h-[400px] overflow-y-auto">
               {cropRecommendations.recommendations.map((rec: any, index: number) => (
                 <div
                   key={index}
@@ -202,9 +202,9 @@ export function WeatherWidget({ farmId, latitude, longitude, showForecast = fals
             <CardDescription>Upcoming weather conditions</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
+            <div className="flex overflow-x-auto gap-3 pb-2 md:grid md:grid-cols-5 snap-x snap-mandatory touch-pan-x scrollbar-hide">
               {forecast.slice(0, 5).map((day: any, index: number) => (
-                <div key={index} className="p-3 rounded-lg border bg-card text-center">
+                <div key={index} className="p-3 rounded-lg border bg-card text-center min-w-[140px] md:min-w-0 flex-shrink-0 snap-center">
                   <p className="text-sm font-medium">
                     {new Date(day.timestamp).toLocaleDateString([], { weekday: "short" })}
                   </p>

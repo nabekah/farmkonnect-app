@@ -20,6 +20,8 @@ import TransportManagement from "./pages/TransportManagement";
 import BusinessStrategy from "./pages/BusinessStrategy";
 import WeatherAlerts from "./pages/WeatherAlerts";
 import WeatherTrends from "./pages/WeatherTrends";
+import Settings from "./pages/Settings";
+import CropPlanning from "./pages/CropPlanning";
 
 function Router() {
   return (
@@ -113,6 +115,20 @@ function Router() {
         {() => (
           <DashboardLayout>
             <WeatherTrends />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/settings">
+        {() => (
+          <DashboardLayout>
+            <Settings />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/crop-planning">
+        {() => (
+          <DashboardLayout>
+            <CropPlanning />
           </DashboardLayout>
         )}
       </Route>
