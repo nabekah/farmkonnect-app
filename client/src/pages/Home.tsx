@@ -1,11 +1,25 @@
 import { useEffect } from "react";
+import { Link, useLocation } from "wouter";
+import { Button } from "../components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
+import {
+  Tractor,
+  Sprout,
+  Beef,
+  ShoppingCart,
+  BarChart3,
+  Cloud,
+  TrendingUp,
+  Shield,
+  Zap,
+  ArrowRight,
+  CheckCircle2,
+  Loader2,
+  Leaf,
+} from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { WeatherWidget } from "@/components/WeatherWidget";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Leaf, TrendingUp, Users, BarChart3, Zap, Settings, Cloud, Droplets, ShoppingCart } from "lucide-react";
 import { getLoginUrl } from "@/const";
-import { useLocation } from "wouter";
+import { WeatherWidget } from "@/components/WeatherWidget";
 
 export default function Home() {
   const { user, loading, isAuthenticated } = useAuth();
@@ -31,304 +45,386 @@ export default function Home() {
     );
   }
 
-  if (!isAuthenticated) {
+  if (isAuthenticated && user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
-        <div className="max-w-2xl w-full space-y-8">
-          <div className="text-center space-y-4">
-            <div className="flex justify-center">
-              <div className="h-16 w-16 rounded-lg bg-green-600 flex items-center justify-center">
-                <Leaf className="h-8 w-8 text-white" />
-              </div>
-            </div>
-            <h1 className="text-4xl font-bold text-gray-900">FarmKonnect</h1>
-            <p className="text-lg text-gray-600">Digital Agriculture Management System for Ghana & West Africa</p>
-          </div>
+      <div className="space-y-8">
+        {/* Welcome Section */}
+        <div className="space-y-2">
+          <h1 className="text-4xl font-bold">Welcome back, {user.name}!</h1>
+          <p className="text-lg text-muted-foreground">Manage your agricultural operations efficiently with FarmKonnect</p>
+        </div>
 
-          <div className="space-y-4 text-gray-600 text-center">
-            <p className="text-base leading-relaxed">
-              FarmKonnect is a comprehensive farm management platform designed for farmers in Ghana and West Africa. 
-              Manage your farms, track crops, monitor livestock health, check weather forecasts, and sell your products 
-              on our integrated marketplace with data-driven insights.
-            </p>
-            <p className="text-sm font-medium text-gray-700">
-              Keywords: farm management, agriculture, crop tracking, livestock management, weather forecasting, agricultural marketplace
-            </p>
-          </div>
+        {/* Weather Widget */}
+        <div className="mb-8">
+          <WeatherWidget
+            latitude={5.6037}
+            longitude={-0.1870}
+            showForecast={true}
+          />
+        </div>
 
-          <Button
-            onClick={() => {
-              window.location.href = getLoginUrl();
-            }}
-            size="lg"
-            className="w-full bg-green-600 hover:bg-green-700"
-          >
-            Sign in to Continue
-          </Button>
-
-          <div className="grid grid-cols-3 gap-4 text-sm">
-            <div className="space-y-2 text-center">
-              <Leaf className="h-6 w-6 mx-auto text-green-600" />
-              <p className="font-medium">Farm Management</p>
-            </div>
-            <div className="space-y-2 text-center">
-              <TrendingUp className="h-6 w-6 mx-auto text-blue-600" />
-              <p className="font-medium">Crop Tracking</p>
-            </div>
-            <div className="space-y-2 text-center">
-              <BarChart3 className="h-6 w-6 mx-auto text-purple-600" />
-              <p className="font-medium">Analytics</p>
-            </div>
+        {/* Quick Actions Grid */}
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold">Quick Actions for Farm Management</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <QuickActionCard
+              icon={<Tractor className="w-8 h-8" />}
+              title="Manage Farms"
+              description="Register and manage your farms"
+              onClick={() => setLocation("/farms")}
+              color="bg-green-500"
+            />
+            <QuickActionCard
+              icon={<Sprout className="w-8 h-8" />}
+              title="Track Crops"
+              description="Monitor crop cycles and yields"
+              onClick={() => setLocation("/crops")}
+              color="bg-emerald-500"
+            />
+            <QuickActionCard
+              icon={<Beef className="w-8 h-8" />}
+              title="Livestock Management"
+              description="Manage animals and health records"
+              onClick={() => setLocation("/livestock")}
+              color="bg-amber-500"
+            />
+            <QuickActionCard
+              icon={<ShoppingCart className="w-8 h-8" />}
+              title="Agricultural Marketplace"
+              description="Buy and sell agricultural products"
+              onClick={() => setLocation("/marketplace")}
+              color="bg-blue-500"
+            />
+            <QuickActionCard
+              icon={<BarChart3 className="w-8 h-8" />}
+              title="Analytics & Reports"
+              description="View performance insights"
+              onClick={() => setLocation("/analytics")}
+              color="bg-purple-500"
+            />
+            <QuickActionCard
+              icon={<Cloud className="w-8 h-8" />}
+              title="Weather Forecasts"
+              description="Check weather and recommendations"
+              onClick={() => setLocation("/weather-alerts")}
+              color="bg-cyan-500"
+            />
           </div>
         </div>
       </div>
     );
   }
 
+  // Public Landing Page
   return (
-    <div className="space-y-8">
-      {/* Welcome Section */}
-      <div className="space-y-2">
-        <h1 className="text-4xl font-bold">Welcome back, {user?.name}!</h1>
-        <p className="text-lg text-muted-foreground">Manage your agricultural operations efficiently with FarmKonnect</p>
-      </div>
-
-      {/* Weather Widget */}
-      <div className="mb-8">
-        <WeatherWidget
-          latitude={5.6037}
-          longitude={-0.1870}
-          showForecast={true}
-        />
-      </div>
-
-      {/* Quick Actions */}
-      <div className="space-y-4">
-        <h2 className="text-2xl font-bold">Quick Actions for Farm Management</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setLocation("/farms")}>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Leaf className="h-5 w-5 text-green-600" />
-                Manage Farms
-              </CardTitle>
-              <CardDescription>Register and manage your farms</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button variant="outline" className="w-full">
-                Go to Farms
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setLocation("/crops")}>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-blue-600" />
-                Track Crops
-              </CardTitle>
-              <CardDescription>Monitor crop cycles and yields</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button variant="outline" className="w-full">
-                Go to Crops
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setLocation("/livestock")}>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5 text-orange-600" />
-                Livestock Management
-              </CardTitle>
-              <CardDescription>Manage animals and health records</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button variant="outline" className="w-full">
-                Go to Livestock
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setLocation("/marketplace")}>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <ShoppingCart className="h-5 w-5 text-purple-600" />
-                Agricultural Marketplace
-              </CardTitle>
-              <CardDescription>Buy and sell agricultural products</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button variant="outline" className="w-full">
-                Go to Marketplace
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setLocation("/analytics")}>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5 text-purple-600" />
-                Analytics & Reports
-              </CardTitle>
-              <CardDescription>View performance insights</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button variant="outline" className="w-full">
-                Go to Analytics
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setLocation("/weather")}>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Cloud className="h-5 w-5 text-gray-600" />
-                Weather Forecasts
-              </CardTitle>
-              <CardDescription>Check weather and recommendations</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button variant="outline" className="w-full">
-                Go to Weather
-              </Button>
-            </CardContent>
-          </Card>
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      {/* Hero Section */}
+      <section className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-green-600/10 to-emerald-600/10 dark:from-green-600/5 dark:to-emerald-600/5"></div>
+        <div className="container mx-auto px-4 py-20 md:py-32 relative">
+          <div className="max-w-4xl mx-auto text-center">
+            <div className="inline-flex items-center gap-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-4 py-2 rounded-full text-sm font-medium mb-6">
+              <Zap className="w-4 h-4" />
+              Smart Agricultural Management System
+            </div>
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
+              Grow Smarter with{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-600 dark:from-green-400 dark:to-emerald-400">
+                FarmKonnect
+              </span>
+            </h1>
+            <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-10 max-w-3xl mx-auto">
+              Manage your farms, track crops, monitor livestock, and boost productivity with real-time weather insights and IoT integration.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <a href={getLoginUrl()}>
+                <Button size="lg" className="text-lg px-8 py-6 bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600">
+                  Get Started
+                  <ArrowRight className="ml-2 w-5 h-5" />
+                </Button>
+              </a>
+              <Link href="/register">
+                <Button size="lg" variant="outline" className="text-lg px-8 py-6 border-2">
+                  Create Account
+                </Button>
+              </Link>
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
 
-      {/* Features Overview */}
-      <div className="space-y-4">
-        <h2 className="text-2xl font-bold">Key Features of FarmKonnect</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Farm Management System</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 text-sm text-muted-foreground">
-              <p>✓ Register multiple farms with GPS coordinates</p>
-              <p>✓ Track farm size and location in Ghana and West Africa</p>
-              <p>✓ Categorize by farm type (crop, livestock, mixed)</p>
-              <p>✓ Manage farm details and operations</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Crop Tracking & Monitoring</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 text-sm text-muted-foreground">
-              <p>✓ Create and manage crop cycles</p>
-              <p>✓ Log soil tests and nutrient levels</p>
-              <p>✓ Record fertilizer applications</p>
-              <p>✓ Track harvest yields and performance</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Livestock Management</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 text-sm text-muted-foreground">
-              <p>✓ Register and track animals</p>
-              <p>✓ Manage health records and vaccinations</p>
-              <p>✓ Track breeding records and due dates</p>
-              <p>✓ Monitor feeding schedules and costs</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Weather & IoT Integration</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 text-sm text-muted-foreground">
-              <p>✓ Real-time weather forecasts</p>
-              <p>✓ IoT sensor monitoring and alerts</p>
-              <p>✓ Soil moisture tracking</p>
-              <p>✓ Smart irrigation recommendations</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Agricultural Marketplace</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 text-sm text-muted-foreground">
-              <p>✓ List and sell agricultural products</p>
-              <p>✓ Browse products from other farmers</p>
-              <p>✓ Manage orders and inventory</p>
-              <p>✓ Track sales and revenue</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Analytics & Insights</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 text-sm text-muted-foreground">
-              <p>✓ Yield distribution charts</p>
-              <p>✓ Soil health trends and analysis</p>
-              <p>✓ Livestock performance metrics</p>
-              <p>✓ Revenue and sales reports</p>
-            </CardContent>
-          </Card>
+      {/* Stats Section */}
+      <section className="py-16 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            <StatCard number="10,000+" label="Active Farmers" />
+            <StatCard number="50,000+" label="Farms Managed" />
+            <StatCard number="99.9%" label="Uptime" />
+            <StatCard number="24/7" label="Support" />
+          </div>
         </div>
-      </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-20">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+              Everything You Need to Succeed
+            </h2>
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+              Comprehensive tools designed for modern agricultural management in Ghana and West Africa
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <FeatureCard
+              icon={<Tractor className="w-12 h-12 text-green-600 dark:text-green-400" />}
+              title="Farm Management"
+              description="Register multiple farms with GPS coordinates, track farm size, and categorize by type (crop, livestock, mixed)."
+              features={[
+                "GPS location tracking",
+                "Multi-farm management",
+                "Farm type categorization",
+                "Detailed farm profiles",
+              ]}
+            />
+            <FeatureCard
+              icon={<Sprout className="w-12 h-12 text-emerald-600 dark:text-emerald-400" />}
+              title="Crop Tracking"
+              description="Monitor crop cycles, log soil tests, record fertilizer applications, and track harvest yields."
+              features={[
+                "Crop cycle management",
+                "Soil health monitoring",
+                "Fertilizer tracking",
+                "Yield analytics",
+              ]}
+            />
+            <FeatureCard
+              icon={<Beef className="w-12 h-12 text-amber-600 dark:text-amber-400" />}
+              title="Livestock Management"
+              description="Track animals, manage health records, monitor breeding, and optimize feeding schedules."
+              features={[
+                "Animal registration",
+                "Health record tracking",
+                "Breeding management",
+                "Feeding optimization",
+              ]}
+            />
+            <FeatureCard
+              icon={<Cloud className="w-12 h-12 text-cyan-600 dark:text-cyan-400" />}
+              title="Weather & IoT"
+              description="Real-time weather forecasts, IoT sensor monitoring, and smart irrigation recommendations."
+              features={[
+                "5-day weather forecasts",
+                "IoT sensor integration",
+                "Soil moisture tracking",
+                "Smart irrigation alerts",
+              ]}
+            />
+            <FeatureCard
+              icon={<ShoppingCart className="w-12 h-12 text-blue-600 dark:text-blue-400" />}
+              title="Marketplace"
+              description="List and sell agricultural products, browse offerings, manage orders, and track revenue."
+              features={[
+                "Product listings",
+                "Order management",
+                "Inventory tracking",
+                "Sales analytics",
+              ]}
+            />
+            <FeatureCard
+              icon={<BarChart3 className="w-12 h-12 text-purple-600 dark:text-purple-400" />}
+              title="Analytics & Insights"
+              description="Data-driven insights with yield charts, soil trends, livestock metrics, and revenue reports."
+              features={[
+                "Yield distribution charts",
+                "Soil health trends",
+                "Performance metrics",
+                "Revenue tracking",
+              ]}
+            />
+          </div>
+        </div>
+      </section>
 
       {/* Benefits Section */}
-      <div className="space-y-4">
-        <h2 className="text-2xl font-bold">Why Choose FarmKonnect?</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
-                <Droplets className="h-5 w-5 text-blue-600" />
-                Smart Irrigation
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm text-muted-foreground">
-              Optimize water usage with weather-based irrigation recommendations and soil moisture monitoring.
-            </CardContent>
-          </Card>
+      <section className="py-20 bg-gradient-to-br from-green-600 to-emerald-600 dark:from-green-700 dark:to-emerald-700 text-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold mb-4">
+              Why Choose FarmKonnect?
+            </h2>
+            <p className="text-xl text-green-50 max-w-2xl mx-auto">
+              Join thousands of farmers who are transforming their agricultural operations
+            </p>
+          </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-green-600" />
-                Increase Yields
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm text-muted-foreground">
-              Make data-driven decisions to improve crop performance and livestock productivity.
-            </CardContent>
-          </Card>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <BenefitCard
+              icon={<Zap className="w-10 h-10" />}
+              title="Smart Irrigation"
+              description="Optimize water usage with weather-based recommendations and soil moisture monitoring."
+            />
+            <BenefitCard
+              icon={<TrendingUp className="w-10 h-10" />}
+              title="Increase Yields"
+              description="Make data-driven decisions to improve crop performance and livestock productivity."
+            />
+            <BenefitCard
+              icon={<ShoppingCart className="w-10 h-10" />}
+              title="Direct Sales"
+              description="Sell your products directly to buyers through our integrated marketplace platform."
+            />
+            <BenefitCard
+              icon={<Shield className="w-10 h-10" />}
+              title="Real-time Alerts"
+              description="Get instant notifications for critical events like breeding due dates and low stock alerts."
+            />
+          </div>
+        </div>
+      </section>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
-                <ShoppingCart className="h-5 w-5 text-purple-600" />
-                Direct Sales
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm text-muted-foreground">
-              Sell your products directly to buyers through our integrated marketplace platform.
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
-                <Zap className="h-5 w-5 text-yellow-600" />
-                Real-time Alerts
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm text-muted-foreground">
-              Get instant notifications for critical events like breeding due dates and low stock alerts.
+      {/* CTA Section */}
+      <section className="py-20">
+        <div className="container mx-auto px-4">
+          <Card className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-2 border-green-200 dark:border-green-800">
+            <CardContent className="p-12 text-center">
+              <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                Ready to Transform Your Farm?
+              </h2>
+              <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
+                Join FarmKonnect today and start managing your agricultural operations more efficiently.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href={getLoginUrl()}>
+                  <Button size="lg" className="text-lg px-8 py-6 bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600">
+                    Get Started Now
+                    <ArrowRight className="ml-2 w-5 h-5" />
+                  </Button>
+                </a>
+                <Link href="/register">
+                  <Button size="lg" variant="outline" className="text-lg px-8 py-6 border-2">
+                    Create Free Account
+                  </Button>
+                </Link>
+              </div>
             </CardContent>
           </Card>
         </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="py-12 bg-gray-900 dark:bg-black text-gray-300">
+        <div className="container mx-auto px-4 text-center">
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <Tractor className="w-6 h-6 text-green-500" />
+            <span className="text-xl font-bold text-white">FarmKonnect</span>
+          </div>
+          <p className="text-sm">
+            © 2026 FarmKonnect. Agricultural Management System for Ghana and West Africa.
+          </p>
+        </div>
+      </footer>
+    </div>
+  );
+}
+
+// Component: Quick Action Card (for logged-in users)
+function QuickActionCard({
+  icon,
+  title,
+  description,
+  onClick,
+  color,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  onClick: () => void;
+  color: string;
+}) {
+  return (
+    <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer group border-2 hover:border-green-500 dark:hover:border-green-400" onClick={onClick}>
+      <CardHeader>
+        <div className={`w-16 h-16 ${color} rounded-xl flex items-center justify-center text-white mb-4 group-hover:scale-110 transition-transform`}>
+          {icon}
+        </div>
+        <CardTitle className="text-xl">{title}</CardTitle>
+        <CardDescription className="text-base">{description}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Button variant="ghost" className="w-full group-hover:bg-green-50 dark:group-hover:bg-green-900/20">
+          Go to {title.split(" ")[0]}
+          <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
+// Component: Stat Card
+function StatCard({ number, label }: { number: string; label: string }) {
+  return (
+    <div className="text-center">
+      <div className="text-4xl md:text-5xl font-bold text-green-600 dark:text-green-400 mb-2">
+        {number}
       </div>
+      <div className="text-gray-600 dark:text-gray-300 font-medium">{label}</div>
+    </div>
+  );
+}
+
+// Component: Feature Card
+function FeatureCard({
+  icon,
+  title,
+  description,
+  features,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  features: string[];
+}) {
+  return (
+    <Card className="hover:shadow-xl transition-all duration-300 border-2 hover:border-green-500 dark:hover:border-green-400">
+      <CardHeader>
+        <div className="mb-4">{icon}</div>
+        <CardTitle className="text-2xl mb-2">{title}</CardTitle>
+        <CardDescription className="text-base">{description}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ul className="space-y-2">
+          {features.map((feature, index) => (
+            <li key={index} className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-300">
+              <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
+              <span>{feature}</span>
+            </li>
+          ))}
+        </ul>
+      </CardContent>
+    </Card>
+  );
+}
+
+// Component: Benefit Card
+function BenefitCard({
+  icon,
+  title,
+  description,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+}) {
+  return (
+    <div className="text-center">
+      <div className="bg-white/10 backdrop-blur-sm w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+        {icon}
+      </div>
+      <h3 className="text-xl font-bold mb-2">{title}</h3>
+      <p className="text-green-50">{description}</p>
     </div>
   );
 }
