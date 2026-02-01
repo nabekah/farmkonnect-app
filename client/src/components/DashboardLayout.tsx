@@ -30,6 +30,7 @@ import { Button } from "./ui/button";
 import { Leaf, TrendingUp, BarChart3, ShoppingCart, Settings, Users, Moon, Sun, BookOpen, Target, Cpu, Truck, Briefcase, CloudRain, LineChart, Sprout, Shield } from 'lucide-react';
 import { useDarkMode } from '@/contexts/DarkModeContext';
 import { NotificationCenter } from './NotificationCenter';
+import { CartButton } from './CartButton';
 
 const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/" },
@@ -291,13 +292,17 @@ function DashboardLayoutContent({
                   </span>
                 </div>
               </div>
-              <NotificationCenter />
+              <div className="flex items-center gap-2">
+                <CartButton />
+                <NotificationCenter />
+              </div>
             </div>
           </div>
         )}
         <main className="flex-1 p-4 flex flex-col">
           {!isMobile && (
-            <div className="flex justify-end mb-4">
+            <div className="flex justify-end mb-4 gap-2">
+              <CartButton />
               <NotificationCenter />
             </div>
           )}

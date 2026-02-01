@@ -13,6 +13,8 @@ import Livestock from "./pages/Livestock";
 import ThemeAdmin from "./components/ThemeAdmin";
 import { Analytics } from "./pages/Analytics";
 import Marketplace from "./pages/Marketplace";
+import Checkout from "./pages/Checkout";
+import Orders from "./pages/Orders";
 import Training from "./pages/Training";
 import MERL from "./pages/MERL";
 import IoTManagement from "./pages/IoTManagement";
@@ -75,6 +77,20 @@ function Router() {
         {() => (
           <DashboardLayout>
             <Marketplace />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/checkout">
+        {() => (
+          <DashboardLayout>
+            <Checkout />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/orders">
+        {() => (
+          <DashboardLayout>
+            <Orders />
           </DashboardLayout>
         )}
       </Route>

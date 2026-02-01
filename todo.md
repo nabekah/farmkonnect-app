@@ -1347,3 +1347,18 @@
 - [x] Add validation to filter out incomplete cart items before syncing
 - [x] Only sync items that have all required fields (productName, price, unit)
 - [x] Clear invalid items from localStorage
+
+
+## Cart UI & Checkout & Order Management
+- [x] Add cart icon with item count badge to header/navigation
+- [x] Create cart dropdown preview showing items, quantities, discounts
+- [x] Build complete checkout page with multi-step flow
+- [x] Add delivery address form with validation
+- [x] Implement delivery zone selector with shipping cost calculation
+- [x] Add payment method selection (Mobile Money, Card, Cash on Delivery)
+- [x] Create order confirmation page with tracking number
+- [x] Build order management dashboard for sellers
+- [x] Add order status filters (buyer/seller views)
+- [x] Implement order details modal with status updates
+- [x] Add revenue analytics from completed orders
+- [x] Test entire cart-to-order flow end-to-end
