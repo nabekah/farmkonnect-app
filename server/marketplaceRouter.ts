@@ -172,8 +172,29 @@ export const marketplaceRouter = router({
     const db = await getDb();
     if (!db) return [];
     
-    return await db.select().from(marketplaceCart)
+    const cartItems = await db.select().from(marketplaceCart)
       .where(eq(marketplaceCart.userId, ctx.user.id));
+    
+    // Fetch product details for each cart item
+    const items = [];
+    for (const cartItem of cartItems) {
+      const product = await db.select().from(marketplaceProducts)
+        .where(eq(marketplaceProducts.id, cartItem.productId))
+        .limit(1);
+      
+      if (product.length > 0) {
+        items.push({
+          productId: product[0].id,
+          productName: product[0].name,
+          price: product[0].price,
+          quantity: parseFloat(cartItem.quantity), // Convert decimal to number
+          unit: product[0].unit,
+          imageUrl: product[0].imageUrl || undefined,
+        });
+      }
+    }
+    
+    return items;
   }),
 
   addToCart: protectedProcedure
