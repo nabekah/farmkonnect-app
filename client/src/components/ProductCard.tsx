@@ -81,59 +81,59 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
       {displayImages.length > 0 && (
         <ProductImageCarousel images={displayImages} productName={product.name} />
       )}
-      <CardHeader>
-        <div className="flex justify-between items-start">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <CardTitle className="line-clamp-2">{product.name}</CardTitle>
+      <CardHeader className="pb-3">
+        <div className="flex justify-between items-start gap-2">
+          <div className="flex-1 min-w-0">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-1">
+              <CardTitle className="line-clamp-2 text-base sm:text-lg">{product.name}</CardTitle>
               {isVerified && (
-                <Badge variant="outline" className="bg-blue-500/10 text-blue-600 border-blue-500/20 flex-shrink-0">
+                <Badge variant="outline" className="bg-blue-500/10 text-blue-600 border-blue-500/20 flex-shrink-0 w-fit text-xs">
                   <Shield className="h-3 w-3 mr-1" />
                   Verified
                 </Badge>
               )}
             </div>
-            <CardDescription>{product.category}</CardDescription>
+            <CardDescription className="text-xs sm:text-sm">{product.category}</CardDescription>
           </div>
           <Button
             variant="ghost"
             size="icon"
             onClick={toggleWishlist}
-            className="shrink-0"
+            className="shrink-0 h-8 w-8 sm:h-10 sm:w-10"
           >
             <Heart
-              className={`h-5 w-5 ${
+              className={`h-4 w-4 sm:h-5 sm:w-5 ${
                 isInWishlist ? "fill-red-500 text-red-500" : "text-muted-foreground"
               }`}
             />
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <p className="text-sm text-muted-foreground line-clamp-2">{product.description}</p>
+      <CardContent className="space-y-3 pt-0">
+        <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">{product.description}</p>
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-2xl font-bold">GH₵{parseFloat(product.price).toFixed(2)}</p>
+            <p className="text-xl sm:text-2xl font-bold">GH₵{parseFloat(product.price).toFixed(2)}</p>
             <p className="text-xs text-muted-foreground">{product.quantity} {product.unit} available</p>
           </div>
         </div>
         {bulkTiers.length > 0 && (
-          <div className="bg-accent/50 p-3 rounded-lg">
-            <p className="text-xs font-semibold text-accent-foreground mb-2">🎯 Bulk Discounts Available</p>
-            <div className="space-y-1">
+          <div className="bg-accent/50 p-2 sm:p-3 rounded-lg">
+            <p className="text-xs font-semibold text-accent-foreground mb-1 sm:mb-2">🎯 Bulk Discounts</p>
+            <div className="space-y-0.5 sm:space-y-1">
               {bulkTiers.slice(0, 2).map((tier: any) => (
                 <p key={tier.id} className="text-xs text-muted-foreground">
                   {parseFloat(tier.minQuantity)}+ {product.unit}: {parseFloat(tier.discountPercentage)}% off
                 </p>
               ))}
               {bulkTiers.length > 2 && (
-                <p className="text-xs text-muted-foreground">+{bulkTiers.length - 2} more tiers</p>
+                <p className="text-xs text-muted-foreground">+{bulkTiers.length - 2} more</p>
               )}
             </div>
           </div>
         )}
-        <Button onClick={() => onAddToCart(product.id)} className="w-full">
-          <ShoppingCart className="mr-2 h-4 w-4" />
+        <Button onClick={() => onAddToCart(product.id)} className="w-full text-sm sm:text-base h-9 sm:h-10">
+          <ShoppingCart className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
           Add to Cart
         </Button>
       </CardContent>

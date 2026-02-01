@@ -254,16 +254,29 @@ export const marketplaceRouter = router({
           .from(marketplaceProducts)
           .where(eq(marketplaceProducts.sellerId, ctx.user.id));
         
+        console.log('[listOrders] Seller ID:', ctx.user.id);
+        console.log('[listOrders] Seller products:', sellerProducts);
+        
         const productIds = sellerProducts.map(p => p.id);
-        if (productIds.length === 0) return [];
+        if (productIds.length === 0) {
+          console.log('[listOrders] No products found for seller');
+          return [];
+        }
         
         // Find orders containing seller's products
         const orderItems = await db.select({ orderId: marketplaceOrderItems.orderId })
           .from(marketplaceOrderItems)
           .where(inArray(marketplaceOrderItems.productId, productIds));
         
+        console.log('[listOrders] Order items with seller products:', orderItems);
+        
         const orderIds = Array.from(new Set(orderItems.map(item => item.orderId)));
-        if (orderIds.length === 0) return [];
+        console.log('[listOrders] Order IDs:', orderIds);
+        
+        if (orderIds.length === 0) {
+          console.log('[listOrders] No orders found with seller products');
+          return [];
+        }
         
         return await db.select().from(marketplaceOrders)
           .where(inArray(marketplaceOrders.id, orderIds))

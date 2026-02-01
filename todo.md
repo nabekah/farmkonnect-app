@@ -1514,3 +1514,18 @@
 - [x] Show seller rank on their analytics dashboard
 - [ ] Implement pagination for large leaderboards
 - [ ] Add search/filter by category or location
+
+## Mobile Responsiveness & UI Fixes
+- [x] Fix seller order visibility bug - sellers not seeing buyer orders
+- [x] Review and fix listOrders query logic for seller role
+- [x] Implement mobile-first responsive design for Marketplace page
+- [x] Fix mobile layout for Orders page
+- [ ] Optimize SellerAnalytics for mobile screens
+- [ ] Make SellerPayouts mobile-friendly
+- [x] Fix SellerLeaderboard mobile layout
+- [x] Optimize ProductCard for small screens
+- [x] Fix navigation and filters for mobile
+- [ ] Test checkout flow on mobile
+- [ ] Ensure all forms are mobile-friendly
+- [ ] Fix table layouts for mobile (use cards instead)
+- [ ] Test all touch interactions

@@ -365,28 +365,29 @@ export default function Marketplace() {
     });
 
   return (
-    <div className="container mx-auto py-8">
-      <div className="flex justify-between items-center mb-6">
+    <div className="container mx-auto py-4 md:py-8 px-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
-          <h1 className="text-3xl font-bold">Marketplace</h1>
-          <p className="text-muted-foreground">Browse and purchase agricultural products</p>
+          <h1 className="text-2xl md:text-3xl font-bold">Marketplace</h1>
+          <p className="text-sm md:text-base text-muted-foreground">Browse and purchase agricultural products</p>
         </div>
-        <Button onClick={() => window.location.href = "/seller-leaderboard"} variant="outline">
+        <Button onClick={() => window.location.href = "/seller-leaderboard"} variant="outline" className="w-full sm:w-auto">
           <Trophy className="mr-2 h-4 w-4" />
-          Seller Leaderboard
+          <span className="hidden sm:inline">Seller Leaderboard</span>
+          <span className="sm:hidden">Leaderboard</span>
         </Button>
       </div>
       <Tabs defaultValue="browse" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="browse">Browse Products</TabsTrigger>
-          <TabsTrigger value="orders">My Orders</TabsTrigger>
-          <TabsTrigger value="selling">My Products</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3 h-auto">
+          <TabsTrigger value="browse" className="text-xs sm:text-sm py-2">Browse</TabsTrigger>
+          <TabsTrigger value="orders" className="text-xs sm:text-sm py-2">Orders</TabsTrigger>
+          <TabsTrigger value="selling" className="text-xs sm:text-sm py-2">My Products</TabsTrigger>
         </TabsList>
 
         {/* Browse Products Tab */}
         <TabsContent value="browse" className="space-y-6">
-          <div className="flex gap-4 flex-wrap">
-            <div className="flex-1 min-w-[200px]">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+            <div className="flex-1 min-w-0">
               <Input
                 placeholder="Search products..."
                 value={searchQuery}
@@ -394,30 +395,32 @@ export default function Marketplace() {
                 className="w-full"
               />
             </div>
-            <Select value={selectedCategory || "all"} onValueChange={(value) => setSelectedCategory(value === "all" ? "" : value)}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Category" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
-                {CATEGORIES.map((cat) => (
-                  <SelectItem key={cat} value={cat}>
-                    {cat}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-[150px]">
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="newest">Newest</SelectItem>
-                <SelectItem value="price-low">Price: Low to High</SelectItem>
-                <SelectItem value="price-high">Price: High to Low</SelectItem>
-                <SelectItem value="name">Name A-Z</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="flex gap-2 sm:gap-3">
+              <Select value={selectedCategory || "all"} onValueChange={(value) => setSelectedCategory(value === "all" ? "" : value)}>
+                <SelectTrigger className="w-full sm:w-[140px]">
+                  <SelectValue placeholder="Category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All</SelectItem>
+                  {CATEGORIES.map((cat) => (
+                    <SelectItem key={cat} value={cat}>
+                      {cat}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="w-full sm:w-[130px]">
+                  <SelectValue placeholder="Sort" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="newest">Newest</SelectItem>
+                  <SelectItem value="price-low">Price ↑</SelectItem>
+                  <SelectItem value="price-high">Price ↓</SelectItem>
+                  <SelectItem value="name">Name</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           {/* Price Range Filter */}
@@ -495,7 +498,7 @@ export default function Marketplace() {
             Showing {products.length} product{products.length !== 1 ? 's' : ''}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
             {products.length === 0 ? (
               <div className="col-span-full text-center py-12">
                 <Package className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-50" />
@@ -831,7 +834,7 @@ export default function Marketplace() {
           )}
 
           {/* My Products Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
             {products
               .filter((p: any) => p.sellerId === user?.id)
               .map((product: any) => (

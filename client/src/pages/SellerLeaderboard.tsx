@@ -45,12 +45,12 @@ export default function SellerLeaderboard() {
   };
 
   return (
-    <div className="container max-w-7xl py-6 space-y-6">
-      <div className="flex items-center gap-3">
-        <Trophy className="h-8 w-8 text-primary" />
+    <div className="container max-w-7xl py-4 md:py-6 px-4 space-y-4 md:space-y-6">
+      <div className="flex items-center gap-2 md:gap-3">
+        <Trophy className="h-6 w-6 md:h-8 md:w-8 text-primary flex-shrink-0" />
         <div>
-          <h1 className="text-3xl font-bold">Seller Leaderboard</h1>
-          <p className="text-muted-foreground">Top performing sellers in the FarmKonnect marketplace</p>
+          <h1 className="text-2xl md:text-3xl font-bold">Seller Leaderboard</h1>
+          <p className="text-sm md:text-base text-muted-foreground">Top performing sellers in the FarmKonnect marketplace</p>
         </div>
       </div>
 
@@ -60,11 +60,11 @@ export default function SellerLeaderboard() {
           <CardTitle>Filters</CardTitle>
           <CardDescription>Customize the leaderboard view</CardDescription>
         </CardHeader>
-        <CardContent className="flex flex-wrap gap-4">
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Time Period</label>
+        <CardContent className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+          <div className="space-y-2 flex-1">
+            <label className="text-xs sm:text-sm font-medium">Time Period</label>
             <Select value={period} onValueChange={(v: any) => setPeriod(v)}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -75,10 +75,10 @@ export default function SellerLeaderboard() {
             </Select>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Ranking Category</label>
+          <div className="space-y-2 flex-1">
+            <label className="text-xs sm:text-sm font-medium">Ranking Category</label>
             <Select value={category} onValueChange={(v: any) => setCategory(v)}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -112,36 +112,36 @@ export default function SellerLeaderboard() {
         <div className="space-y-4">
           {topSellers.map((seller: any) => (
             <Card key={seller.id} className={`${getRankBgColor(seller.rank)} transition-all hover:shadow-lg`}>
-              <CardContent className="p-6">
-                <div className="flex items-start gap-6">
+              <CardContent className="p-4 md:p-6">
+                <div className="flex items-start gap-3 md:gap-6">
                   {/* Rank Badge */}
-                  <div className="flex-shrink-0 flex items-center justify-center w-16 h-16">
+                  <div className="flex-shrink-0 flex items-center justify-center w-12 h-12 md:w-16 md:h-16">
                     {getRankIcon(seller.rank)}
                   </div>
 
                   {/* Seller Info */}
                   <div className="flex-1 space-y-3">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h3 className="text-xl font-bold flex items-center gap-2">
-                          {seller.name}
+                    <div className="flex flex-col sm:flex-row items-start justify-between gap-2 sm:gap-0">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-base sm:text-xl font-bold flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                          <span className="truncate">{seller.name}</span>
                           {seller.isVerified && (
-                            <Badge variant="outline" className="bg-blue-500/10 text-blue-600 border-blue-500/20">
+                            <Badge variant="outline" className="bg-blue-500/10 text-blue-600 border-blue-500/20 w-fit text-xs">
                               ✓ Verified
                             </Badge>
                           )}
                         </h3>
-                        <p className="text-sm text-muted-foreground">{seller.email}</p>
+                        <p className="text-xs sm:text-sm text-muted-foreground truncate">{seller.email}</p>
                       </div>
 
-                      <div className="text-right">
-                        <p className="text-sm text-muted-foreground">{getCategoryLabel()}</p>
-                        <p className="text-2xl font-bold text-primary">{getCategoryValue(seller)}</p>
+                      <div className="text-left sm:text-right">
+                        <p className="text-xs sm:text-sm text-muted-foreground">{getCategoryLabel()}</p>
+                        <p className="text-xl sm:text-2xl font-bold text-primary">{getCategoryValue(seller)}</p>
                       </div>
                     </div>
 
                     {/* Stats Grid */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
                       <div className="space-y-1">
                         <p className="text-xs text-muted-foreground">Revenue</p>
                         <p className="font-semibold">GH₵{seller.revenue.toFixed(2)}</p>

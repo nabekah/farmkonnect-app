@@ -134,20 +134,21 @@ export default function Orders() {
   };
 
   return (
-    <div className="container max-w-7xl py-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Orders</h1>
-        <div className="flex gap-3">
+    <div className="container max-w-7xl py-4 md:py-6 px-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <h1 className="text-2xl md:text-3xl font-bold">Orders</h1>
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
           {role === "seller" && (
-            <Link href="/seller-analytics">
-              <Button variant="outline">
+            <Link href="/seller-analytics" className="w-full sm:w-auto">
+              <Button variant="outline" className="w-full sm:w-auto">
                 <BarChart3 className="h-4 w-4 mr-2" />
-                View Analytics
+                <span className="hidden sm:inline">View Analytics</span>
+                <span className="sm:hidden">Analytics</span>
               </Button>
             </Link>
           )}
           <Select value={role} onValueChange={(v) => setRole(v as "buyer" | "seller")}>
-            <SelectTrigger className="w-40">
+            <SelectTrigger className="w-full sm:w-40">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -178,17 +179,17 @@ export default function Orders() {
             
             return (
               <Card key={order.id} className="hover:shadow-md transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="font-semibold text-lg">{order.orderNumber}</h3>
-                        <Badge className={`${statusConfig[status].color} text-white`}>
+                <CardContent className="p-4 md:p-6">
+                  <div className="flex flex-col sm:flex-row justify-between items-start gap-3 mb-4">
+                    <div className="flex-1">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
+                        <h3 className="font-semibold text-base md:text-lg">{order.orderNumber}</h3>
+                        <Badge className={`${statusConfig[status].color} text-white w-fit`}>
                           <StatusIcon className="h-3 w-3 mr-1" />
                           {statusConfig[status].label}
                         </Badge>
                       </div>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-xs md:text-sm text-muted-foreground">
                         {new Date(order.createdAt).toLocaleDateString("en-GB", {
                           day: "2-digit",
                           month: "short",
@@ -198,31 +199,34 @@ export default function Orders() {
                         })}
                       </p>
                     </div>
-                    <div className="text-right">
-                      <p className="text-2xl font-bold">GH₵{parseFloat(order.totalAmount).toFixed(2)}</p>
-                      <p className="text-sm text-muted-foreground">{order.paymentStatus}</p>
+                    <div className="text-left sm:text-right">
+                      <p className="text-xl md:text-2xl font-bold">GH₵{parseFloat(order.totalAmount).toFixed(2)}</p>
+                      <p className="text-xs md:text-sm text-muted-foreground">{order.paymentStatus}</p>
                     </div>
                   </div>
 
-                  <div className="flex justify-between items-center">
-                    <div className="text-sm">
-                      <p className="text-muted-foreground">Delivery Address:</p>
-                      <p className="font-medium">{parseDeliveryAddress(order.deliveryAddress).city || "N/A"}</p>
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                    <div className="text-sm flex-1">
+                      <p className="text-muted-foreground text-xs md:text-sm">Delivery Address:</p>
+                      <p className="font-medium text-sm md:text-base">{parseDeliveryAddress(order.deliveryAddress).city || "N/A"}</p>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2 w-full sm:w-auto">
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => setSelectedOrderId(order.id)}
+                        className="flex-1 sm:flex-none"
                       >
-                        <Eye className="h-4 w-4 mr-1" />
-                        View Details
+                        <Eye className="h-4 w-4 sm:mr-1" />
+                        <span className="hidden sm:inline">View Details</span>
+                        <span className="sm:hidden">Details</span>
                       </Button>
                       {role === "buyer" && (status === "confirmed" || status === "shipped" || status === "delivered") && (
-                        <Link href={`/track-order/${order.id}`}>
-                          <Button variant="outline" size="sm">
-                            <MapPin className="h-4 w-4 mr-1" />
-                            Track
+                        <Link href={`/track-order/${order.id}`} className="flex-1 sm:flex-none">
+                          <Button variant="outline" size="sm" className="w-full">
+                            <MapPin className="h-4 w-4 sm:mr-1" />
+                            <span className="hidden sm:inline">Track</span>
+                            <span className="sm:hidden">Track</span>
                           </Button>
                         </Link>
                       )}
@@ -232,9 +236,11 @@ export default function Orders() {
                           size="sm"
                           onClick={() => handleCancelOrder(order.id, order.orderNumber)}
                           disabled={cancelOrder.isPending}
+                          className="flex-1 sm:flex-none"
                         >
-                          <XCircle className="h-4 w-4 mr-1" />
-                          Cancel Order
+                          <XCircle className="h-4 w-4 sm:mr-1" />
+                          <span className="hidden sm:inline">Cancel Order</span>
+                          <span className="sm:hidden">Cancel</span>
                         </Button>
                       )}
                       {role === "buyer" && status === "delivered" && (
@@ -242,9 +248,11 @@ export default function Orders() {
                           variant="default"
                           size="sm"
                           onClick={() => setReviewOrderId(order.id)}
+                          className="flex-1 sm:flex-none"
                         >
-                          <Star className="h-4 w-4 mr-1" />
-                          Write Review
+                          <Star className="h-4 w-4 sm:mr-1" />
+                          <span className="hidden sm:inline">Write Review</span>
+                          <span className="sm:hidden">Review</span>
                         </Button>
                       )}
                       {role === "buyer" && (status === "delivered" || status === "shipped") && (
@@ -252,9 +260,11 @@ export default function Orders() {
                           variant="outline"
                           size="sm"
                           onClick={() => setDisputeOrderId(order.id)}
+                          className="flex-1 sm:flex-none"
                         >
-                          <AlertTriangle className="h-4 w-4 mr-1" />
-                          File Dispute
+                          <AlertTriangle className="h-4 w-4 sm:mr-1" />
+                          <span className="hidden sm:inline">File Dispute</span>
+                          <span className="sm:hidden">Dispute</span>
                         </Button>
                       )}
                       {role === "seller" && status !== "delivered" && status !== "cancelled" && (
@@ -262,7 +272,7 @@ export default function Orders() {
                           value={status}
                           onValueChange={(v) => handleStatusUpdate(order.id, v as OrderStatus)}
                         >
-                          <SelectTrigger className="w-32">
+                          <SelectTrigger className="w-full sm:w-32">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
