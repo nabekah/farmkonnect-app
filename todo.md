@@ -1297,3 +1297,22 @@
 - [x] Add tools (Cutlass, Hoe, Sprayer, Wheelbarrow, Pruning shears, Boots, Basket, pH meter)
 - [x] Update marketplace category filter to match new product categories
 - [x] Test category filtering and search functionality
+
+
+## Marketplace Enhancements - Reviews, Bulk Pricing, Delivery Zones
+- [x] Create productReviews table schema with star ratings and comments
+- [x] Create bulkPricingTiers table schema for quantity-based discounts
+- [x] Create deliveryZones table schema for regional shipping costs
+- [x] Add backend procedures for product reviews (create, list, update, delete)
+- [x] Add backend procedures for bulk pricing management
+- [x] Add backend procedures for delivery zone management
+- [x] Build product reviews UI component with star ratings
+- [x] Implement review submission form with validation
+- [x] Display average ratings on product cards
+- [x] Create bulk pricing configuration UI for sellers
+- [x] Implement automatic discount calculation in cart
+- [x] Display bulk discount information on product pages
+- [x] Build delivery zone management interface for admin
+- [x] Add shipping cost calculation based on delivery zone
+- [x] Display estimated delivery time and cost at checkout
+- [x] Create unit tests for all new features

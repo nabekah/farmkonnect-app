@@ -10,6 +10,9 @@ import {
   marketplaceTransactions,
   marketplaceCart,
   marketplaceReviews,
+  marketplaceProductReviews,
+  marketplaceBulkPricingTiers,
+  marketplaceDeliveryZones,
 } from "../drizzle/schema";
 import { eq, and, desc, like } from "drizzle-orm";
 import { storagePut } from "./storage";
@@ -330,7 +333,8 @@ export const marketplaceRouter = router({
     }),
 
   // ========== REVIEWS ==========
-  getProductReviews: protectedProcedure
+  // Old reviews table (deprecated - use getProductReviews instead)
+  getOldReviews: protectedProcedure
     .input(z.object({ productId: z.number() }))
     .query(async ({ input }) => {
       const db = await getDb();
@@ -341,7 +345,7 @@ export const marketplaceRouter = router({
         .orderBy(desc(marketplaceReviews.createdAt));
     }),
 
-  createReview: protectedProcedure
+  createOldReview: protectedProcedure
     .input(z.object({
       productId: z.number(),
       orderId: z.number().optional(),
@@ -361,6 +365,215 @@ export const marketplaceRouter = router({
         title: input.title,
         comment: input.comment,
       });
+    }),
+
+  // ========== PRODUCT REVIEWS ==========
+  getProductReviews: protectedProcedure
+    .input(z.object({ productId: z.number() }))
+    .query(async ({ input }) => {
+      const db = await getDb();
+      if (!db) return [];
+      
+      return await db.select().from(marketplaceProductReviews)
+        .where(eq(marketplaceProductReviews.productId, input.productId))
+        .orderBy(desc(marketplaceProductReviews.createdAt));
+    }),
+
+  createProductReview: protectedProcedure
+    .input(z.object({
+      productId: z.number(),
+      rating: z.number().min(1).max(5),
+      comment: z.string().optional(),
+      verifiedPurchase: z.boolean().optional(),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      
+      // Insert review
+      const [review] = await db.insert(marketplaceProductReviews).values({
+        productId: input.productId,
+        userId: ctx.user.id,
+        rating: input.rating,
+        comment: input.comment || null,
+        verifiedPurchase: input.verifiedPurchase || false,
+      });
+      
+      // Update product average rating and review count
+      const reviews = await db.select().from(marketplaceProductReviews)
+        .where(eq(marketplaceProductReviews.productId, input.productId));
+      
+      const avgRating = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
+      
+      await db.update(marketplaceProducts)
+        .set({ 
+          rating: avgRating.toFixed(2),
+          reviewCount: reviews.length 
+        })
+        .where(eq(marketplaceProducts.id, input.productId));
+      
+      return review;
+    }),
+
+  markReviewHelpful: protectedProcedure
+    .input(z.object({ reviewId: z.number() }))
+    .mutation(async ({ input }) => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      
+      const [review] = await db.select().from(marketplaceProductReviews)
+        .where(eq(marketplaceProductReviews.id, input.reviewId));
+      
+      if (!review) throw new TRPCError({ code: "NOT_FOUND", message: "Review not found" });
+      
+      return await db.update(marketplaceProductReviews)
+        .set({ helpfulCount: review.helpfulCount + 1 })
+        .where(eq(marketplaceProductReviews.id, input.reviewId));
+    }),
+
+  // ========== BULK PRICING TIERS ==========
+  getBulkPricingTiers: protectedProcedure
+    .input(z.object({ productId: z.number() }))
+    .query(async ({ input }) => {
+      const db = await getDb();
+      if (!db) return [];
+      
+      return await db.select().from(marketplaceBulkPricingTiers)
+        .where(eq(marketplaceBulkPricingTiers.productId, input.productId))
+        .orderBy(marketplaceBulkPricingTiers.minQuantity);
+    }),
+
+  createBulkPricingTier: protectedProcedure
+    .input(z.object({
+      productId: z.number(),
+      minQuantity: z.string(),
+      maxQuantity: z.string().optional(),
+      discountPercentage: z.string(),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      
+      // Verify product ownership
+      const [product] = await db.select().from(marketplaceProducts)
+        .where(eq(marketplaceProducts.id, input.productId));
+      
+      if (!product || product.sellerId !== ctx.user.id) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Not authorized" });
+      }
+      
+      // Calculate discounted price
+      const basePrice = parseFloat(product.price);
+      const discount = parseFloat(input.discountPercentage);
+      const discountedPrice = (basePrice * (1 - discount / 100)).toFixed(2);
+      
+      return await db.insert(marketplaceBulkPricingTiers).values({
+        productId: input.productId,
+        minQuantity: input.minQuantity,
+        maxQuantity: input.maxQuantity || null,
+        discountPercentage: input.discountPercentage,
+        discountedPrice,
+      });
+    }),
+
+  deleteBulkPricingTier: protectedProcedure
+    .input(z.object({ tierId: z.number() }))
+    .mutation(async ({ input, ctx }) => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      
+      // Verify ownership through product
+      const [tier] = await db.select().from(marketplaceBulkPricingTiers)
+        .where(eq(marketplaceBulkPricingTiers.id, input.tierId));
+      
+      if (!tier) throw new TRPCError({ code: "NOT_FOUND" });
+      
+      const [product] = await db.select().from(marketplaceProducts)
+        .where(eq(marketplaceProducts.id, tier.productId));
+      
+      if (!product || product.sellerId !== ctx.user.id) {
+        throw new TRPCError({ code: "FORBIDDEN" });
+      }
+      
+      return await db.delete(marketplaceBulkPricingTiers)
+        .where(eq(marketplaceBulkPricingTiers.id, input.tierId));
+    }),
+
+  // ========== DELIVERY ZONES ==========
+  getDeliveryZones: protectedProcedure.query(async () => {
+    const db = await getDb();
+    if (!db) return [];
+    
+    return await db.select().from(marketplaceDeliveryZones)
+      .where(eq(marketplaceDeliveryZones.isActive, true));
+  }),
+
+  createDeliveryZone: protectedProcedure
+    .input(z.object({
+      name: z.string(),
+      region: z.string(),
+      shippingCost: z.string(),
+      estimatedDays: z.number(),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      
+      // Only admin can create delivery zones
+      if (ctx.user.role !== "admin") {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Admin access required" });
+      }
+      
+      return await db.insert(marketplaceDeliveryZones).values({
+        name: input.name,
+        region: input.region,
+        shippingCost: input.shippingCost,
+        estimatedDays: input.estimatedDays,
+        isActive: true,
+      });
+    }),
+
+  updateDeliveryZone: protectedProcedure
+    .input(z.object({
+      zoneId: z.number(),
+      name: z.string().optional(),
+      region: z.string().optional(),
+      shippingCost: z.string().optional(),
+      estimatedDays: z.number().optional(),
+      isActive: z.boolean().optional(),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      
+      if (ctx.user.role !== "admin") {
+        throw new TRPCError({ code: "FORBIDDEN" });
+      }
+      
+      const updates: any = {};
+      if (input.name) updates.name = input.name;
+      if (input.region) updates.region = input.region;
+      if (input.shippingCost) updates.shippingCost = input.shippingCost;
+      if (input.estimatedDays !== undefined) updates.estimatedDays = input.estimatedDays;
+      if (input.isActive !== undefined) updates.isActive = input.isActive;
+      
+      return await db.update(marketplaceDeliveryZones)
+        .set(updates)
+        .where(eq(marketplaceDeliveryZones.id, input.zoneId));
+    }),
+
+  deleteDeliveryZone: protectedProcedure
+    .input(z.object({ zoneId: z.number() }))
+    .mutation(async ({ input, ctx }) => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      
+      if (ctx.user.role !== "admin") {
+        throw new TRPCError({ code: "FORBIDDEN" });
+      }
+      
+      return await db.delete(marketplaceDeliveryZones)
+        .where(eq(marketplaceDeliveryZones.id, input.zoneId));
     }),
 
   // ========== ANALYTICS ==========

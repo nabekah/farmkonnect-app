@@ -127,6 +127,13 @@
       "when": 1769898399151,
       "tag": "0017_cold_slayback",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "5",
+      "when": 1769956681762,
+      "tag": "0018_brainy_gamora",
+      "breakpoints": true
     }
   ]
 }

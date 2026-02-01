@@ -627,6 +627,55 @@ export type MarketplaceProductImage = typeof marketplaceProductImages.$inferSele
 export type InsertMarketplaceProductImage = typeof marketplaceProductImages.$inferInsert;
 
 // ============================================================================
+// MARKETPLACE - PRODUCT REVIEWS
+// ============================================================================
+export const marketplaceProductReviews = mysqlTable("marketplaceProductReviews", {
+  id: int("id").autoincrement().primaryKey(),
+  productId: int("productId").notNull().references(() => marketplaceProducts.id, { onDelete: "cascade" }),
+  userId: int("userId").notNull(),
+  rating: int("rating").notNull(), // 1-5 stars
+  comment: text("comment"),
+  verifiedPurchase: boolean("verifiedPurchase").default(false).notNull(),
+  helpfulCount: int("helpfulCount").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type MarketplaceProductReview = typeof marketplaceProductReviews.$inferSelect;
+export type InsertMarketplaceProductReview = typeof marketplaceProductReviews.$inferInsert;
+
+// ============================================================================
+// MARKETPLACE - BULK PRICING TIERS
+// ============================================================================
+export const marketplaceBulkPricingTiers = mysqlTable("marketplaceBulkPricingTiers", {
+  id: int("id").autoincrement().primaryKey(),
+  productId: int("productId").notNull().references(() => marketplaceProducts.id, { onDelete: "cascade" }),
+  minQuantity: decimal("minQuantity", { precision: 10, scale: 2 }).notNull(),
+  maxQuantity: decimal("maxQuantity", { precision: 10, scale: 2 }),
+  discountPercentage: decimal("discountPercentage", { precision: 5, scale: 2 }).notNull(),
+  discountedPrice: decimal("discountedPrice", { precision: 10, scale: 2 }).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type MarketplaceBulkPricingTier = typeof marketplaceBulkPricingTiers.$inferSelect;
+export type InsertMarketplaceBulkPricingTier = typeof marketplaceBulkPricingTiers.$inferInsert;
+
+// ============================================================================
+// MARKETPLACE - DELIVERY ZONES
+// ============================================================================
+export const marketplaceDeliveryZones = mysqlTable("marketplaceDeliveryZones", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(), // e.g., "Greater Accra", "Ashanti Region"
+  region: varchar("region", { length: 100 }).notNull(),
+  shippingCost: decimal("shippingCost", { precision: 10, scale: 2 }).notNull(),
+  estimatedDays: int("estimatedDays").notNull(), // Estimated delivery days
+  isActive: boolean("isActive").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type MarketplaceDeliveryZone = typeof marketplaceDeliveryZones.$inferSelect;
+export type InsertMarketplaceDeliveryZone = typeof marketplaceDeliveryZones.$inferInsert;
+
+// ============================================================================
 // MARKETPLACE - ORDERS
 // ============================================================================
 export const marketplaceOrders = mysqlTable("marketplaceOrders", {
