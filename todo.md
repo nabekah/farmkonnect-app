@@ -1718,3 +1718,34 @@
 - [ ] Add financial trend analysis
 - [ ] Add ROI calculations
 - [ ] Add seasonal pattern analysis
+
+
+## Phase 1: Crop Management Backend Implementation
+- [ ] Add crop management procedures to existing routers.ts
+- [ ] Implement startCropCycle procedure with validation
+- [ ] Implement recordCropActivity procedure for planting, fertilization, pest control
+- [ ] Implement recordYield procedure for harvest recording
+- [ ] Implement getStatistics procedure for crop metrics
+- [ ] Write vitest tests for all crop procedures
+- [ ] Verify database integration and data flows
+
+## Phase 2: Financial Dashboard UI Implementation
+- [ ] Create FarmFinance.tsx page with financial dashboard layout
+- [ ] Add expense tracking form and list
+- [ ] Add revenue tracking form and list
+- [ ] Create expense breakdown chart by category
+- [ ] Create revenue breakdown chart by source
+- [ ] Add profit/loss summary cards
+- [ ] Implement financial filters (date range, category)
+- [ ] Add CSV export functionality for accounting
+- [ ] Make dashboard mobile-responsive
+
+## Phase 3: Weather-Based Alerts Implementation
+- [ ] Integrate existing weather API with alert system
+- [ ] Create alert rules for planting/harvesting times
+- [ ] Implement pest prevention recommendations
+- [ ] Add SMS alert notifications for critical weather
+- [ ] Add email alert notifications
+- [ ] Create alert management page for farmers
+- [ ] Add alert history/log tracking
+- [ ] Test alert delivery and notifications
