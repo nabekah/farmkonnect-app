@@ -3,12 +3,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import { Download, TrendingUp, TrendingDown, DollarSign, Users, Droplet, Wrench } from "lucide-react";
+import { Download, TrendingUp, TrendingDown, DollarSign, Users, Droplet, Wrench, FileText, FileSpreadsheet } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 
 export default function AnalyticsDashboard() {
   const [selectedFarmId, setSelectedFarmId] = useState<number | null>(null);
   const [dateRange, setDateRange] = useState("month");
+  const [startDate, setStartDate] = useState<string>(
+    new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+  );
+  const [endDate, setEndDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [isExporting, setIsExporting] = useState(false);
 
   // Fetch farms
   const { data: farms = [] } = trpc.farms.list.useQuery();
@@ -43,6 +48,101 @@ export default function AnalyticsDashboard() {
     selectedFarmId ? { farmId: selectedFarmId } : { farmId: 0 },
     { enabled: !!selectedFarmId }
   );
+
+  // Export mutations
+  const exportFinancialExcel = trpc.export.exportFinancialExcel.useMutation();
+  const exportLivestockExcel = trpc.export.exportLivestockExcel.useMutation();
+  const exportAllDataExcel = trpc.export.exportAllDataExcel.useMutation();
+  const generatePDFReport = trpc.export.generatePDFReport.useMutation();
+
+  // Handle exports
+  const handleExportFinancialExcel = async () => {
+    if (!selectedFarmId) return;
+    setIsExporting(true);
+    try {
+      const result = await exportFinancialExcel.mutateAsync({ startDate, endDate });
+      const blob = new Blob([Uint8Array.from(atob(result.data), c => c.charCodeAt(0))], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = result.filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Export failed:', error);
+      alert('Export failed. Please try again.');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleExportLivestockExcel = async () => {
+    if (!selectedFarmId) return;
+    setIsExporting(true);
+    try {
+      const result = await exportLivestockExcel.mutateAsync({ farmId: selectedFarmId });
+      const blob = new Blob([Uint8Array.from(atob(result.data), c => c.charCodeAt(0))], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = result.filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Export failed:', error);
+      alert('Export failed. Please try again.');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleExportAllData = async () => {
+    if (!selectedFarmId) return;
+    setIsExporting(true);
+    try {
+      const result = await exportAllDataExcel.mutateAsync({ farmId: selectedFarmId });
+      const blob = new Blob([Uint8Array.from(atob(result.data), c => c.charCodeAt(0))], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = result.filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Export failed:', error);
+      alert('Export failed. Please try again.');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleGeneratePDFReport = async () => {
+    if (!selectedFarmId) return;
+    setIsExporting(true);
+    try {
+      const result = await generatePDFReport.mutateAsync({ startDate, endDate, farmId: selectedFarmId });
+      const blob = new Blob([result.html], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const win = window.open(url, '_blank');
+      if (win) {
+        win.onload = () => {
+          win.print();
+        };
+      }
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('PDF generation failed:', error);
+      alert('PDF generation failed. Please try again.');
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   // Prepare chart data
   const financialChartData = [
@@ -126,11 +226,83 @@ export default function AnalyticsDashboard() {
               ))}
             </SelectContent>
           </Select>
-          <Button onClick={handleExportReport} className="w-full md:w-auto">
-            <Download className="w-4 h-4 mr-2" />
-            Export Report
-          </Button>
         </div>
+      </div>
+
+      {/* Date Range and Export Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Export Reports</CardTitle>
+          <CardDescription>Select date range and export farm data in various formats</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium mb-2 block">Start Date</label>
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-md"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-2 block">End Date</label>
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-md"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+              <Button
+                onClick={handleExportFinancialExcel}
+                disabled={!selectedFarmId || isExporting}
+                variant="outline"
+                className="w-full"
+              >
+                <FileSpreadsheet className="w-4 h-4 mr-2" />
+                Financial Excel
+              </Button>
+              <Button
+                onClick={handleExportLivestockExcel}
+                disabled={!selectedFarmId || isExporting}
+                variant="outline"
+                className="w-full"
+              >
+                <FileSpreadsheet className="w-4 h-4 mr-2" />
+                Livestock Excel
+              </Button>
+              <Button
+                onClick={handleExportAllData}
+                disabled={!selectedFarmId || isExporting}
+                variant="outline"
+                className="w-full"
+              >
+                <FileSpreadsheet className="w-4 h-4 mr-2" />
+                Complete Data
+              </Button>
+              <Button
+                onClick={handleGeneratePDFReport}
+                disabled={!selectedFarmId || isExporting}
+                variant="outline"
+                className="w-full"
+              >
+                <FileText className="w-4 h-4 mr-2" />
+                PDF Report
+              </Button>
+            </div>
+            {isExporting && (
+              <p className="text-sm text-muted-foreground text-center">Generating export...</p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
       </div>
 
       {/* Key Metrics */}

@@ -10,6 +10,7 @@ import { serveStatic, setupVite } from "./vite";
 import { initializeWeatherCron } from "../weatherCron";
 import { initializeNotificationCron } from "../notificationCron";
 import { initializeWebSocketServer } from "./websocket";
+import { initializeAlertScheduler } from "./alertScheduler";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -63,8 +64,11 @@ async function startServer() {
   server.listen(port, () => {
     console.log(`Server running on http://localhost:${port}/`);
     
-    // Initialize WebSocket server
-    initializeWebSocketServer(server);
+  // Initialize WebSocket server
+  initializeWebSocketServer(server);
+  
+  // Initialize alert scheduler
+  initializeAlertScheduler();
     
     // Initialize cron jobs after server starts
     initializeWeatherCron();

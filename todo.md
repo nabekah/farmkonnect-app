@@ -2103,3 +2103,46 @@
 - [ ] Add alert history logging
 - [x] Test automated health alerts
 - [x] Test automated water quality alerts
+
+
+## Phase 9: Export UI, Alert Scheduling, History Dashboard, and Fertilizer Tracking
+
+### Export UI Implementation
+- [x] Add export buttons to Analytics Dashboard
+- [x] Add date range selector component
+- [x] Implement financial report export with download
+- [x] Implement livestock report export with download
+- [x] Implement complete farm data export with download
+- [x] Add PDF report generation with download
+- [x] Add loading states during export
+- [x] Add success/error notifications
+- [x] Test all export functionality
+
+### Scheduled Alert Monitoring
+- [x] Install node-cron package
+- [x] Create alert scheduler service
+- [x] Set up hourly alert checks
+- [x] Add farm list iteration for monitoring
+- [x] Test scheduled execution
+- [x] Add error handling and logging
+- [x] Verify alerts are sent correctly
+
+### Alert History Dashboard
+- [ ] Create alertHistory schema in database
+- [ ] Create alert history router
+- [ ] Build AlertHistory page component
+- [ ] Add severity filter (critical/warning/info)
+- [ ] Add type filter (health/water_quality)
+- [ ] Add date range filter
+- [ ] Display alert list with pagination
+- [ ] Add alert details modal
+- [ ] Test filtering and pagination
+
+### Fertilizer Application Tracking
+- [ ] Review existing fertilizer schema
+- [ ] Create/update fertilizer router
+- [ ] Build fertilizer tracking UI
+- [ ] Add fertilizer application form
+- [ ] Add fertilizer history list
+- [ ] Add fertilizer analytics
+- [ ] Test fertilizer tracking functionality
