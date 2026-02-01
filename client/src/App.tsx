@@ -19,6 +19,8 @@ import SellerAnalytics from "./pages/SellerAnalytics";
 import SellerPayouts from "./pages/SellerPayouts";
 import Wishlist from "./pages/Wishlist";
 import OrderTracking from "./pages/OrderTracking";
+import SellerVerification from "./pages/SellerVerification";
+import InventoryAlerts from "./pages/InventoryAlerts";
 import Training from "./pages/Training";
 import MERL from "./pages/MERL";
 import IoTManagement from "./pages/IoTManagement";
@@ -123,6 +125,20 @@ function Router() {
         {() => (
           <DashboardLayout>
             <OrderTracking />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/seller-verification">
+        {() => (
+          <DashboardLayout>
+            <SellerVerification />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/inventory-alerts">
+        {() => (
+          <DashboardLayout>
+            <InventoryAlerts />
           </DashboardLayout>
         )}
       </Route>

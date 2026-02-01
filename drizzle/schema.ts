@@ -731,6 +731,42 @@ export type MarketplaceWishlist = typeof marketplaceWishlist.$inferSelect;
 export type InsertMarketplaceWishlist = typeof marketplaceWishlist.$inferInsert;
 
 // ============================================================================
+// MARKETPLACE - SELLER VERIFICATION
+// ============================================================================
+export const sellerVerifications = mysqlTable("sellerVerifications", {
+  id: int("id").autoincrement().primaryKey(),
+  sellerId: int("sellerId").notNull(),
+  documentUrl: text("documentUrl").notNull(), // S3 URL to verification document
+  documentType: varchar("documentType", { length: 100 }).notNull(), // business_license, tax_id, national_id, etc.
+  status: mysqlEnum("status", ["pending", "approved", "rejected"]).default("pending").notNull(),
+  submittedAt: timestamp("submittedAt").defaultNow().notNull(),
+  reviewedAt: timestamp("reviewedAt"),
+  reviewedBy: int("reviewedBy"), // admin user ID
+  notes: text("notes"), // admin notes for rejection reason or comments
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type SellerVerification = typeof sellerVerifications.$inferSelect;
+export type InsertSellerVerification = typeof sellerVerifications.$inferInsert;
+
+// ============================================================================
+// MARKETPLACE - INVENTORY ALERTS
+// ============================================================================
+export const inventoryAlerts = mysqlTable("inventoryAlerts", {
+  id: int("id").autoincrement().primaryKey(),
+  sellerId: int("sellerId").notNull(),
+  productId: int("productId").notNull().references(() => marketplaceProducts.id, { onDelete: "cascade" }),
+  threshold: decimal("threshold", { precision: 10, scale: 2 }).notNull(), // alert when quantity falls below this
+  isActive: boolean("isActive").default(true).notNull(),
+  lastAlertSent: timestamp("lastAlertSent"),
+  alertFrequencyHours: int("alertFrequencyHours").default(24).notNull(), // minimum hours between alerts
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type InventoryAlert = typeof inventoryAlerts.$inferSelect;
+export type InsertInventoryAlert = typeof inventoryAlerts.$inferInsert;
+
+// ============================================================================
 // MARKETPLACE - DELIVERY ZONES
 // ============================================================================
 export const marketplaceDeliveryZones = mysqlTable("marketplaceDeliveryZones", {

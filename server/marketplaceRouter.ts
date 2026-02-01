@@ -17,6 +17,8 @@ import {
   marketplaceOrderDisputes,
   marketplaceSellerPayouts,
   marketplaceWishlist,
+  sellerVerifications,
+  inventoryAlerts,
   users,
 } from "../drizzle/schema";
 import { eq, and, desc, like, inArray } from "drizzle-orm";
@@ -1254,5 +1256,279 @@ export const marketplaceRouter = router({
         savings: totalOriginal - totalDiscounted,
         tier: applicableTier,
       };
+    }),
+
+  // ========== SELLER VERIFICATION ==========
+  submitVerification: protectedProcedure
+    .input(z.object({
+      documentData: z.string(), // base64 encoded document
+      documentType: z.string(),
+      fileName: z.string(),
+      mimeType: z.string(),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      
+      // Decode and upload document to S3
+      const base64Data = input.documentData.split(',')[1] || input.documentData;
+      const buffer = Buffer.from(base64Data, 'base64');
+      
+      const timestamp = Date.now();
+      const randomSuffix = Math.random().toString(36).substring(2, 8);
+      const fileExtension = input.fileName.split('.').pop() || 'pdf';
+      const fileKey = `marketplace/verification/${ctx.user.id}/${timestamp}-${randomSuffix}.${fileExtension}`;
+      
+      const { url } = await storagePut(fileKey, buffer, input.mimeType);
+      
+      // Create verification request
+      await db.insert(sellerVerifications).values({
+        sellerId: ctx.user.id,
+        documentUrl: url,
+        documentType: input.documentType,
+        status: "pending",
+      });
+      
+      return { success: true, documentUrl: url };
+    }),
+
+  getVerificationStatus: protectedProcedure
+    .query(async ({ ctx }) => {
+      const db = await getDb();
+      if (!db) return null;
+      
+      const verifications = await db.select().from(sellerVerifications)
+        .where(eq(sellerVerifications.sellerId, ctx.user.id))
+        .orderBy(desc(sellerVerifications.createdAt))
+        .limit(1);
+      
+      return verifications[0] || null;
+    }),
+
+  listVerificationRequests: protectedProcedure
+    .query(async ({ ctx }) => {
+      const db = await getDb();
+      if (!db) return [];
+      
+      // Only admins can see all verification requests
+      if (ctx.user.role !== 'admin') {
+        throw new TRPCError({ code: "FORBIDDEN" });
+      }
+      
+      const verifications = await db.select().from(sellerVerifications)
+        .orderBy(desc(sellerVerifications.createdAt));
+      
+      return verifications;
+    }),
+
+  reviewVerification: protectedProcedure
+    .input(z.object({
+      verificationId: z.number(),
+      status: z.enum(["approved", "rejected"]),
+      notes: z.string().optional(),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      
+      // Only admins can review verifications
+      if (ctx.user.role !== 'admin') {
+        throw new TRPCError({ code: "FORBIDDEN" });
+      }
+      
+      await db.update(sellerVerifications)
+        .set({
+          status: input.status,
+          reviewedAt: new Date(),
+          reviewedBy: ctx.user.id,
+          notes: input.notes,
+        })
+        .where(eq(sellerVerifications.id, input.verificationId));
+      
+      return { success: true };
+    }),
+
+  isSellerVerified: publicProcedure
+    .input(z.object({ sellerId: z.number() }))
+    .query(async ({ input }) => {
+      const db = await getDb();
+      if (!db) return false;
+      
+      const verification = await db.select().from(sellerVerifications)
+        .where(and(
+          eq(sellerVerifications.sellerId, input.sellerId),
+          eq(sellerVerifications.status, "approved")
+        ))
+        .limit(1);
+      
+      return verification.length > 0;
+    }),
+
+  // ========== INVENTORY ALERTS ==========
+  setInventoryAlert: protectedProcedure
+    .input(z.object({
+      productId: z.number(),
+      threshold: z.number(),
+      isActive: z.boolean().optional(),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      
+      // Verify user owns the product
+      const product = await db.select().from(marketplaceProducts)
+        .where(eq(marketplaceProducts.id, input.productId))
+        .limit(1);
+      
+      if (!product[0] || product[0].sellerId !== ctx.user.id) {
+        throw new TRPCError({ code: "FORBIDDEN" });
+      }
+      
+      // Check if alert already exists
+      const existing = await db.select().from(inventoryAlerts)
+        .where(and(
+          eq(inventoryAlerts.productId, input.productId),
+          eq(inventoryAlerts.sellerId, ctx.user.id)
+        ))
+        .limit(1);
+      
+      if (existing[0]) {
+        // Update existing alert
+        await db.update(inventoryAlerts)
+          .set({
+            threshold: input.threshold.toString(),
+            isActive: input.isActive ?? true,
+          })
+          .where(eq(inventoryAlerts.id, existing[0].id));
+      } else {
+        // Create new alert
+        await db.insert(inventoryAlerts).values({
+          sellerId: ctx.user.id,
+          productId: input.productId,
+          threshold: input.threshold.toString(),
+          isActive: input.isActive ?? true,
+        });
+      }
+      
+      return { success: true };
+    }),
+
+  getInventoryAlert: protectedProcedure
+    .input(z.object({ productId: z.number() }))
+    .query(async ({ input, ctx }) => {
+      const db = await getDb();
+      if (!db) return null;
+      
+      const alert = await db.select().from(inventoryAlerts)
+        .where(and(
+          eq(inventoryAlerts.productId, input.productId),
+          eq(inventoryAlerts.sellerId, ctx.user.id)
+        ))
+        .limit(1);
+      
+      return alert[0] || null;
+    }),
+
+  listInventoryAlerts: protectedProcedure
+    .query(async ({ ctx }) => {
+      const db = await getDb();
+      if (!db) return [];
+      
+      const alerts = await db.select().from(inventoryAlerts)
+        .where(eq(inventoryAlerts.sellerId, ctx.user.id));
+      
+      return alerts;
+    }),
+
+  checkLowStockProducts: protectedProcedure
+    .query(async ({ ctx }) => {
+      const db = await getDb();
+      if (!db) return [];
+      
+      // Get all active alerts for this seller
+      const alerts = await db.select().from(inventoryAlerts)
+        .where(and(
+          eq(inventoryAlerts.sellerId, ctx.user.id),
+          eq(inventoryAlerts.isActive, true)
+        ));
+      
+      const lowStockProducts = [];
+      
+      for (const alert of alerts) {
+        const product = await db.select().from(marketplaceProducts)
+          .where(eq(marketplaceProducts.id, alert.productId))
+          .limit(1);
+        
+        if (product[0]) {
+          const currentQty = parseFloat(product[0].quantity);
+          const threshold = parseFloat(alert.threshold);
+          
+          if (currentQty <= threshold) {
+            lowStockProducts.push({
+              ...product[0],
+              alertThreshold: threshold,
+              alertId: alert.id,
+            });
+          }
+        }
+      }
+      
+      return lowStockProducts;
+    }),
+
+  sendLowStockAlert: protectedProcedure
+    .input(z.object({ productId: z.number() }))
+    .mutation(async ({ input, ctx }) => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      
+      const product = await db.select().from(marketplaceProducts)
+        .where(eq(marketplaceProducts.id, input.productId))
+        .limit(1);
+      
+      if (!product[0] || product[0].sellerId !== ctx.user.id) {
+        throw new TRPCError({ code: "FORBIDDEN" });
+      }
+      
+      const alert = await db.select().from(inventoryAlerts)
+        .where(and(
+          eq(inventoryAlerts.productId, input.productId),
+          eq(inventoryAlerts.sellerId, ctx.user.id)
+        ))
+        .limit(1);
+      
+      if (!alert[0]) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "No alert configured for this product" });
+      }
+      
+      // Check if we should send alert (respect frequency)
+      if (alert[0].lastAlertSent) {
+        const hoursSinceLastAlert = 
+          (Date.now() - new Date(alert[0].lastAlertSent).getTime()) / (1000 * 60 * 60);
+        
+        if (hoursSinceLastAlert < alert[0].alertFrequencyHours) {
+          return { success: false, message: "Alert sent too recently" };
+        }
+      }
+      
+      // Send SMS notification
+      const user = await db.select().from(users)
+        .where(eq(users.id, ctx.user.id))
+        .limit(1);
+      
+      if (user[0]?.phone) {
+        const message = `Low Stock Alert: ${product[0].name} is running low (${product[0].quantity} ${product[0].unit} remaining). Restock soon to avoid stockouts.`;
+        await sendSMS({
+          to: user[0].phone,
+          message,
+        });
+      }
+      
+      // Update last alert sent time
+      await db.update(inventoryAlerts)
+        .set({ lastAlertSent: new Date() })
+        .where(eq(inventoryAlerts.id, alert[0].id));
+      
+      return { success: true };
     }),
 });

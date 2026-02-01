@@ -1476,3 +1476,27 @@
 - [x] Add "Cooperative Pricing" badge on eligible products
 - [ ] Create bulk order inquiry form for large quantities
 - [x] Display tier pricing table (e.g., 10+ 5% off, 50+ 10% off)
+
+## Seller Verification Badges System
+- [x] Create sellerVerifications database table (sellerId, documentUrl, status, submittedAt, reviewedAt, reviewedBy, notes)
+- [x] Add verification status field to user table or separate verification tracking
+- [x] Create seller verification request page with document upload
+- [x] Add file upload to S3 for verification documents
+- [ ] Build admin verification review dashboard
+- [x] Implement admin approval/rejection workflow with notes
+- [ ] Add verification badge display on seller profiles
+- [x] Show verification badge on product cards
+- [ ] Add verification status indicator in seller analytics
+- [ ] Send notification to seller on verification status change
+
+## Automated Inventory Alerts
+- [x] Create inventoryAlerts database table (sellerId, productId, threshold, isActive, lastAlertSent)
+- [ ] Add inventory threshold configuration in product edit
+- [x] Create background job to check inventory levels
+- [ ] Implement email notification for low stock alerts
+- [x] Implement SMS notification for low stock alerts
+- [x] Add "Quick Restock" button in alert notifications
+- [x] Create inventory alerts management page for sellers
+- [ ] Add alert history/log tracking
+- [x] Implement alert frequency control (don't spam daily)
+- [ ] Show low stock warning badge on seller's product list

@@ -1,8 +1,9 @@
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
+import { Badge } from "./ui/badge";
 import { ProductImageCarousel } from "./ProductImageCarousel";
-import { ShoppingCart, Heart } from "lucide-react";
+import { Heart, ShoppingCart, Shield } from "lucide-react";
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
 
@@ -27,6 +28,11 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
   // Get bulk pricing tiers
   const { data: bulkTiers = [] } = trpc.marketplace.getBulkPricingTiers.useQuery({ 
     productId: product.id 
+  });
+  
+  // Check if seller is verified
+  const { data: isVerified = false } = trpc.marketplace.isSellerVerified.useQuery({ 
+    sellerId: product.sellerId 
   });
   
   useEffect(() => {
@@ -77,8 +83,16 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
       )}
       <CardHeader>
         <div className="flex justify-between items-start">
-          <div className="flex-1">
-            <CardTitle className="line-clamp-2">{product.name}</CardTitle>
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <CardTitle className="line-clamp-2">{product.name}</CardTitle>
+              {isVerified && (
+                <Badge variant="outline" className="bg-blue-500/10 text-blue-600 border-blue-500/20 flex-shrink-0">
+                  <Shield className="h-3 w-3 mr-1" />
+                  Verified
+                </Badge>
+              )}
+            </div>
             <CardDescription>{product.category}</CardDescription>
           </div>
           <Button
