@@ -1441,3 +1441,38 @@
 - [x] Create CSV export for accounting purposes
 - [x] Display total earnings, pending balance, and paid out amounts
 - [ ] Add date range filters for financial reports
+
+## Seller Payouts Sidebar Navigation
+- [x] Add Seller Payouts link to DashboardLayout sidebar menu
+- [x] Add appropriate icon for financial/payout section
+- [x] Test navigation from sidebar to payouts page
+
+## Product Wishlist/Favorites System
+- [x] Create wishlist database table (userId, productId, createdAt)
+- [x] Add wishlist procedures (add, remove, list)
+- [x] Add heart icon to product cards in marketplace
+- [x] Implement toggle favorite functionality with optimistic updates
+- [x] Create dedicated Wishlist page showing saved products
+- [ ] Add wishlist count badge in navigation
+- [x] Show "Added to wishlist" toast notifications
+- [x] Display wishlist status on product detail view
+
+## Order Tracking with Map Visualization
+- [x] Create OrderTracking page with route parameter for order ID
+- [x] Add tracking timeline component (ordered → confirmed → shipped → delivered)
+- [x] Integrate Google Maps to show delivery route
+- [x] Add estimated delivery date calculation
+- [x] Display current shipment status with location updates
+- [x] Add "Track Order" button in Orders page
+- [ ] Show courier information and contact details
+- [x] Add delivery address marker on map
+
+## Bulk Order Pricing for Cooperatives
+- [x] Update marketplaceBulkPricingTiers table usage
+- [ ] Add bulk pricing configuration in product creation/edit
+- [x] Display quantity discount tiers on product pages
+- [x] Implement automatic discount calculation in cart
+- [ ] Show savings amount in cart and checkout
+- [x] Add "Cooperative Pricing" badge on eligible products
+- [ ] Create bulk order inquiry form for large quantities
+- [x] Display tier pricing table (e.g., 10+ 5% off, 50+ 10% off)

@@ -27,7 +27,7 @@ import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
 import { Button } from "./ui/button";
 
-import { Leaf, TrendingUp, BarChart3, ShoppingCart, Settings, Users, Moon, Sun, BookOpen, Target, Cpu, Truck, Briefcase, CloudRain, LineChart, Sprout, Shield } from 'lucide-react';
+import { Leaf, TrendingUp, BarChart3, ShoppingCart, Settings, Users, Moon, Sun, BookOpen, Target, Cpu, Truck, Briefcase, CloudRain, LineChart, Sprout, Shield, DollarSign, Heart } from 'lucide-react';
 import { useDarkMode } from '@/contexts/DarkModeContext';
 import { NotificationCenter } from './NotificationCenter';
 import { CartButton } from './CartButton';
@@ -38,6 +38,8 @@ const menuItems = [
   { icon: TrendingUp, label: "Crops", path: "/crops" },
   { icon: Users, label: "Livestock", path: "/livestock" },
   { icon: ShoppingCart, label: "Marketplace", path: "/marketplace" },
+  { icon: Heart, label: "Wishlist", path: "/wishlist" },
+  { icon: DollarSign, label: "Seller Payouts", path: "/seller-payouts" },
   { icon: BookOpen, label: "Training", path: "/training" },
   { icon: Target, label: "MERL", path: "/merl" },
   { icon: Cpu, label: "IoT", path: "/iot" },

@@ -719,6 +719,18 @@ export type MarketplaceSellerPayout = typeof marketplaceSellerPayouts.$inferSele
 export type InsertMarketplaceSellerPayout = typeof marketplaceSellerPayouts.$inferInsert;
 
 // ============================================================================
+// MARKETPLACE - WISHLIST
+// ============================================================================
+export const marketplaceWishlist = mysqlTable("marketplaceWishlist", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  productId: int("productId").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type MarketplaceWishlist = typeof marketplaceWishlist.$inferSelect;
+export type InsertMarketplaceWishlist = typeof marketplaceWishlist.$inferInsert;
+
+// ============================================================================
 // MARKETPLACE - DELIVERY ZONES
 // ============================================================================
 export const marketplaceDeliveryZones = mysqlTable("marketplaceDeliveryZones", {

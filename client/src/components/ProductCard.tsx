@@ -2,7 +2,9 @@ import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { ProductImageCarousel } from "./ProductImageCarousel";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, Heart } from "lucide-react";
+import { toast } from "sonner";
+import { useState, useEffect } from "react";
 
 interface ProductCardProps {
   product: any;
@@ -10,10 +12,58 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, onAddToCart }: ProductCardProps) {
+  const [isInWishlist, setIsInWishlist] = useState(false);
+  
   // Fetch images for this specific product
   const { data: images = [] } = trpc.marketplace.getProductImages.useQuery({ 
     productId: product.id 
   });
+  
+  // Check if product is in wishlist
+  const { data: wishlistStatus } = trpc.marketplace.isInWishlist.useQuery({ 
+    productId: product.id 
+  });
+  
+  // Get bulk pricing tiers
+  const { data: bulkTiers = [] } = trpc.marketplace.getBulkPricingTiers.useQuery({ 
+    productId: product.id 
+  });
+  
+  useEffect(() => {
+    if (wishlistStatus !== undefined) {
+      setIsInWishlist(wishlistStatus);
+    }
+  }, [wishlistStatus]);
+  
+  const addToWishlist = trpc.marketplace.addToWishlist.useMutation({
+    onSuccess: (data) => {
+      if (!data.alreadyExists) {
+        setIsInWishlist(true);
+        toast.success("Added to wishlist");
+      }
+    },
+    onError: () => {
+      toast.error("Failed to add to wishlist");
+    },
+  });
+  
+  const removeFromWishlist = trpc.marketplace.removeFromWishlist.useMutation({
+    onSuccess: () => {
+      setIsInWishlist(false);
+      toast.success("Removed from wishlist");
+    },
+    onError: () => {
+      toast.error("Failed to remove from wishlist");
+    },
+  });
+  
+  const toggleWishlist = () => {
+    if (isInWishlist) {
+      removeFromWishlist.mutate({ productId: product.id });
+    } else {
+      addToWishlist.mutate({ productId: product.id });
+    }
+  };
 
   // Combine fetched images with fallback to imageUrl
   const displayImages = images.length > 0 
@@ -26,8 +76,24 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
         <ProductImageCarousel images={displayImages} productName={product.name} />
       )}
       <CardHeader>
-        <CardTitle className="line-clamp-2">{product.name}</CardTitle>
-        <CardDescription>{product.category}</CardDescription>
+        <div className="flex justify-between items-start">
+          <div className="flex-1">
+            <CardTitle className="line-clamp-2">{product.name}</CardTitle>
+            <CardDescription>{product.category}</CardDescription>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleWishlist}
+            className="shrink-0"
+          >
+            <Heart
+              className={`h-5 w-5 ${
+                isInWishlist ? "fill-red-500 text-red-500" : "text-muted-foreground"
+              }`}
+            />
+          </Button>
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-sm text-muted-foreground line-clamp-2">{product.description}</p>
@@ -37,6 +103,21 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
             <p className="text-xs text-muted-foreground">{product.quantity} {product.unit} available</p>
           </div>
         </div>
+        {bulkTiers.length > 0 && (
+          <div className="bg-accent/50 p-3 rounded-lg">
+            <p className="text-xs font-semibold text-accent-foreground mb-2">🎯 Bulk Discounts Available</p>
+            <div className="space-y-1">
+              {bulkTiers.slice(0, 2).map((tier: any) => (
+                <p key={tier.id} className="text-xs text-muted-foreground">
+                  {parseFloat(tier.minQuantity)}+ {product.unit}: {parseFloat(tier.discountPercentage)}% off
+                </p>
+              ))}
+              {bulkTiers.length > 2 && (
+                <p className="text-xs text-muted-foreground">+{bulkTiers.length - 2} more tiers</p>
+              )}
+            </div>
+          </div>
+        )}
         <Button onClick={() => onAddToCart(product.id)} className="w-full">
           <ShoppingCart className="mr-2 h-4 w-4" />
           Add to Cart

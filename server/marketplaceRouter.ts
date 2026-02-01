@@ -1,4 +1,4 @@
-import { router, protectedProcedure } from "./_core/trpc";
+import { router, protectedProcedure, publicProcedure } from "./_core/trpc";
 import { z } from "zod";
 import { getDb } from "./db";
 import { TRPCError } from "@trpc/server";
@@ -16,6 +16,7 @@ import {
   marketplaceOrderReviews,
   marketplaceOrderDisputes,
   marketplaceSellerPayouts,
+  marketplaceWishlist,
   users,
 } from "../drizzle/schema";
 import { eq, and, desc, like, inArray } from "drizzle-orm";
@@ -1100,6 +1101,158 @@ export const marketplaceRouter = router({
         totalEarnings: completed + pending + unpaidAmount,
         pendingBalance: pending + unpaidAmount,
         paidOut: completed,
+      };
+    }),
+
+  // ========== WISHLIST ==========
+  addToWishlist: protectedProcedure
+    .input(z.object({ productId: z.number() }))
+    .mutation(async ({ input, ctx }) => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      
+      // Check if already in wishlist
+      const existing = await db.select().from(marketplaceWishlist)
+        .where(and(
+          eq(marketplaceWishlist.userId, ctx.user.id),
+          eq(marketplaceWishlist.productId, input.productId)
+        ))
+        .limit(1);
+      
+      if (existing[0]) {
+        return { success: true, alreadyExists: true };
+      }
+      
+      await db.insert(marketplaceWishlist).values({
+        userId: ctx.user.id,
+        productId: input.productId,
+      });
+      
+      return { success: true, alreadyExists: false };
+    }),
+
+  removeFromWishlist: protectedProcedure
+    .input(z.object({ productId: z.number() }))
+    .mutation(async ({ input, ctx }) => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      
+      await db.delete(marketplaceWishlist)
+        .where(and(
+          eq(marketplaceWishlist.userId, ctx.user.id),
+          eq(marketplaceWishlist.productId, input.productId)
+        ));
+      
+      return { success: true };
+    }),
+
+  getWishlist: protectedProcedure
+    .query(async ({ ctx }) => {
+      const db = await getDb();
+      if (!db) return [];
+      
+      const wishlistItems = await db.select()
+        .from(marketplaceWishlist)
+        .where(eq(marketplaceWishlist.userId, ctx.user.id))
+        .orderBy(desc(marketplaceWishlist.createdAt));
+      
+      // Get product details for each wishlist item
+      const productIds = wishlistItems.map(item => item.productId);
+      if (productIds.length === 0) return [];
+      
+      const products = await db.select()
+        .from(marketplaceProducts)
+        .where(inArray(marketplaceProducts.id, productIds));
+      
+      return wishlistItems.map(item => {
+        const product = products.find(p => p.id === item.productId);
+        return {
+          ...item,
+          product,
+        };
+      });
+    }),
+
+  isInWishlist: protectedProcedure
+    .input(z.object({ productId: z.number() }))
+    .query(async ({ input, ctx }) => {
+      const db = await getDb();
+      if (!db) return false;
+      
+      const item = await db.select().from(marketplaceWishlist)
+        .where(and(
+          eq(marketplaceWishlist.userId, ctx.user.id),
+          eq(marketplaceWishlist.productId, input.productId)
+        ))
+        .limit(1);
+      
+      return item.length > 0;
+    }),
+
+  getWishlistCount: protectedProcedure
+    .query(async ({ ctx }) => {
+      const db = await getDb();
+      if (!db) return 0;
+      
+      const items = await db.select().from(marketplaceWishlist)
+        .where(eq(marketplaceWishlist.userId, ctx.user.id));
+      
+      return items.length;
+    }),
+
+  // ========== BULK DISCOUNT CALCULATION ==========
+  calculateBulkDiscount: publicProcedure
+    .input(z.object({
+      productId: z.number(),
+      quantity: z.number(),
+    }))
+    .query(async ({ input }) => {
+      const db = await getDb();
+      if (!db) return null;
+      
+      // Get product price
+      const product = await db.select().from(marketplaceProducts)
+        .where(eq(marketplaceProducts.id, input.productId))
+        .limit(1);
+      
+      if (!product[0]) return null;
+      
+      // Get applicable tier
+      const tiers = await db.select().from(marketplaceBulkPricingTiers)
+        .where(eq(marketplaceBulkPricingTiers.productId, input.productId))
+        .orderBy(desc(marketplaceBulkPricingTiers.minQuantity));
+      
+      let applicableTier = null;
+      for (const tier of tiers) {
+        const minQty = parseFloat(tier.minQuantity);
+        const maxQty = tier.maxQuantity ? parseFloat(tier.maxQuantity) : Infinity;
+        
+        if (input.quantity >= minQty && input.quantity <= maxQty) {
+          applicableTier = tier;
+          break;
+        }
+      }
+      
+      if (!applicableTier) {
+        return {
+          originalPrice: parseFloat(product[0].price),
+          discountedPrice: parseFloat(product[0].price),
+          discountPercentage: 0,
+          savings: 0,
+        };
+      }
+      
+      const originalPrice = parseFloat(product[0].price);
+      const discountedPrice = parseFloat(applicableTier.discountedPrice);
+      const totalOriginal = originalPrice * input.quantity;
+      const totalDiscounted = discountedPrice * input.quantity;
+      
+      return {
+        originalPrice,
+        discountedPrice,
+        discountPercentage: parseFloat(applicableTier.discountPercentage),
+        savings: totalOriginal - totalDiscounted,
+        tier: applicableTier,
       };
     }),
 });

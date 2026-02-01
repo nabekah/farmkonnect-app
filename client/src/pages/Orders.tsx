@@ -19,7 +19,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Package, Eye, Truck, CheckCircle2, Clock, XCircle, BarChart3, Star, MessageSquare, AlertTriangle } from "lucide-react";
+import { Package, Eye, Truck, CheckCircle2, Clock, XCircle, BarChart3, Star, MessageSquare, AlertTriangle, MapPin } from "lucide-react";
 import { Link } from "wouter";
 import { toast } from "sonner";
 
@@ -218,6 +218,14 @@ export default function Orders() {
                         <Eye className="h-4 w-4 mr-1" />
                         View Details
                       </Button>
+                      {role === "buyer" && (status === "confirmed" || status === "shipped" || status === "delivered") && (
+                        <Link href={`/track-order/${order.id}`}>
+                          <Button variant="outline" size="sm">
+                            <MapPin className="h-4 w-4 mr-1" />
+                            Track
+                          </Button>
+                        </Link>
+                      )}
                       {role === "buyer" && status === "pending" && (
                         <Button
                           variant="destructive"

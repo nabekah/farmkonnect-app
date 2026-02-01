@@ -17,6 +17,8 @@ import Checkout from "./pages/Checkout";
 import Orders from "./pages/Orders";
 import SellerAnalytics from "./pages/SellerAnalytics";
 import SellerPayouts from "./pages/SellerPayouts";
+import Wishlist from "./pages/Wishlist";
+import OrderTracking from "./pages/OrderTracking";
 import Training from "./pages/Training";
 import MERL from "./pages/MERL";
 import IoTManagement from "./pages/IoTManagement";
@@ -107,6 +109,20 @@ function Router() {
         {() => (
           <DashboardLayout>
             <SellerPayouts />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/wishlist">
+        {() => (
+          <DashboardLayout>
+            <Wishlist />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/track-order/:id">
+        {() => (
+          <DashboardLayout>
+            <OrderTracking />
           </DashboardLayout>
         )}
       </Route>
