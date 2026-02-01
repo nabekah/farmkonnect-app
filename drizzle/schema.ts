@@ -1266,3 +1266,134 @@ export const passwordResetRequests = mysqlTable("passwordResetRequests", {
 
 export type PasswordResetRequest = typeof passwordResetRequests.$inferSelect;
 export type InsertPasswordResetRequest = typeof passwordResetRequests.$inferInsert;
+
+
+// ============================================================================
+// FINANCIAL MANAGEMENT
+// ============================================================================
+
+// Farm Expenses
+export const farmExpenses = mysqlTable("farmExpenses", {
+  id: int("id").autoincrement().primaryKey(),
+  farmId: int("farmId").notNull().references(() => farms.id),
+  category: varchar("category", { length: 50 }).notNull(), // seeds, fertilizers, pesticides, labor, equipment, fuel, utilities, maintenance, feed, veterinary, other
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  expenseDate: date("expenseDate").notNull(),
+  description: text("description"),
+  vendor: varchar("vendor", { length: 255 }),
+  invoiceNumber: varchar("invoiceNumber", { length: 100 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type FarmExpense = typeof farmExpenses.$inferSelect;
+export type InsertFarmExpense = typeof farmExpenses.$inferInsert;
+
+// Farm Revenue
+export const farmRevenue = mysqlTable("farmRevenue", {
+  id: int("id").autoincrement().primaryKey(),
+  farmId: int("farmId").notNull().references(() => farms.id),
+  source: varchar("source", { length: 50 }).notNull(), // crop_sales, livestock_sales, fish_sales, services, other
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  saleDate: date("saleDate").notNull(),
+  buyer: varchar("buyer", { length: 255 }),
+  quantity: varchar("quantity", { length: 100 }),
+  unit: varchar("unit", { length: 50 }), // kg, liters, pieces, etc
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type FarmRevenue = typeof farmRevenue.$inferSelect;
+export type InsertFarmRevenue = typeof farmRevenue.$inferInsert;
+
+// Farm Workers
+export const farmWorkers = mysqlTable("farmWorkers", {
+  id: int("id").autoincrement().primaryKey(),
+  farmId: int("farmId").notNull().references(() => farms.id),
+  name: varchar("name", { length: 255 }).notNull(),
+  role: varchar("role", { length: 100 }).notNull(), // farm manager, laborer, specialist, etc
+  contact: varchar("contact", { length: 20 }),
+  email: varchar("email", { length: 255 }),
+  hireDate: date("hireDate").notNull(),
+  salary: decimal("salary", { precision: 10, scale: 2 }),
+  salaryFrequency: varchar("salaryFrequency", { length: 20 }), // daily, weekly, monthly
+  status: varchar("status", { length: 20 }).default("active"), // active, inactive, on_leave
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type FarmWorker = typeof farmWorkers.$inferSelect;
+export type InsertFarmWorker = typeof farmWorkers.$inferInsert;
+
+// Farm Assets
+export const farmAssets = mysqlTable("farmAssets", {
+  id: int("id").autoincrement().primaryKey(),
+  farmId: int("farmId").notNull().references(() => farms.id),
+  assetType: varchar("assetType", { length: 100 }).notNull(), // tractor, pump, shed, fence, etc
+  name: varchar("name", { length: 255 }).notNull(),
+  purchaseDate: date("purchaseDate").notNull(),
+  purchaseValue: decimal("purchaseValue", { precision: 10, scale: 2 }),
+  currentValue: decimal("currentValue", { precision: 10, scale: 2 }),
+  maintenanceSchedule: varchar("maintenanceSchedule", { length: 50 }), // monthly, quarterly, annually
+  lastMaintenanceDate: date("lastMaintenanceDate"),
+  nextMaintenanceDate: date("nextMaintenanceDate"),
+  status: varchar("status", { length: 20 }).default("active"), // active, maintenance, retired
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type FarmAsset = typeof farmAssets.$inferSelect;
+export type InsertFarmAsset = typeof farmAssets.$inferInsert;
+
+// Fish Ponds
+export const fishPonds = mysqlTable("fishPonds", {
+  id: int("id").autoincrement().primaryKey(),
+  farmId: int("farmId").notNull().references(() => farms.id),
+  pondName: varchar("pondName", { length: 255 }).notNull(),
+  sizeSquareMeters: decimal("sizeSquareMeters", { precision: 10, scale: 2 }),
+  depthMeters: decimal("depthMeters", { precision: 5, scale: 2 }),
+  waterSource: varchar("waterSource", { length: 100 }), // borehole, river, rain, etc
+  stockingDensity: varchar("stockingDensity", { length: 100 }), // fingerlings per square meter
+  status: varchar("status", { length: 20 }).default("active"), // active, draining, empty
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type FishPond = typeof fishPonds.$inferSelect;
+export type InsertFishPond = typeof fishPonds.$inferInsert;
+
+// Fish Stocking Records
+export const fishStockingRecords = mysqlTable("fishStockingRecords", {
+  id: int("id").autoincrement().primaryKey(),
+  pondId: int("pondId").notNull().references(() => fishPonds.id),
+  species: varchar("species", { length: 100 }).notNull(), // tilapia, catfish, carp, etc
+  fingerlings: int("fingerlings").notNull(),
+  stockingDate: date("stockingDate").notNull(),
+  expectedHarvestDate: date("expectedHarvestDate"),
+  status: varchar("status", { length: 20 }).default("stocked"), // stocked, growing, harvesting, harvested
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type FishStockingRecord = typeof fishStockingRecords.$inferSelect;
+export type InsertFishStockingRecord = typeof fishStockingRecords.$inferInsert;
+
+// Fish Pond Activities (water quality, feeding, etc)
+export const fishPondActivities = mysqlTable("fishPondActivities", {
+  id: int("id").autoincrement().primaryKey(),
+  pondId: int("pondId").notNull().references(() => fishPonds.id),
+  activityType: varchar("activityType", { length: 50 }).notNull(), // feeding, water_change, treatment, harvesting, etc
+  activityDate: date("activityDate").notNull(),
+  waterTemperature: decimal("waterTemperature", { precision: 5, scale: 2 }),
+  phLevel: decimal("phLevel", { precision: 3, scale: 1 }),
+  dissolvedOxygen: decimal("dissolvedOxygen", { precision: 5, scale: 2 }),
+  feedAmount: decimal("feedAmount", { precision: 10, scale: 2 }), // kg
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type FishPondActivity = typeof fishPondActivities.$inferSelect;
+export type InsertFishPondActivity = typeof fishPondActivities.$inferInsert;

@@ -20,6 +20,11 @@ import { smsRouter } from "./smsRouter";
 import { securityRouter } from "./securityRouter";
 import { passwordResetRouter } from "./passwordResetRouter";
 import { uploadRouter } from "./uploadRouter";
+import { financialRouter } from "./financialRouter";
+import { livestockRouter } from "./livestockRouter";
+import { workforceRouter } from "./workforceRouter";
+import { fishFarmingRouter } from "./fishFarmingRouter";
+import { assetRouter } from "./assetRouter";
 import { z } from "zod";
 import { getDb } from "./db";
 import { TRPCError } from "@trpc/server";
@@ -47,6 +52,11 @@ import { eq } from "drizzle-orm";
 export const appRouter = router({
   system: systemRouter,
   upload: uploadRouter,
+  financial: financialRouter,
+  livestock: livestockRouter,
+  workforce: workforceRouter,
+  fishFarming: fishFarmingRouter,
+  assets: assetRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {
