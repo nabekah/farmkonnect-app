@@ -1749,3 +1749,115 @@
 - [ ] Create alert management page for farmers
 - [ ] Add alert history/log tracking
 - [ ] Test alert delivery and notifications
+
+
+## Phase 2: Complete Frontend Integration with Real-time Notifications & Analytics
+
+### Phase 2.1: Financial Management Integration
+- [x] Update FarmFinance component to use trpc.financial.expenses
+- [x] Update FarmFinance component to use trpc.financial.revenue
+- [x] Implement expense creation form with tRPC mutation
+- [x] Implement revenue creation form with tRPC mutation
+- [x] Add expense/revenue list with pagination
+- [x] Implement expense/revenue filtering and search
+- [x] Add delete/update functionality
+- [x] Create financial summary card with real data
+- [x] Write vitest tests for FarmFinance component
+
+### Phase 2.2: Livestock Management Integration
+- [x] Update LivestockManagement component to use trpc.livestock.animals
+- [x] Implement animal creation form with tRPC mutation
+- [x] Add animal list with status filtering
+- [x] Implement health records UI with trpc.livestock.healthRecords
+- [ ] Add breeding records UI with trpc.livestock.breedingRecords
+- [ ] Implement feeding records UI with trpc.livestock.feedingRecords
+- [ ] Add performance metrics tracking UI
+- [x] Create animal detail view with all related records
+- [ ] Write vitest tests for LivestockManagement component
+
+### Phase 2.3: Workforce Management Integration
+- [ ] Update WorkforceManagement component to use trpc.workforce.workers
+- [ ] Implement worker creation form with tRPC mutation
+- [ ] Add worker list with role filtering
+- [ ] Implement payroll calculation UI with trpc.workforce.payroll
+- [ ] Add salary payout form with payment method selection
+- [ ] Implement attendance tracking UI
+- [ ] Add performance evaluation form
+- [ ] Create team statistics dashboard
+- [ ] Write vitest tests for WorkforceManagement component
+
+### Phase 2.4: Fish Farming Integration
+- [ ] Update FishFarming component to use trpc.fishFarming.ponds
+- [ ] Implement pond creation form with tRPC mutation
+- [ ] Add pond list with status filtering
+- [ ] Implement water quality monitoring UI with trpc.fishFarming.waterQuality
+- [ ] Add stocking/harvest recording UI
+- [ ] Implement feeding schedule UI
+- [ ] Add disease tracking UI
+- [ ] Create pond analytics view with health status
+- [ ] Write vitest tests for FishFarming component
+
+### Phase 2.5: Asset Management Integration
+- [ ] Update AssetManagement component to use trpc.assets.assets
+- [ ] Implement asset creation form with tRPC mutation
+- [ ] Add asset list with type/status filtering
+- [ ] Implement maintenance tracking UI with trpc.assets.maintenance
+- [ ] Add depreciation calculator UI
+- [ ] Create asset inventory analytics view
+- [ ] Implement high-value asset alerts
+- [ ] Add depreciation report generation
+- [ ] Write vitest tests for AssetManagement component
+
+### Phase 2.6: WebSocket Real-time Notifications
+- [ ] Create WebSocket server integration in server/_core
+- [ ] Implement notification event emitters for all modules
+- [ ] Create notification subscription hooks (useNotifications)
+- [ ] Add event types for: animal health alerts, water quality warnings, maintenance reminders, payroll notifications, financial alerts
+- [ ] Implement server-side notification persistence
+- [ ] Create notification queue system
+- [ ] Add SMS/push notification integration
+- [ ] Write vitest tests for notification system
+
+### Phase 2.7: Notification UI Components
+- [ ] Create NotificationCenter component enhancements
+- [ ] Implement notification toast/badge system
+- [ ] Add notification history view
+- [ ] Create notification preferences/settings
+- [ ] Implement notification filtering and search
+- [ ] Add notification sound/vibration alerts
+- [ ] Create notification permission requests
+- [ ] Write vitest tests for notification UI
+
+### Phase 2.8: Advanced Analytics Dashboard
+- [ ] Create AnalyticsDashboard main component
+- [ ] Implement financial analytics charts (revenue/expense trends, profit/loss)
+- [ ] Add livestock analytics (animal count, health status, breeding success rate)
+- [ ] Create workforce analytics (payroll trends, team productivity, attendance rate)
+- [ ] Implement fish farming analytics (pond health, harvest yield, feed efficiency)
+- [ ] Add asset analytics (depreciation, maintenance costs, utilization)
+- [ ] Create cross-module KPI dashboard
+- [ ] Implement date range filtering for all charts
+- [ ] Add drill-down capabilities for detailed analysis
+- [ ] Write vitest tests for analytics components
+
+### Phase 2.9: Data Export & Reporting
+- [ ] Implement CSV export for all data modules
+- [ ] Add PDF report generation for financial summaries
+- [ ] Create livestock health reports
+- [ ] Implement payroll report generation
+- [ ] Add fish farming performance reports
+- [ ] Create asset depreciation reports
+- [ ] Implement scheduled report generation
+- [ ] Add email report delivery
+- [ ] Write vitest tests for export/reporting
+
+### Phase 2.10: Testing & Deployment
+- [ ] Run full test suite (pnpm test)
+- [ ] Perform end-to-end testing of all integrations
+- [ ] Test real-time notifications
+- [ ] Verify analytics dashboard accuracy
+- [ ] Test data export functionality
+- [ ] Performance testing and optimization
+- [ ] Security audit of new features
+- [ ] Create final checkpoint
+- [ ] Document all new features

@@ -25,6 +25,7 @@ import { livestockRouter } from "./livestockRouter";
 import { workforceRouter } from "./workforceRouter";
 import { fishFarmingRouter } from "./fishFarmingRouter";
 import { assetRouter } from "./assetRouter";
+import { reportingRouter } from "./reportingRouter";
 import { z } from "zod";
 import { getDb } from "./db";
 import { TRPCError } from "@trpc/server";
@@ -57,6 +58,7 @@ export const appRouter = router({
   workforce: workforceRouter,
   fishFarming: fishFarmingRouter,
   assets: assetRouter,
+  reporting: reportingRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -6,303 +6,468 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Trash2, Edit2, Heart, AlertTriangle, TrendingUp } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Plus, Trash2, Edit2, Heart, AlertTriangle, TrendingUp, Loader2 } from "lucide-react";
+import { trpc } from "@/lib/trpc";
+
+const ANIMAL_TYPES = [
+  { id: 1, name: "Cattle" },
+  { id: 2, name: "Pig" },
+  { id: 3, name: "Goat" },
+  { id: 4, name: "Sheep" },
+  { id: 5, name: "Poultry" },
+  { id: 6, name: "Other" },
+];
 
 export default function LivestockManagement() {
-  const [piggery, setPiggery] = useState<any[]>([]);
-  const [poultry, setPoultry] = useState<any[]>([]);
+  const [selectedFarmId, setSelectedFarmId] = useState<number | null>(null);
   const [showNewAnimal, setShowNewAnimal] = useState(false);
-  const [animalType, setAnimalType] = useState("pig");
-  const [healthRecords, setHealthRecords] = useState<any[]>([]);
+  const [showHealthRecord, setShowHealthRecord] = useState(false);
+  const [selectedAnimalId, setSelectedAnimalId] = useState<number | null>(null);
 
-  const handleAddAnimal = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const animal = {
-      id: Date.now(),
-      type: formData.get("type"),
-      breed: formData.get("breed"),
-      quantity: formData.get("quantity"),
-      age: formData.get("age"),
-      weight: formData.get("weight"),
-      batchId: formData.get("batchId"),
-      purchaseDate: formData.get("purchaseDate"),
-      health: "healthy",
-      createdAt: new Date(),
-    };
+  // Fetch farms
+  const { data: farms = [] } = trpc.farms.list.useQuery();
 
-    if (animal.type === "pig") {
-      setPiggery([...piggery, animal]);
-    } else {
-      setPoultry([...poultry, animal]);
+  // Set first farm as default
+  useMemo(() => {
+    if (farms.length > 0 && !selectedFarmId) {
+      setSelectedFarmId(farms[0].id);
     }
+  }, [farms, selectedFarmId]);
 
-    // Toast notification would go here
-    setShowNewAnimal(false);
+  // Fetch animals
+  const { data: animals = [], isLoading: animalsLoading, refetch: refetchAnimals } = trpc.livestock.animals.list.useQuery(
+    selectedFarmId ? { farmId: selectedFarmId } : { farmId: 0 },
+    { enabled: !!selectedFarmId }
+  );
+
+  // Fetch health records
+  const { data: healthRecords = [], isLoading: healthLoading, refetch: refetchHealth } = trpc.livestock.healthRecords.list.useQuery(
+    selectedAnimalId ? { animalId: selectedAnimalId } : { animalId: 0 },
+    { enabled: !!selectedAnimalId }
+  );
+
+  // Mutations
+  const createAnimal = trpc.livestock.animals.create.useMutation({
+    onSuccess: () => {
+      refetchAnimals();
+      setShowNewAnimal(false);
+    },
+  });
+
+  const deleteAnimal = trpc.livestock.animals.delete.useMutation({
+    onSuccess: () => {
+      refetchAnimals();
+    },
+  });
+
+  const createHealthRecord = trpc.livestock.healthRecords.create.useMutation({
+    onSuccess: () => {
+      refetchHealth();
+      setShowHealthRecord(false);
+    },
+  });
+
+  // Health records deletion not available in current router
+
+  // Calculate stats
+  const stats = {
+    totalAnimals: animals.length,
+    activeAnimals: animals.filter((a) => a.status === "active").length,
+    soldAnimals: animals.filter((a) => a.status === "sold").length,
+    totalBatches: animals.length,
+  };
+
+  const handleAddAnimal = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!selectedFarmId) return;
+
+    const formData = new FormData(e.currentTarget);
+    const typeId = parseInt(formData.get("typeId") as string);
+
+    await createAnimal.mutateAsync({
+      farmId: selectedFarmId,
+      typeId,
+      uniqueTagId: (formData.get("uniqueTagId") as string) || undefined,
+      birthDate: formData.get("birthDate") ? new Date(formData.get("birthDate") as string) : undefined,
+      gender: (formData.get("gender") as any) || "unknown",
+      breed: (formData.get("breed") as string) || undefined,
+    });
+
     (e.target as HTMLFormElement).reset();
   };
 
-  const handleRecordHealth = (animalId: number, animalType: string) => {
-    const record = {
-      id: Date.now(),
-      animalId,
-      animalType,
-      date: new Date().toISOString().split("T")[0],
-      condition: "healthy",
-      notes: "",
-      treatment: null,
-    };
-    setHealthRecords([...healthRecords, record]);
-    // Toast notification would go here
+  const handleAddHealthRecord = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!selectedAnimalId) return;
+
+    const formData = new FormData(e.currentTarget);
+
+    await createHealthRecord.mutateAsync({
+      animalId: selectedAnimalId,
+      recordDate: new Date(formData.get("recordDate") as string),
+      eventType: (formData.get("eventType") as any) || "checkup",
+      details: (formData.get("details") as string) || undefined,
+    });
+
+    (e.target as HTMLFormElement).reset();
   };
 
-  const deleteAnimal = (id: number, type: string) => {
-    if (type === "pig") {
-      setPiggery(piggery.filter(a => a.id !== id));
-    } else {
-      setPoultry(poultry.filter(a => a.id !== id));
-    }
-    // Toast notification would go here
-  };
-
-  const stats = {
-    totalPigs: piggery.reduce((sum, p) => sum + parseInt(p.quantity || 0), 0),
-    totalPoultry: poultry.reduce((sum, p) => sum + parseInt(p.quantity || 0), 0),
-    healthyAnimals: piggery.filter(p => p.health === "healthy").length + poultry.filter(p => p.health === "healthy").length,
-    totalBatches: piggery.length + poultry.length,
-  };
-
-  const AnimalCard = ({ animal, type }: any) => (
-    <Card className="hover:shadow-lg transition-shadow">
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
-          <div>
-            <CardTitle className="text-lg capitalize">{animal.breed}</CardTitle>
-            <CardDescription>Batch ID: {animal.batchId}</CardDescription>
-          </div>
-          <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-            animal.health === "healthy" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-          }`}>
-            {animal.health}
-          </span>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        <div className="grid grid-cols-2 gap-3 text-sm">
-          <div>
-            <p className="text-muted-foreground">Quantity</p>
-            <p className="font-semibold">{animal.quantity}</p>
-          </div>
-          <div>
-            <p className="text-muted-foreground">Age</p>
-            <p className="font-semibold">{animal.age} months</p>
-          </div>
-          <div>
-            <p className="text-muted-foreground">Avg Weight</p>
-            <p className="font-semibold">{animal.weight} kg</p>
-          </div>
-          <div>
-            <p className="text-muted-foreground">Purchase Date</p>
-            <p className="font-semibold text-xs">{animal.purchaseDate}</p>
-          </div>
-        </div>
-        <div className="flex gap-2 pt-3">
-          <Button
-            size="sm"
-            variant="outline"
-            className="flex-1"
-            onClick={() => handleRecordHealth(animal.id, type)}
-          >
-            <Heart className="w-4 h-4 mr-1" />
-            Health
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            className="flex-1"
-          >
-            <TrendingUp className="w-4 h-4 mr-1" />
-            Feed
-          </Button>
-          <Button
-            size="sm"
-            variant="destructive"
-            onClick={() => deleteAnimal(animal.id, type)}
-          >
-            <Trash2 className="w-4 h-4" />
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
-  );
+  // Group animals by type
+  const animalsByType = animals.reduce((acc: Record<string, any[]>, animal) => {
+    const typeObj = ANIMAL_TYPES.find((t) => t.id === animal.typeId);
+    const type = typeObj?.name || "Other";
+    if (!acc[type]) acc[type] = [];
+    acc[type].push(animal);
+    return acc;
+  }, {});
 
   return (
     <div className="space-y-6 p-4 md:p-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold">Livestock Management</h1>
-          <p className="text-sm md:text-base text-muted-foreground">Track piggery and poultry operations</p>
+          <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2">
+            <TrendingUp className="w-8 h-8" />
+            Livestock Management
+          </h1>
+          <p className="text-sm md:text-base text-muted-foreground">Track and manage your livestock</p>
         </div>
-        <Dialog open={showNewAnimal} onOpenChange={setShowNewAnimal}>
-          <DialogTrigger asChild>
-            <Button className="w-full md:w-auto"><Plus className="w-4 h-4 mr-2" />Add Batch</Button>
-          </DialogTrigger>
-          <DialogContent className="max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Add Livestock Batch</DialogTitle>
-              <DialogDescription>Record a new batch of animals</DialogDescription>
-            </DialogHeader>
-            <form onSubmit={handleAddAnimal} className="space-y-4">
+        <div className="flex flex-col gap-2">
+          <Select value={selectedFarmId?.toString() || ""} onValueChange={(val) => setSelectedFarmId(parseInt(val))}>
+            <SelectTrigger className="w-full md:w-48">
+              <SelectValue placeholder="Select farm" />
+            </SelectTrigger>
+            <SelectContent>
+              {farms.map((farm) => (
+                <SelectItem key={farm.id} value={farm.id.toString()}>
+                  {farm.farmName}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Total Animals</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.totalAnimals}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Active</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600">{stats.activeAnimals}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Sold</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-orange-600">{stats.soldAnimals}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Total Records</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.totalBatches}</div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Add Animal Button */}
+      <Dialog open={showNewAnimal} onOpenChange={setShowNewAnimal}>
+        <DialogTrigger asChild>
+          <Button className="w-full md:w-auto">
+            <Plus className="w-4 h-4 mr-2" />
+            Add Animal
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Add New Animal</DialogTitle>
+            <DialogDescription>Register a new animal to your farm</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleAddAnimal} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="typeId">Animal Type</Label>
+              <Select name="typeId" defaultValue="1">
+                <SelectTrigger id="typeId">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {ANIMAL_TYPES.map((type) => (
+                    <SelectItem key={type.id} value={type.id.toString()}>
+                      {type.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="breed">Breed</Label>
+              <Input id="breed" name="breed" placeholder="e.g., Holstein" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="uniqueTagId">Tag ID</Label>
+              <Input id="uniqueTagId" name="uniqueTagId" placeholder="e.g., TAG-001" />
+            </div>
+            <div className="grid grid-cols-2 gap-2">
               <div className="space-y-2">
-                <Label htmlFor="type">Animal Type</Label>
-                <Select name="type" defaultValue="pig" onValueChange={setAnimalType}>
-                  <SelectTrigger id="type">
+                <Label htmlFor="gender">Gender</Label>
+                <Select name="gender" defaultValue="unknown">
+                  <SelectTrigger id="gender">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="pig">Piggery</SelectItem>
-                    <SelectItem value="poultry">Poultry</SelectItem>
+                    <SelectItem value="male">Male</SelectItem>
+                    <SelectItem value="female">Female</SelectItem>
+                    <SelectItem value="unknown">Unknown</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="breed">Breed</Label>
-                <Input
-                  id="breed"
-                  name="breed"
-                  placeholder={animalType === "pig" ? "e.g., Landrace, Duroc" : "e.g., Broiler, Layer"}
-                />
+                <Label htmlFor="birthDate">Birth Date</Label>
+                <Input id="birthDate" name="birthDate" type="date" />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="batchId">Batch ID</Label>
-                <Input id="batchId" name="batchId" placeholder="e.g., BATCH-2024-001" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="quantity">Quantity</Label>
-                <Input id="quantity" name="quantity" type="number" placeholder="Number of animals" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="age">Age (months)</Label>
-                <Input id="age" name="age" type="number" placeholder="Age in months" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="weight">Average Weight (kg)</Label>
-                <Input id="weight" name="weight" type="number" placeholder="Average weight" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="purchaseDate">Purchase Date</Label>
-                <Input id="purchaseDate" name="purchaseDate" type="date" />
-              </div>
-              <Button type="submit" className="w-full">Add Batch</Button>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </div>
+            </div>
+            <Button type="submit" className="w-full" disabled={createAnimal.isPending}>
+              {createAnimal.isPending ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Adding...
+                </>
+              ) : (
+                "Add Animal"
+              )}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
 
-      {/* Statistics */}
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">Total Pigs</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalPigs}</div>
-            <p className="text-xs text-muted-foreground">{piggery.length} batches</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">Total Poultry</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalPoultry}</div>
-            <p className="text-xs text-muted-foreground">{poultry.length} batches</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">Healthy Animals</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">{stats.healthyAnimals}</div>
-            <p className="text-xs text-muted-foreground">All batches</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">Total Batches</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalBatches}</div>
-            <p className="text-xs text-muted-foreground">Active</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Tabs for Piggery and Poultry */}
-      <Tabs defaultValue="piggery" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="piggery">Piggery ({piggery.length})</TabsTrigger>
-          <TabsTrigger value="poultry">Poultry ({poultry.length})</TabsTrigger>
+      {/* Animals Tabs */}
+      <Tabs defaultValue="all" className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="all">All Animals</TabsTrigger>
+          <TabsTrigger value="health">Health Records</TabsTrigger>
+          <TabsTrigger value="stats">Statistics</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="piggery" className="space-y-4">
-          {piggery.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {piggery.map((pig) => (
-                <AnimalCard key={pig.id} animal={pig} type="pig" />
-              ))}
-            </div>
-          ) : (
+        <TabsContent value="all" className="space-y-4">
+          {animalsLoading ? (
             <Card>
-              <CardContent className="py-12 text-center">
-                <p className="text-muted-foreground">No piggery batches recorded yet</p>
+              <CardContent className="pt-6">
+                <p className="text-center text-muted-foreground">Loading animals...</p>
               </CardContent>
             </Card>
+          ) : animals.length === 0 ? (
+            <Card>
+              <CardContent className="pt-6">
+                <p className="text-center text-muted-foreground">No animals registered yet</p>
+              </CardContent>
+            </Card>
+          ) : (
+            Object.entries(animalsByType).map(([type, typeAnimals]) => (
+              <div key={type} className="space-y-3">
+                <h3 className="text-lg font-semibold capitalize">{type}</h3>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {(typeAnimals as any[]).map((animal) => (
+                    <Card key={animal.id} className="hover:shadow-lg transition-shadow">
+                      <CardHeader className="pb-3">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <CardTitle className="text-lg capitalize">{animal.breed || type}</CardTitle>
+                            <CardDescription>ID: {animal.uniqueTagId || animal.id}</CardDescription>
+                          </div>
+                          <span
+                            className={`px-3 py-1 rounded-full text-xs font-medium ${
+                              animal.status === "active" ? "bg-green-100 text-green-800" : "bg-orange-100 text-orange-800"
+                            }`}
+                          >
+                            {animal.status}
+                          </span>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        <div className="grid grid-cols-2 gap-3 text-sm">
+                          <div>
+                            <p className="text-muted-foreground">Gender</p>
+                            <p className="font-semibold capitalize">{animal.gender || "Unknown"}</p>
+                          </div>
+                          <div>
+                            <p className="text-muted-foreground">Birth Date</p>
+                            <p className="font-semibold">
+                              {animal.birthDate ? new Date(animal.birthDate).toLocaleDateString() : "N/A"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2 pt-2 border-t">
+                          <Dialog open={showHealthRecord && selectedAnimalId === animal.id} onOpenChange={setShowHealthRecord}>
+                            <DialogTrigger asChild>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="flex-1"
+                                onClick={() => setSelectedAnimalId(animal.id)}
+                              >
+                                <Heart className="w-4 h-4 mr-1" />
+                                Health
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-h-[90vh] overflow-y-auto">
+                              <DialogHeader>
+                                <DialogTitle>Record Health Event</DialogTitle>
+                                <DialogDescription>Add health record for {animal.breed || type}</DialogDescription>
+                              </DialogHeader>
+                              <form onSubmit={handleAddHealthRecord} className="space-y-4">
+                                <div className="space-y-2">
+                                  <Label htmlFor="recordDate">Date</Label>
+                                  <Input id="recordDate" name="recordDate" type="date" required />
+                                </div>
+                                <div className="space-y-2">
+                                  <Label htmlFor="eventType">Event Type</Label>
+                                  <Select name="eventType" defaultValue="checkup">
+                                    <SelectTrigger id="eventType">
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="vaccination">Vaccination</SelectItem>
+                                      <SelectItem value="treatment">Treatment</SelectItem>
+                                      <SelectItem value="illness">Illness</SelectItem>
+                                      <SelectItem value="checkup">Checkup</SelectItem>
+                                      <SelectItem value="other">Other</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                                <div className="space-y-2">
+                                  <Label htmlFor="details">Details</Label>
+                                  <Textarea id="details" name="details" placeholder="Details about the event..." />
+                                </div>
+                                <Button type="submit" className="w-full" disabled={createHealthRecord.isPending}>
+                                  {createHealthRecord.isPending ? (
+                                    <>
+                                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                      Saving...
+                                    </>
+                                  ) : (
+                                    "Record Event"
+                                  )}
+                                </Button>
+                              </form>
+                            </DialogContent>
+                          </Dialog>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            className="flex-1"
+                            onClick={() => deleteAnimal.mutate({ id: animal.id })}
+                          >
+                            <Trash2 className="w-4 h-4 mr-1" />
+                            Delete
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            ))
           )}
         </TabsContent>
 
-        <TabsContent value="poultry" className="space-y-4">
-          {poultry.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {poultry.map((bird) => (
-                <AnimalCard key={bird.id} animal={bird} type="poultry" />
-              ))}
-            </div>
-          ) : (
+        <TabsContent value="health" className="space-y-4">
+          {!selectedAnimalId ? (
             <Card>
-              <CardContent className="py-12 text-center">
-                <p className="text-muted-foreground">No poultry batches recorded yet</p>
+              <CardContent className="pt-6">
+                <p className="text-center text-muted-foreground">Select an animal to view health records</p>
               </CardContent>
             </Card>
+          ) : healthLoading ? (
+            <Card>
+              <CardContent className="pt-6">
+                <p className="text-center text-muted-foreground">Loading health records...</p>
+              </CardContent>
+            </Card>
+          ) : healthRecords.length === 0 ? (
+            <Card>
+              <CardContent className="pt-6">
+                <p className="text-center text-muted-foreground">No health records yet</p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-3">
+              {(healthRecords as any[]).map((record) => {
+                const animal = animals.find((a) => a.id === record.animalId);
+                return (
+                  <Card key={record.id}>
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <CardTitle className="text-base">{animal?.breed || "Animal"}</CardTitle>
+                          <CardDescription>{new Date(record.recordDate).toLocaleDateString()}</CardDescription>
+                        </div>
+                        <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          {record.eventType}
+                        </span>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-2 text-sm">
+                      {record.details && <p><strong>Details:</strong> {record.details}</p>}
+
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
           )}
+        </TabsContent>
+
+        <TabsContent value="stats" className="space-y-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>Animals by Type</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {Object.entries(animalsByType).map(([type, typeAnimals]) => (
+                  <div key={type} className="flex justify-between items-center pb-2 border-b">
+                    <span className="capitalize font-medium">{type}</span>
+                    <span className="font-semibold">{(typeAnimals as any[]).length} records</span>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Status Summary</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex justify-between items-center pb-2 border-b">
+                  <span className="font-medium">Active</span>
+                  <span className="font-semibold text-green-600">{stats.activeAnimals}</span>
+                </div>
+                <div className="flex justify-between items-center pb-2 border-b">
+                  <span className="font-medium">Sold</span>
+                  <span className="font-semibold text-orange-600">{stats.soldAnimals}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="font-medium">Total</span>
+                  <span className="font-semibold">{stats.totalAnimals}</span>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
-
-      {/* Health Records */}
-      {healthRecords.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Health Records</CardTitle>
-            <CardDescription>Latest health checks and treatments</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {healthRecords.slice(-5).map((record) => (
-                <div key={record.id} className="border rounded-lg p-4 flex items-start justify-between">
-                  <div>
-                    <p className="font-semibold capitalize">{record.animalType} Health Check</p>
-                    <p className="text-sm text-muted-foreground">{record.date}</p>
-                  </div>
-                  <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                    Recorded
-                  </span>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }
