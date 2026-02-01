@@ -35,6 +35,16 @@ export default function Orders() {
   const [role, setRole] = useState<"buyer" | "seller">("buyer");
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
 
+  // Safe JSON parser for deliveryAddress
+  const parseDeliveryAddress = (address: string) => {
+    try {
+      return JSON.parse(address);
+    } catch {
+      // If not valid JSON, return as plain string
+      return { city: address };
+    }
+  };
+
   const { data: orders = [], refetch } = trpc.marketplace.listOrders.useQuery({ role });
   const { data: orderDetails } = trpc.marketplace.getOrder.useQuery(
     { id: selectedOrderId! },
@@ -130,7 +140,7 @@ export default function Orders() {
                   <div className="flex justify-between items-center">
                     <div className="text-sm">
                       <p className="text-muted-foreground">Delivery Address:</p>
-                      <p className="font-medium">{JSON.parse(order.deliveryAddress).city || "N/A"}</p>
+                      <p className="font-medium">{parseDeliveryAddress(order.deliveryAddress).city || "N/A"}</p>
                     </div>
                     <div className="flex gap-2">
                       <Button
