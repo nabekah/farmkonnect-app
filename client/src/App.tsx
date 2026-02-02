@@ -58,6 +58,7 @@ import ReportTemplateCustomization from "./pages/ReportTemplateCustomization";
 import { InventoryManagement } from "./pages/InventoryManagement";
 import { SoilHealthRecommendations } from "./pages/SoilHealthRecommendations";
 import { FertilizerCostDashboard } from "./pages/FertilizerCostDashboard";
+import { FloatingElements } from "./components/FloatingElements";
 
 function Router() {
   return (
@@ -422,6 +423,7 @@ function App() {
         >
           <TooltipProvider>
             <Toaster />
+            <FloatingElements />
             <Router />
           </TooltipProvider>
         </ThemeProvider>
