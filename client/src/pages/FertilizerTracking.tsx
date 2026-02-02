@@ -280,7 +280,7 @@ export default function FertilizerTracking() {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{usageStats?.totalQuantity.toFixed(2) || 0} kg</div>
+            <div className="text-2xl font-bold">{usageStats?.totalQuantity ? Number(usageStats.totalQuantity).toFixed(2) : 0} kg</div>
             <p className="text-xs text-muted-foreground">
               Across all applications
             </p>
