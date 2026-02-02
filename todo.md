@@ -36,6 +36,11 @@
 - Dev server running on port 3001 (port 3000 was busy)
 - Database connection and authentication working correctly
 
+## Current Bug Fixes
+- [x] Fix shopping cart error: cartId undefined instead of number - Added id field to getCart response
+- [x] Verify cart initialization on app load - id field now included in cart items
+- [x] Test cart operations (add, remove, update) - removeFromCart now has valid cartId
+
 ## Livestock Management Implementation
 - [x] Extend tRPC routers with animals, health records, and vaccinations
 - [x] Create Livestock Management page component with animal listing

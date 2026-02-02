@@ -192,6 +192,7 @@ export const marketplaceRouter = router({
       
       if (product.length > 0) {
         items.push({
+          id: cartItem.id, // Include cart item id for removal operations
           productId: product[0].id,
           productName: product[0].name,
           price: product[0].price,
