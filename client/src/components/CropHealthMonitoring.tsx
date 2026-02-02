@@ -296,7 +296,7 @@ export function CropHealthMonitoring({ cycleId }: CropHealthMonitoringProps) {
                     <div className="grid grid-cols-3 gap-2">
                       {imagePreviews.map((preview, index) => (
                         <div key={index} className="relative">
-                          <img src={preview} alt={`Preview ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                          <img src={preview} alt={`Preview ${index + 1}`} width={96} height={96} className="w-full h-24 object-cover rounded" />
                           <button
                             onClick={() => handleRemoveImage(index)}
                             className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
@@ -313,7 +313,7 @@ export function CropHealthMonitoring({ cycleId }: CropHealthMonitoringProps) {
                       <p className="text-sm font-medium">Uploaded Photos:</p>
                       <div className="grid grid-cols-3 gap-2">
                         {healthForm.photoUrls.map((url, index) => (
-                          <img key={index} src={url} alt={`Uploaded ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                          <img key={index} src={url} alt={`Uploaded ${index + 1}`} width={96} height={96} className="w-full h-24 object-cover rounded" />
                         ))}
                       </div>
                     </div>
@@ -387,7 +387,7 @@ export function CropHealthMonitoring({ cycleId }: CropHealthMonitoringProps) {
                     <p className="text-sm font-medium mb-2">Photos:</p>
                     <div className="grid grid-cols-4 gap-2">
                       {record.photoUrls.split(",").map((url: string, index: number) => (
-                        <img key={index} src={url} alt={`Issue ${index + 1}`} className="w-full h-20 object-cover rounded" />
+                        <img key={index} src={url} alt={`Issue ${index + 1}`} width={80} height={80} className="w-full h-20 object-cover rounded" />
                       ))}
                     </div>
                   </div>

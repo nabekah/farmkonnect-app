@@ -12,19 +12,22 @@
     <meta name="author" content="FarmKonnect" />
     <meta property="og:title" content="FarmKonnect - Smart Agricultural Management Platform" />
     <meta property="og:description" content="Comprehensive farm management platform for tracking crops, livestock, weather, and marketplace sales." />
-    <meta property="og:type" content="website" />    
-    <!-- THIS IS THE START OF A COMMENT BLOCK, BLOCK TO BE DELETED: Google Fonts here, example:
+    <meta property="og:type" content="website" />
+    
+    <!-- Performance Optimizations -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="dns-prefetch" href="https://api.openweathermap.org" />
+    <link rel="dns-prefetch" href="https://maps.googleapis.com" />
+    <link rel="preload" as="style" href="/index.css" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    THIS IS THE END OF A COMMENT BLOCK, BLOCK TO BE DELETED -->
   </head>
 
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     <script
-      defer
+      async
       src="%VITE_ANALYTICS_ENDPOINT%/umami"
       data-website-id="%VITE_ANALYTICS_WEBSITE_ID%"></script>
     

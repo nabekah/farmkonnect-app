@@ -2,6 +2,7 @@ import "dotenv/config";
 import express from "express";
 import { createServer } from "http";
 import net from "net";
+import compression from "compression";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
 import { appRouter } from "../routers";
@@ -32,12 +33,65 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
   throw new Error(`No available port found starting from ${startPort}`);
 }
 
+// Cache middleware for static assets and API responses
+function cacheMiddleware(req: express.Request, res: express.Response, next: express.NextFunction) {
+  // Cache static assets for 1 year (with content hash)
+  if (req.path.match(/\.(js|css|png|jpg|jpeg|gif|svg|webp|woff|woff2|ttf|eot)$/)) {
+    res.set('Cache-Control', 'public, max-age=31536000, immutable');
+  }
+  // Cache API responses for 5 minutes
+  else if (req.path.startsWith('/api/')) {
+    res.set('Cache-Control', 'public, max-age=300, s-maxage=300');
+  }
+  // Don't cache HTML pages
+  else {
+    res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
+  }
+  next();
+}
+
+// Performance headers middleware
+function performanceHeaders(req: express.Request, res: express.Response, next: express.NextFunction) {
+  // Enable compression hints
+  res.set('Vary', 'Accept-Encoding');
+  
+  // Add ETag for cache validation
+  res.set('ETag', `"${Date.now()}"`);  
+  
+  // Preconnect hints for critical origins
+  res.set('Link', '</assets>; rel=preconnect, <https://fonts.googleapis.com>; rel=preconnect, <https://fonts.gstatic.com>; rel=preconnect');
+  
+  next();
+}
+
 async function startServer() {
   const app = express();
   const server = createServer(app);
+  
+  // Enable compression middleware (gzip + brotli)
+  app.use(compression({
+    level: 6,
+    threshold: 1024, // Only compress responses larger than 1KB
+    filter: (req: any, res: any) => {
+      if (req.headers['x-no-compression']) {
+        return false;
+      }
+      return compression.filter(req, res);
+    }
+  }));
+  
+  // Apply performance headers
+  app.use(performanceHeaders);
+  
+  // Apply cache middleware
+  app.use(cacheMiddleware);
+  
   // Configure body parser with larger size limit for file uploads
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
+  
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
   // tRPC API
@@ -53,6 +107,14 @@ async function startServer() {
     await setupVite(app, server);
   } else {
     serveStatic(app);
+    // Add security headers for production
+    app.use((req, res, next) => {
+      res.set('X-Content-Type-Options', 'nosniff');
+      res.set('X-Frame-Options', 'SAMEORIGIN');
+      res.set('X-XSS-Protection', '1; mode=block');
+      res.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+      next();
+    });
   }
 
   const preferredPort = parseInt(process.env.PORT || "3000");

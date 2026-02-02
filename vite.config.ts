@@ -167,6 +167,21 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
+    minify: 'terser',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom'],
+          'vendor-ui': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-select', '@radix-ui/react-tabs'],
+          'vendor-charts': ['chart.js', 'react-chartjs-2'],
+          'vendor-trpc': ['@trpc/client', '@trpc/react-query'],
+          'vendor-utils': ['date-fns', 'clsx', 'tailwind-merge'],
+        },
+      },
+    },
+    reportCompressedSize: true,
+    chunkSizeWarningLimit: 500,
+    cssCodeSplit: true,
   },
   server: {
     host: true,
@@ -189,5 +204,16 @@ export default defineConfig({
       strict: true,
       deny: ["**/.*"],
     },
+  },
+  optimizeDeps: {
+    include: [
+      'react',
+      'react-dom',
+      '@trpc/client',
+      '@trpc/react-query',
+      'chart.js',
+      'react-chartjs-2',
+      'date-fns',
+    ],
   },
 });

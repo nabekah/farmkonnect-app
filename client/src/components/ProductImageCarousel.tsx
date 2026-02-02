@@ -33,6 +33,8 @@ export function ProductImageCarousel({ images, productName, className = "" }: Pr
       <img
         src={images[currentIndex]}
         alt={`${productName} - Image ${currentIndex + 1}`}
+        width={400}
+        height={192}
         className="w-full h-full object-cover"
         onError={(e) => {
           (e.target as HTMLImageElement).style.display = 'none';
