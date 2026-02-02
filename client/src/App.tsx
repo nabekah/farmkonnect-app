@@ -48,11 +48,19 @@ import PredictiveAnalytics from "./pages/PredictiveAnalytics";
 import NotificationSettings from "./pages/NotificationSettings";
 import AlertHistory from "./pages/AlertHistory";
 import FertilizerTracking from "./pages/FertilizerTracking";
+import ReportManagement from "./pages/ReportManagement";
 
 function Router() {
   return (
     <Switch>
        <Route path="/" component={Home} />
+      <Route path="/report-management">
+        {() => (
+          <DashboardLayout>
+            <ReportManagement />
+          </DashboardLayout>
+        )}
+      </Route>
       <Route path="/register" component={Register} />
       <Route path="/forgot-password" component={ForgotPassword} />
       <Route path="/reset-password" component={ResetPassword} />

@@ -1437,3 +1437,40 @@ export const alertHistory = mysqlTable("alertHistory", {
 
 export type AlertHistory = typeof alertHistory.$inferSelect;
 export type InsertAlertHistory = typeof alertHistory.$inferInsert;
+
+
+// ============================================================================
+// REPORTING AND ANALYTICS
+// ============================================================================
+export const reportSchedules = mysqlTable("reportSchedules", {
+  id: int("id").autoincrement().primaryKey(),
+  farmId: int("farmId").notNull().references(() => farms.id),
+  reportType: mysqlEnum("reportType", ["financial", "livestock", "complete"]).notNull(),
+  frequency: mysqlEnum("frequency", ["daily", "weekly", "monthly"]).notNull(),
+  recipients: text("recipients").notNull(), // JSON array of email addresses
+  isActive: boolean("isActive").default(true).notNull(),
+  nextRun: timestamp("nextRun"),
+  lastRun: timestamp("lastRun"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type ReportSchedule = typeof reportSchedules.$inferSelect;
+export type InsertReportSchedule = typeof reportSchedules.$inferInsert;
+
+export const reportHistory = mysqlTable("reportHistory", {
+  id: int("id").autoincrement().primaryKey(),
+  scheduleId: int("scheduleId").notNull().references(() => reportSchedules.id),
+  farmId: int("farmId").notNull().references(() => farms.id),
+  reportType: mysqlEnum("reportType", ["financial", "livestock", "complete"]).notNull(),
+  status: mysqlEnum("status", ["pending", "generating", "success", "failed"]).default("pending").notNull(),
+  generatedAt: timestamp("generatedAt"),
+  sentAt: timestamp("sentAt"),
+  recipientCount: int("recipientCount").default(0),
+  fileSize: int("fileSize"), // in bytes
+  errorMessage: text("errorMessage"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type ReportHistory = typeof reportHistory.$inferSelect;
+export type InsertReportHistory = typeof reportHistory.$inferInsert;

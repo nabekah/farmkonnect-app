@@ -2184,3 +2184,79 @@
 - [ ] Add average response time metrics
 - [ ] Implement response rate visualization
 - [ ] Test acknowledgment workflow
+
+
+## Phase 11: Advanced Reporting System
+### Database Schema
+- [ ] Add reportSchedules table (id, farmId, reportType, frequency, recipients, isActive, nextRun, createdAt, updatedAt)
+- [ ] Add reportHistory table (id, scheduleId, farmId, reportType, status, generatedAt, sentAt, errorMessage)
+- [ ] Run database migration with pnpm db:push
+
+### Report Generation Service
+- [ ] Create reportGenerator.ts service with PDF generation using ReportLab
+- [ ] Implement Excel export using openpyxl or similar
+- [ ] Add financial report template (expenses, revenue, profit/loss)
+- [ ] Add livestock report template (animal counts, health records, breeding data)
+- [ ] Add complete farm data report template
+- [ ] Implement email attachment logic with SendGrid
+
+### Report Scheduling Router
+- [ ] Create reportScheduling.ts tRPC router
+- [ ] Implement createSchedule procedure (farmId, reportType, frequency, recipients)
+- [ ] Implement getSchedules query (list user's active schedules)
+- [ ] Implement updateSchedule mutation (toggle active/pause)
+- [ ] Implement deleteSchedule mutation
+- [ ] Implement triggerManualReport mutation (run report immediately)
+- [ ] Implement getReportHistory query (pagination support)
+- [ ] Implement getScheduleStats query (total, active, recent reports, success rate)
+
+### Report Scheduler Service
+- [ ] Create reportScheduler.ts cron job service
+- [ ] Implement daily, weekly, monthly frequency checking
+- [ ] Implement automatic report generation and email sending
+- [ ] Add error handling and retry logic
+- [ ] Add logging for report generation events
+
+### Report Management UI
+- [ ] Create ReportManagement.tsx page component
+- [ ] Build schedule creation dialog with farm/type/frequency/recipients selection
+- [ ] Create active schedules list with status badges
+- [ ] Add Run Now button for manual triggering
+- [ ] Add Pause/Resume buttons for schedule control
+- [ ] Add Delete button with confirmation
+- [ ] Display report history with generation status
+- [ ] Show success/failure indicators with error messages
+- [ ] Add statistics cards (total schedules, active, recent, success rate)
+
+### Navigation Integration
+- [ ] Add Report Management menu item to DashboardLayout sidebar
+- [ ] Add route in App.tsx for /report-management
+- [ ] Test navigation and routing
+
+### Testing
+- [ ] Write vitest tests for reportScheduling router
+- [ ] Test schedule creation and retrieval
+- [ ] Test report generation with mock data
+- [ ] Test email sending integration
+- [ ] Test frequency calculations (daily, weekly, monthly)
+- [ ] Test error handling and edge cases
+- [ ] Run all tests and verify passing
+
+### Deployment
+- [ ] Create checkpoint for Advanced Reporting System
+- [ ] Verify TypeScript compilation passes
+- [ ] Test UI in browser with real data
+- [ ] Verify email delivery with test recipients
+
+
+## Advanced Reporting System Implementation
+- [x] Add reportSchedules and reportHistory database tables to schema
+- [x] Create report generation service (reportGenerator.ts) with PDF and Excel export
+- [x] Add sendEmailWithAttachment method to NotificationService
+- [x] Build report scheduling tRPC router with 6 procedures (createSchedule, getSchedules, updateSchedule, deleteSchedule, triggerManualReport, getReportHistory, getScheduleStats)
+- [x] Create ReportManagement UI page with schedule creation and history viewing
+- [x] Add Report Management route to App.tsx
+- [x] Add Report Management menu item to DashboardLayout sidebar
+- [x] Install pdf-lib and xlsx packages for report generation
+- [x] TypeScript compilation: 0 errors
+- [x] Create comprehensive unit tests for report scheduling (9 tests)

@@ -52,6 +52,47 @@ export class NotificationService {
       return { success: false, provider: 'sendgrid', error: error.message };
     }
   }
+  async sendEmailWithAttachment(options: { to: string | string[]; subject: string; html: string; attachmentBuffer: Buffer; attachmentFilename: string; }) {
+    console.log(`[Notification] Sending email with attachment`);
+    
+    if (!process.env.SENDGRID_API_KEY) {
+      console.warn('[Notification] SendGrid API key not configured');
+      return { success: false, provider: 'sendgrid', error: 'API key not configured' };
+    }
+
+    const fromEmail = process.env.SENDGRID_FROM_EMAIL || 'noreply@farmkonnect.com';
+    const recipients = Array.isArray(options.to) ? options.to : [options.to];
+    
+    try {
+      const attachmentBase64 = options.attachmentBuffer.toString('base64');
+      const attachmentType = options.attachmentFilename.endsWith('.pdf') 
+        ? 'application/pdf' 
+        : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+
+      for (const recipient of recipients) {
+        await sgMail.send({
+          to: recipient,
+          from: fromEmail,
+          subject: options.subject,
+          html: options.html,
+          attachments: [
+            {
+              content: attachmentBase64,
+              filename: options.attachmentFilename,
+              type: attachmentType,
+              disposition: 'attachment',
+            },
+          ],
+        });
+      }
+      console.log(`[Notification] Email with attachment sent successfully`);
+      return { success: true, provider: 'sendgrid' };
+    } catch (error: any) {
+      console.error('[Notification] SendGrid error:', error.message);
+      return { success: false, provider: 'sendgrid', error: error.message };
+    }
+  }
+
   async sendSMS(to: string, body: string) {
     console.log(`[Notification] Sending SMS to ${to}: ${body}`);
     
