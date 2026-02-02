@@ -54,6 +54,7 @@ import ReportAnalyticsDashboard from "./pages/ReportAnalyticsDashboard";
 import AdvancedReportScheduling from "./pages/AdvancedReportScheduling";
 import RecipientGroupManagement from "./pages/RecipientGroupManagement";
 import ReportHistoryExport from "./pages/ReportHistoryExport";
+import ReportTemplateCustomization from "./pages/ReportTemplateCustomization";
 
 function Router() {
   return (
@@ -98,6 +99,13 @@ function Router() {
         {() => (
           <DashboardLayout>
             <ReportHistoryExport />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/report-template-customization">
+        {() => (
+          <DashboardLayout>
+            <ReportTemplateCustomization />
           </DashboardLayout>
         )}
       </Route>

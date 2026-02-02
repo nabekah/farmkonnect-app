@@ -27,7 +27,7 @@ import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
 import { Button } from "./ui/button";
 
-import { Leaf, TrendingUp, BarChart3, ShoppingCart, Settings, Users, Moon, Sun, BookOpen, Target, Cpu, Truck, Briefcase, CloudRain, LineChart, Sprout, Shield, DollarSign, Heart, CheckCircle, Wallet, Fish, Wrench, UserCog, PieChart, Brain, Bell, History, Droplets, FileText, Calendar, Download } from 'lucide-react';
+import { Leaf, TrendingUp, BarChart3, ShoppingCart, Settings, Users, Moon, Sun, BookOpen, Target, Cpu, Truck, Briefcase, CloudRain, LineChart, Sprout, Shield, DollarSign, Heart, CheckCircle, Wallet, Fish, Wrench, UserCog, PieChart, Brain, Bell, History, Droplets, FileText, Calendar, Download, Palette } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
 import { Badge } from './ui/badge';
 import { useDarkMode } from '@/contexts/DarkModeContext';
@@ -72,6 +72,7 @@ const menuItems = [
   { icon: Calendar, label: "Advanced Scheduling", path: "/advanced-report-scheduling" },
   { icon: Users, label: "Recipient Groups", path: "/recipient-groups" },
   { icon: Download, label: "History & Export", path: "/report-history-export" },
+  { icon: Palette, label: "Template Customization", path: "/report-template-customization" },
   { icon: Settings, label: "Settings", path: "/settings" },
 ];
 

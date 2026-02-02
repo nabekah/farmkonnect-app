@@ -1608,3 +1608,75 @@ export const reportExportLog = mysqlTable("reportExportLog", {
 });
 export type ReportExportLog = typeof reportExportLog.$inferSelect;
 export type InsertReportExportLog = typeof reportExportLog.$inferInsert;
+
+
+// ============================================================================
+// REPORT TEMPLATE SECTIONS & CUSTOMIZATION
+// ============================================================================
+export const reportTemplateSections = mysqlTable("reportTemplateSections", {
+  id: int("id").autoincrement().primaryKey(),
+  templateId: int("templateId").notNull().references(() => reportTemplates.id),
+  sectionName: varchar("sectionName", { length: 100 }).notNull(),
+  sectionType: mysqlEnum("sectionType", ["financial", "livestock", "crop", "weather", "summary", "custom"]).notNull(),
+  isEnabled: boolean("isEnabled").default(true).notNull(),
+  displayOrder: int("displayOrder").notNull(),
+  customContent: text("customContent"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type ReportTemplateSection = typeof reportTemplateSections.$inferSelect;
+export type InsertReportTemplateSection = typeof reportTemplateSections.$inferInsert;
+
+export const reportTemplateCustomization = mysqlTable("reportTemplateCustomization", {
+  id: int("id").autoincrement().primaryKey(),
+  templateId: int("templateId").notNull().references(() => reportTemplates.id),
+  farmId: int("farmId").notNull().references(() => farms.id),
+  brandingColor: varchar("brandingColor", { length: 7 }),
+  headerText: text("headerText"),
+  footerText: text("footerText"),
+  logoUrl: text("logoUrl"),
+  includeCharts: boolean("includeCharts").default(true).notNull(),
+  includeMetrics: boolean("includeMetrics").default(true).notNull(),
+  includeRecommendations: boolean("includeRecommendations").default(true).notNull(),
+  pageOrientation: mysqlEnum("pageOrientation", ["portrait", "landscape"]).default("portrait").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type ReportTemplateCustomization = typeof reportTemplateCustomization.$inferSelect;
+export type InsertReportTemplateCustomization = typeof reportTemplateCustomization.$inferInsert;
+
+// ============================================================================
+// REPORT EXECUTION & SCHEDULING LOGS
+// ============================================================================
+export const reportExecutionLog = mysqlTable("reportExecutionLog", {
+  id: int("id").autoincrement().primaryKey(),
+  scheduleId: int("scheduleId").notNull().references(() => reportSchedules.id),
+  farmId: int("farmId").notNull().references(() => farms.id),
+  executionStatus: mysqlEnum("executionStatus", ["pending", "running", "success", "failed", "partial"]).notNull(),
+  executedAt: timestamp("executedAt").defaultNow().notNull(),
+  completedAt: timestamp("completedAt"),
+  reportHistoryId: int("reportHistoryId").references(() => reportHistory.id),
+  recipientCount: int("recipientCount").default(0).notNull(),
+  successCount: int("successCount").default(0).notNull(),
+  failureCount: int("failureCount").default(0).notNull(),
+  errorMessage: text("errorMessage"),
+  executionDurationMs: int("executionDurationMs"),
+  nextScheduledExecution: timestamp("nextScheduledExecution"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type ReportExecutionLog = typeof reportExecutionLog.$inferSelect;
+export type InsertReportExecutionLog = typeof reportExecutionLog.$inferInsert;
+
+export const reportExecutionDetails = mysqlTable("reportExecutionDetails", {
+  id: int("id").autoincrement().primaryKey(),
+  executionLogId: int("executionLogId").notNull().references(() => reportExecutionLog.id),
+  recipientEmail: varchar("recipientEmail", { length: 320 }).notNull(),
+  recipientName: varchar("recipientName", { length: 255 }),
+  deliveryStatus: mysqlEnum("deliveryStatus", ["pending", "sent", "failed", "bounced"]).notNull(),
+  deliveryTimestamp: timestamp("deliveryTimestamp"),
+  errorReason: text("errorReason"),
+  retryCount: int("retryCount").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type ReportExecutionDetail = typeof reportExecutionDetails.$inferSelect;
+export type InsertReportExecutionDetail = typeof reportExecutionDetails.$inferInsert;

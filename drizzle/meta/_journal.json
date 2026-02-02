@@ -211,6 +211,13 @@
       "when": 1770028797613,
       "tag": "0029_acoustic_hellfire_club",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "5",
+      "when": 1770031129148,
+      "tag": "0030_overjoyed_mister_sinister",
+      "breakpoints": true
     }
   ]
 }

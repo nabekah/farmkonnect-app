@@ -36,6 +36,8 @@ import { reportTemplatesRouter } from "./routers/reportTemplates";
 import { reportAnalyticsRouter } from "./routers/reportAnalytics";
 import { recipientManagementRouter } from "./routers/recipientManagement";
 import { reportExportRouter } from "./routers/reportExport";
+import { reportTemplateCustomizationRouter } from "./routers/reportTemplateCustomization";
+import { reportExecutionRouter } from "./routers/reportExecution";
 import { z } from "zod";
 import { getDb } from "./db";
 import { TRPCError } from "@trpc/server";
@@ -79,6 +81,8 @@ export const appRouter = router({
   reportAnalytics: reportAnalyticsRouter,
   recipientManagement: recipientManagementRouter,
   reportExport: reportExportRouter,
+  reportTemplateCustomization: reportTemplateCustomizationRouter,
+  reportExecution: reportExecutionRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {

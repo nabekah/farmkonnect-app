@@ -2304,3 +2304,35 @@
 - [x] Implement automatic archival with retention policies and expiry tracking
 - [x] Create report history and export UI (ReportHistoryExport.tsx)
 - [x] Add download and archival controls with statistics dashboard
+
+
+## Phase 18: Scheduled Report Execution Service
+- [ ] Create background job scheduler with node-cron
+- [ ] Implement report execution service with automatic scheduling
+- [ ] Add execution logging and failure notifications
+- [ ] Build report execution tRPC router (5 procedures)
+- [ ] Create execution history tracking and monitoring
+
+## Phase 19: Report Templates Customization
+- [ ] Add reportTemplateSections database table
+- [ ] Create template section customization service
+- [ ] Build template customization tRPC router (8 procedures)
+- [ ] Create report template customization UI page
+- [ ] Add custom branding and header support
+- [ ] Implement section selection interface with preview
+
+
+## Phase 18: Scheduled Report Execution Service
+- [x] Install node-cron for job scheduling
+- [x] Create scheduled report execution service (scheduledReportExecutionService.ts)
+- [x] Implement background job runner with minute-based polling
+- [x] Add execution logging, error handling, and analytics tracking
+- [x] Integrate with server startup in _core/index.ts
+
+## Phase 19: Report Templates Customization
+- [x] Add reportTemplateSections and reportTemplateCustomizations database tables
+- [x] Create report template customization service (reportTemplateCustomizationService.ts)
+- [x] Build report template customization tRPC router (11 procedures)
+- [x] Create Report Template Customization UI (ReportTemplateCustomization.tsx)
+- [x] Add section visibility toggle, custom sections, and branding options
+- [x] Integrate with App.tsx routing and DashboardLayout navigation
