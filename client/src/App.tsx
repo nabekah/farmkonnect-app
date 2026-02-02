@@ -55,6 +55,9 @@ import AdvancedReportScheduling from "./pages/AdvancedReportScheduling";
 import RecipientGroupManagement from "./pages/RecipientGroupManagement";
 import ReportHistoryExport from "./pages/ReportHistoryExport";
 import ReportTemplateCustomization from "./pages/ReportTemplateCustomization";
+import { InventoryManagement } from "./pages/InventoryManagement";
+import { SoilHealthRecommendations } from "./pages/SoilHealthRecommendations";
+import { FertilizerCostDashboard } from "./pages/FertilizerCostDashboard";
 
 function Router() {
   return (
@@ -106,6 +109,27 @@ function Router() {
         {() => (
           <DashboardLayout>
             <ReportTemplateCustomization />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/inventory-management">
+        {() => (
+          <DashboardLayout>
+            <InventoryManagement />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/soil-health-recommendations">
+        {() => (
+          <DashboardLayout>
+            <SoilHealthRecommendations />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/fertilizer-cost-dashboard">
+        {() => (
+          <DashboardLayout>
+            <FertilizerCostDashboard />
           </DashboardLayout>
         )}
       </Route>
