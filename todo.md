@@ -2461,3 +2461,42 @@
 - [ ] Implement breadcrumb context
 - [ ] Add breadcrumb routing integration
 - [ ] Display breadcrumbs on all pages
+
+
+## Phase 28: Lighthouse Optimization (Performance, Accessibility, Security)
+
+### Performance Improvements
+- [ ] Implement code splitting for route-based lazy loading
+- [ ] Optimize main-thread tasks to reduce TBT (Target Blocking Time)
+- [ ] Implement dynamic imports for heavy components
+- [ ] Add image optimization and WebP format support
+- [ ] Reduce unused JavaScript (531 KiB savings target)
+- [ ] Optimize CSS and remove unused styles
+- [ ] Implement critical CSS inlining
+- [ ] Add service worker for offline support and caching
+
+### Accessibility Improvements
+- [ ] Fix touch target sizes (minimum 48x48px)
+- [ ] Improve color contrast ratios (WCAG AA compliance)
+- [ ] Fix viewport meta tag (remove user-scalable="no")
+- [ ] Add ARIA labels and semantic HTML
+- [ ] Test keyboard navigation
+- [ ] Add focus indicators and skip links
+- [ ] Improve form accessibility
+
+### Security Hardening
+- [ ] Add Content Security Policy (CSP) header
+- [ ] Add HSTS (HTTP Strict-Transport-Security) header
+- [ ] Add COOP (Cross-Origin-Opener-Policy) header
+- [ ] Add XFO (X-Frame-Options) header
+- [ ] Implement Trusted Types for XSS protection
+- [ ] Remove deprecated APIs
+- [ ] Add security headers to Express server
+- [ ] Implement rate limiting and CORS properly
+
+### Bundle Optimization
+- [ ] Add source maps for debugging
+- [ ] Remove unused dependencies
+- [ ] Implement tree-shaking
+- [ ] Optimize vendor bundles
+- [ ] Add gzip/brotli compression
