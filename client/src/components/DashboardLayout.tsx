@@ -27,57 +27,18 @@ import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
 import { Button } from "./ui/button";
 
-import { Leaf, TrendingUp, BarChart3, ShoppingCart, Settings, Users, Moon, Sun, BookOpen, Target, Cpu, Truck, Briefcase, CloudRain, LineChart, Sprout, Shield, DollarSign, Heart, CheckCircle, Wallet, Fish, Wrench, UserCog, PieChart, Brain, Bell, History, Droplets, FileText, Calendar, Download, Palette } from 'lucide-react';
+import { Moon, Sun, Settings } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
 import { Badge } from './ui/badge';
 import { useDarkMode } from '@/contexts/DarkModeContext';
 import { NotificationCenter } from './NotificationCenter';
 import { RealtimeToast } from './RealtimeToast';
 import { CartButton } from './CartButton';
+import { navigationStructure, getAllMenuItems, filterNavigationByRole } from './NavigationStructure';
+import { MenuGroup } from './MenuGroup';
 
-const menuItems = [
-  { icon: LayoutDashboard, label: "Dashboard", path: "/" },
-  { icon: Leaf, label: "Farms", path: "/farms" },
-  { icon: TrendingUp, label: "Crops", path: "/crops" },
-  { icon: Users, label: "Livestock", path: "/livestock" },
-  { icon: Wallet, label: "Farm Finance", path: "/farm-finance" },
-  { icon: Users, label: "Livestock Mgmt", path: "/livestock-management" },
-  { icon: UserCog, label: "Workforce", path: "/workforce-management" },
-  { icon: Fish, label: "Fish Farming", path: "/fish-farming" },
-  { icon: Wrench, label: "Asset Mgmt", path: "/asset-management" },
-  { icon: PieChart, label: "Analytics Dashboard", path: "/analytics-dashboard" },
-  { icon: Brain, label: "Predictive Analytics", path: "/predictive-analytics" },
-  { icon: ShoppingCart, label: "Marketplace", path: "/marketplace" },
-  { icon: Heart, label: "Wishlist", path: "/wishlist" },
-  { icon: DollarSign, label: "Seller Payouts", path: "/seller-payouts" },
-  { icon: BookOpen, label: "Training", path: "/training" },
-  { icon: Target, label: "MERL", path: "/merl" },
-  { icon: Cpu, label: "IoT", path: "/iot" },
-  { icon: Truck, label: "Transport", path: "/transport" },
-  { icon: Briefcase, label: "Business", path: "/business" },
-  { icon: CloudRain, label: "Weather Alerts", path: "/weather-alerts" },
-  { icon: LineChart, label: "Weather Trends", path: "/weather-trends" },
-  { icon: Sprout, label: "Crop Planning", path: "/crop-planning" },
-  { icon: BarChart3, label: "Analytics", path: "/analytics" },
-  { icon: Database, label: "Data Management", path: "/data-management" },
-  { icon: Shield, label: "Security Dashboard", path: "/security", adminOnly: true },
-  { icon: Shield, label: "Role Management", path: "/role-management", adminOnly: true },
-  { icon: CheckCircle, label: "Seller Verification", path: "/admin-verification", adminOnly: true },
-  { icon: Bell, label: "Notifications", path: "/notification-settings" },
-  { icon: History, label: "Alert History", path: "/alert-history" },
-  { icon: Droplets, label: "Fertilizer Tracking", path: "/fertilizer-tracking" },
-  { icon: Droplets, label: "Inventory Management", path: "/inventory-management" },
-  { icon: Leaf, label: "Soil Health", path: "/soil-health-recommendations" },
-  { icon: TrendingUp, label: "Cost Dashboard", path: "/fertilizer-cost-dashboard" },
-  { icon: FileText, label: "Report Management", path: "/report-management" },
-  { icon: FileText, label: "Report Templates", path: "/report-templates" },
-  { icon: BarChart3, label: "Report Analytics", path: "/report-analytics" },
-  { icon: Calendar, label: "Advanced Scheduling", path: "/advanced-report-scheduling" },
-  { icon: Users, label: "Recipient Groups", path: "/recipient-groups" },
-  { icon: Download, label: "History & Export", path: "/report-history-export" },
-  { icon: Palette, label: "Template Customization", path: "/report-template-customization" },
-  { icon: Settings, label: "Settings", path: "/settings" },
-];
+const menuItems = getAllMenuItems();
+
 
 const SIDEBAR_WIDTH_KEY = "sidebar-width";
 const DEFAULT_WIDTH = 280;
@@ -231,36 +192,24 @@ function DashboardLayoutContent({
             </div>
           </SidebarHeader>
 
-          <SidebarContent className="gap-0">
-            <SidebarMenu className="px-2 py-1">
-              {menuItems
-                .filter(item => !(item as any).adminOnly || user?.role === 'admin')
-                .map(item => {
-                const isActive = location === item.path;
+          <SidebarContent className="gap-0 overflow-y-auto">
+            <div className="space-y-2 px-2 py-1">
+              {filterNavigationByRole(user?.role === 'admin').map((group) => {
+                const filteredItems = group.items.filter(
+                  (item) => !item.adminOnly || user?.role === 'admin'
+                );
                 return (
-                  <SidebarMenuItem key={item.path}>
-                    <SidebarMenuButton
-                      isActive={isActive}
-                      onClick={() => setLocation(item.path)}
-                      tooltip={item.label}
-                      className={`h-10 transition-all font-normal`}
-                    >
-                      <item.icon
-                        className={`h-4 w-4 ${isActive ? "text-primary" : ""}`}
-                      />
-                      <span className="flex items-center gap-2">
-                        {item.label}
-                        {item.path === "/wishlist" && wishlistCount > 0 && (
-                          <Badge variant="secondary" className="h-5 px-1.5 text-xs">
-                            {wishlistCount}
-                          </Badge>
-                        )}
-                      </span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
+                  <MenuGroup
+                    key={group.title}
+                    group={group}
+                    isCollapsed={isCollapsed}
+                    onNavigate={setLocation}
+                    currentPath={location}
+                    filteredItems={filteredItems}
+                  />
                 );
               })}
-            </SidebarMenu>
+            </div>
           </SidebarContent>
 
           <SidebarFooter className="p-3 space-y-2">
