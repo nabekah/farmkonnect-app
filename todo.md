@@ -2336,3 +2336,28 @@
 - [x] Create Report Template Customization UI (ReportTemplateCustomization.tsx)
 - [x] Add section visibility toggle, custom sections, and branding options
 - [x] Integrate with App.tsx routing and DashboardLayout navigation
+
+
+## Phase 20: Fertilizer Cost Analysis
+- [ ] Add fertilizerCosts and costAnalysis database tables
+- [ ] Create fertilizer cost analysis service
+- [ ] Build fertilizer cost tRPC router (8 procedures)
+- [ ] Create Cost Analysis UI component with ROI calculations
+- [ ] Add cost trend charts and alternative recommendations
+- [ ] Integrate with FertilizerTracking page
+
+## Phase 21: Fertilizer Inventory Management
+- [ ] Add fertilizerInventory and inventoryTransactions database tables
+- [ ] Create inventory management service with stock tracking
+- [ ] Build inventory tRPC router (10 procedures)
+- [ ] Create Inventory Management UI with reorder points
+- [ ] Add low-stock alerts and supplier ordering
+- [ ] Integrate with FertilizerTracking page
+
+## Phase 22: Soil Health Recommendations
+- [ ] Add soilHealthRecommendations database table
+- [ ] Create recommendations engine analyzing soil tests
+- [ ] Build recommendations tRPC router (6 procedures)
+- [ ] Create Soil Health Recommendations UI with fertilizer suggestions
+- [ ] Add application rate recommendations based on soil deficiencies
+- [ ] Integrate with CropTracking and FertilizerTracking pages

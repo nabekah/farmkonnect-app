@@ -1680,3 +1680,98 @@ export const reportExecutionDetails = mysqlTable("reportExecutionDetails", {
 });
 export type ReportExecutionDetail = typeof reportExecutionDetails.$inferSelect;
 export type InsertReportExecutionDetail = typeof reportExecutionDetails.$inferInsert;
+
+
+// ============================================================================
+// FERTILIZER COST ANALYSIS
+// ============================================================================
+export const fertilizerCosts = mysqlTable("fertilizerCosts", {
+  id: int("id").autoincrement().primaryKey(),
+  fertilizerType: varchar("fertilizerType", { length: 100 }).notNull(),
+  supplier: varchar("supplier", { length: 255 }),
+  costPerKg: decimal("costPerKg", { precision: 10, scale: 4 }).notNull(),
+  currency: varchar("currency", { length: 3 }).default("USD").notNull(),
+  effectiveDate: date("effectiveDate").notNull(),
+  expiryDate: date("expiryDate"),
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type FertilizerCost = typeof fertilizerCosts.$inferSelect;
+export type InsertFertilizerCost = typeof fertilizerCosts.$inferInsert;
+
+export const costAnalysis = mysqlTable("costAnalysis", {
+  id: int("id").autoincrement().primaryKey(),
+  cycleId: int("cycleId").notNull().references(() => cropCycles.id),
+  totalCostSpent: decimal("totalCostSpent", { precision: 12, scale: 2 }).notNull(),
+  costPerHectare: decimal("costPerHectare", { precision: 10, scale: 2 }).notNull(),
+  costPerKgYield: decimal("costPerKgYield", { precision: 10, scale: 4 }),
+  roiPercentage: decimal("roiPercentage", { precision: 8, scale: 2 }),
+  averageCostPerApplication: decimal("averageCostPerApplication", { precision: 10, scale: 2 }),
+  mostExpensiveType: varchar("mostExpensiveType", { length: 100 }),
+  analysisDate: timestamp("analysisDate").defaultNow().notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type CostAnalysis = typeof costAnalysis.$inferSelect;
+export type InsertCostAnalysis = typeof costAnalysis.$inferInsert;
+
+// ============================================================================
+// FERTILIZER INVENTORY MANAGEMENT
+// ============================================================================
+export const fertilizerInventory = mysqlTable("fertilizer_inventory", {
+  id: int("id").autoincrement().primaryKey(),
+  farmId: int("farmId").notNull().references(() => farms.id),
+  fertilizerType: varchar("fertilizerType", { length: 100 }).notNull(),
+  currentStock: decimal("currentStock", { precision: 12, scale: 2 }).notNull(),
+  unit: varchar("unit", { length: 20 }).default("kg").notNull(),
+  reorderPoint: decimal("reorderPoint", { precision: 12, scale: 2 }).notNull(),
+  reorderQuantity: decimal("reorderQuantity", { precision: 12, scale: 2 }).notNull(),
+  supplier: varchar("supplier", { length: 255 }),
+  supplierContact: varchar("supplierContact", { length: 255 }),
+  lastRestockDate: date("lastRestockDate"),
+  expiryDate: date("expiryDate"),
+  storageLocation: varchar("storageLocation", { length: 255 }),
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type FertilizerInventory = typeof fertilizerInventory.$inferSelect;
+export type InsertFertilizerInventory = typeof fertilizerInventory.$inferInsert;
+
+export const fertilizerInventoryTransactions = mysqlTable("fertilizer_inventory_transactions", {
+  id: int("id").autoincrement().primaryKey(),
+  inventoryId: int("inventoryId").notNull().references(() => fertilizerInventory.id),
+  transactionType: mysqlEnum("transactionType", ["purchase", "usage", "adjustment", "damage", "expiry"]).notNull(),
+  quantity: decimal("quantity", { precision: 12, scale: 2 }).notNull(),
+  unit: varchar("unit", { length: 20 }).default("kg").notNull(),
+  cost: decimal("cost", { precision: 12, scale: 2 }),
+  reason: text("reason"),
+  referenceId: int("referenceId"), // Links to fertilizer application or purchase order
+  transactionDate: date("transactionDate").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type FertilizerInventoryTransaction = typeof fertilizerInventoryTransactions.$inferSelect;
+export type InsertFertilizerInventoryTransaction = typeof fertilizerInventoryTransactions.$inferInsert;
+
+// ============================================================================
+// SOIL HEALTH RECOMMENDATIONS
+// ============================================================================
+export const soilHealthRecommendations = mysqlTable("soilHealthRecommendations", {
+  id: int("id").autoincrement().primaryKey(),
+  soilTestId: int("soilTestId").notNull().references(() => soilTests.id),
+  cycleId: int("cycleId").notNull().references(() => cropCycles.id),
+  recommendedFertilizerType: varchar("recommendedFertilizerType", { length: 100 }).notNull(),
+  recommendedQuantityKg: decimal("recommendedQuantityKg", { precision: 10, scale: 2 }).notNull(),
+  applicationTiming: varchar("applicationTiming", { length: 100 }),
+  deficiencyType: varchar("deficiencyType", { length: 100 }),
+  deficiencySeverity: mysqlEnum("deficiencySeverity", ["low", "moderate", "high", "critical"]).notNull(),
+  expectedYieldImprovement: decimal("expectedYieldImprovement", { precision: 8, scale: 2 }),
+  costBenefit: decimal("costBenefit", { precision: 10, scale: 2 }),
+  alternativeOptions: text("alternativeOptions"), // JSON array of alternative fertilizers
+  implementationStatus: mysqlEnum("implementationStatus", ["pending", "applied", "completed", "cancelled"]).default("pending").notNull(),
+  appliedDate: date("appliedDate"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type SoilHealthRecommendation = typeof soilHealthRecommendations.$inferSelect;
+export type InsertSoilHealthRecommendation = typeof soilHealthRecommendations.$inferInsert;
