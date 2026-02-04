@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MessageCircle, Wifi, WifiOff, X, Minimize2, Maximize2 } from 'lucide-react';
+import { MessageCircle, X, Minimize2, Maximize2 } from 'lucide-react';
 import { Button } from './ui/button';
 
 interface FloatingPosition {
@@ -8,28 +8,11 @@ interface FloatingPosition {
 }
 
 export function FloatingElements() {
-  const [isOnline, setIsOnline] = useState(true);
   const [chatOpen, setChatOpen] = useState(false);
   const [chatMinimized, setChatMinimized] = useState(false);
   const [chatPos, setChatPos] = useState<FloatingPosition>({ x: 20, y: 20 });
-  const [statusPos, setStatusPos] = useState<FloatingPosition>({ x: 20, y: 80 });
   const [draggingChat, setDraggingChat] = useState(false);
-  const [draggingStatus, setDraggingStatus] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-
-  // Monitor online/offline status
-  useEffect(() => {
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
-
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
-  }, []);
 
   // Handle chat dragging
   const handleChatMouseDown = (e: React.MouseEvent) => {
@@ -41,14 +24,7 @@ export function FloatingElements() {
     });
   };
 
-  const handleStatusMouseDown = (e: React.MouseEvent) => {
-    if ((e.target as HTMLElement).closest('button')) return;
-    setDraggingStatus(true);
-    setDragOffset({
-      x: e.clientX - statusPos.x,
-      y: e.clientY - statusPos.y,
-    });
-  };
+
 
   // Handle mouse move for dragging
   useEffect(() => {
@@ -59,20 +35,13 @@ export function FloatingElements() {
           y: Math.max(0, Math.min(e.clientY - dragOffset.y, window.innerHeight - 400)),
         });
       }
-      if (draggingStatus) {
-        setStatusPos({
-          x: Math.max(0, Math.min(e.clientX - dragOffset.x, window.innerWidth - 100)),
-          y: Math.max(0, Math.min(e.clientY - dragOffset.y, window.innerHeight - 100)),
-        });
-      }
     };
 
     const handleMouseUp = () => {
       setDraggingChat(false);
-      setDraggingStatus(false);
     };
 
-    if (draggingChat || draggingStatus) {
+    if (draggingChat) {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
     }
@@ -81,34 +50,10 @@ export function FloatingElements() {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [draggingChat, draggingStatus, dragOffset]);
+  }, [draggingChat, dragOffset]);
 
   return (
     <>
-      {/* Status Indicator - Draggable */}
-      <div
-        className="fixed z-40 cursor-move select-none"
-        style={{
-          left: `${statusPos.x}px`,
-          top: `${statusPos.y}px`,
-        }}
-        onMouseDown={handleStatusMouseDown}
-      >
-        <div className="flex items-center gap-2 bg-background border border-border rounded-full px-3 py-2 shadow-lg hover:shadow-xl transition-shadow">
-          {isOnline ? (
-            <>
-              <Wifi className="h-4 w-4 text-green-500" />
-              <span className="text-xs font-medium text-green-600">Online</span>
-            </>
-          ) : (
-            <>
-              <WifiOff className="h-4 w-4 text-red-500" />
-              <span className="text-xs font-medium text-red-600">Offline</span>
-            </>
-          )}
-        </div>
-      </div>
-
       {/* Chat Button - Draggable */}
       <div
         className="fixed z-50 cursor-move select-none"
@@ -198,7 +143,7 @@ export function FloatingElements() {
       </div>
 
       {/* Hint Text */}
-      {(draggingChat || draggingStatus) && (
+      {draggingChat && (
         <div className="fixed bottom-4 left-4 bg-foreground text-background px-3 py-2 rounded text-sm z-40 pointer-events-none">
           Drag to reposition
         </div>
