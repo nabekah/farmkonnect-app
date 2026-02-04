@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { ProductImageCarousel } from "@/components/ProductImageCarousel";
 import { ProductCard } from "@/components/ProductCard";
 import { SellerProductCard } from "@/components/SellerProductCard";
+import { CartExpirationWarning } from "@/components/CartExpirationWarning";
 
 const CATEGORIES = ["Seeds", "Fertilizers", "Pesticides", "Equipment", "Tools"];
 const UNITS = ["kg", "liter", "dozen", "piece", "ton", "bag"];
@@ -574,6 +575,7 @@ export default function Marketplace() {
                 <CardTitle>Shopping Cart</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
+                <CartExpirationWarning cartItems={cart} onExtendExpiration={() => refetchCart()} />
                 {cart.map((item: any) => {
                   const product = products.find((p: any) => p.id === item.productId);
                   return (

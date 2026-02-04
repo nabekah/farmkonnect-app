@@ -2535,3 +2535,15 @@
 - [x] All optimizations implemented and tested
 - [x] Performance test suite created and passing
 - [x] Ready for Lighthouse re-audit
+
+
+## Cart Expiration Warning Feature (COMPLETED)
+- [x] Add expiration status calculation to getCart query
+- [x] Include daysRemaining, isExpiring, isExpired flags in cart response
+- [x] Create CartExpirationWarning UI component with visual alerts
+- [x] Display warning for items expiring within 7 days
+- [x] Display error for expired items
+- [x] Add "Extend Expiration" button to extend 30 days
+- [x] Integrate CartExpirationWarning into Marketplace page
+- [x] Create comprehensive test suite (15 tests passing)
+- [x] Verify TypeScript compilation (0 errors)

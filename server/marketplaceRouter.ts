@@ -199,14 +199,24 @@ export const marketplaceRouter = router({
         .limit(1);
       
       if (product.length > 0) {
+        const now = new Date();
+        const expiresAt = new Date(cartItem.expiresAt as any);
+        const daysRemaining = Math.ceil((expiresAt.getTime() - now.getTime()) / (24 * 60 * 60 * 1000));
+        const isExpiring = daysRemaining <= 7 && daysRemaining > 0;
+        const isExpired = daysRemaining <= 0;
+        
         items.push({
-          id: cartItem.id, // Include cart item id for removal operations
+          id: cartItem.id,
           productId: product[0].id,
           productName: product[0].name,
           price: product[0].price,
-          quantity: parseFloat(cartItem.quantity), // Convert decimal to number
+          quantity: parseFloat(cartItem.quantity),
           unit: product[0].unit,
           imageUrl: product[0].imageUrl || undefined,
+          expiresAt: expiresAt.toISOString(),
+          daysRemaining,
+          isExpiring,
+          isExpired,
         });
       }
     }
