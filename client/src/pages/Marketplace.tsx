@@ -16,6 +16,7 @@ import { ProductImageCarousel } from "@/components/ProductImageCarousel";
 import { ProductCard } from "@/components/ProductCard";
 import { SellerProductCard } from "@/components/SellerProductCard";
 import { CartExpirationWarning } from "@/components/CartExpirationWarning";
+import { GridSkeleton, TableSkeleton, CardSkeleton } from "@/components/Skeletons";
 
 const CATEGORIES = ["Seeds", "Fertilizers", "Pesticides", "Equipment", "Tools"];
 const UNITS = ["kg", "liter", "dozen", "piece", "ton", "bag"];
@@ -58,7 +59,7 @@ export default function Marketplace() {
   });
 
   // Queries
-  const { data: allProducts = [], refetch: refetchProducts } = trpc.marketplace.listProducts.useQuery({
+  const { data: allProducts = [], refetch: refetchProducts, isLoading: isProductsLoading } = trpc.marketplace.listProducts.useQuery({
     category: selectedCategory || undefined,
     search: searchQuery || undefined,
     limit: 50,
@@ -103,9 +104,9 @@ export default function Marketplace() {
     setActiveFilters(filters);
   }, [selectedCategory, searchQuery, priceRange]);
 
-  const { data: cart = [], refetch: refetchCart } = trpc.marketplace.getCart.useQuery();
-  const { data: sellerStats } = trpc.marketplace.getSellerStats.useQuery();
-  const { data: orders = [] } = trpc.marketplace.listOrders.useQuery({ role: "buyer" });
+  const { data: cart = [], refetch: refetchCart, isLoading: isCartLoading } = trpc.marketplace.getCart.useQuery();
+  const { data: sellerStats, isLoading: isSellerStatsLoading } = trpc.marketplace.getSellerStats.useQuery();
+  const { data: orders = [], isLoading: isOrdersLoading } = trpc.marketplace.listOrders.useQuery({ role: "buyer" });
 
   // For now, we'll use imageUrl from products and fetch images on-demand in the component
   // This avoids violating React hooks rules by calling useQuery in a loop
@@ -496,7 +497,9 @@ export default function Marketplace() {
           </div>
 
           <div className="feature-grid">
-            {products.length === 0 ? (
+            {isProductsLoading ? (
+              <GridSkeleton count={6} columns={3} />
+            ) : products.length === 0 ? (
               <div className="col-span-full text-center py-12">
                 <Package className="h-16 w-16 mx-auto mb-4 text-gray-400" />
                 <h3 className="text-lg font-semibold mb-2 text-gray-900">No products found</h3>
@@ -524,7 +527,9 @@ export default function Marketplace() {
 
         {/* My Orders Tab */}
         <TabsContent value="orders" className="space-y-4">
-          {orders.length === 0 ? (
+          {isOrdersLoading ? (
+            <TableSkeleton rows={3} columns={4} />
+          ) : orders.length === 0 ? (
             <Card>
               <CardContent className="pt-6 text-center text-muted-foreground">
                 No orders yet. Start shopping!
