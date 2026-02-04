@@ -180,7 +180,15 @@ export const marketplaceRouter = router({
     const db = await getDb();
     if (!db) return [];
     
-    const cartItems = await db.select().from(marketplaceCart)
+    const cartItems = await db.select({
+      id: marketplaceCart.id,
+      userId: marketplaceCart.userId,
+      productId: marketplaceCart.productId,
+      quantity: marketplaceCart.quantity,
+      addedAt: marketplaceCart.addedAt,
+      updatedAt: marketplaceCart.updatedAt,
+      expiresAt: marketplaceCart.expiresAt,
+    }).from(marketplaceCart)
       .where(eq(marketplaceCart.userId, ctx.user.id));
     
     // Fetch product details for each cart item
