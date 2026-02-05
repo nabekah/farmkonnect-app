@@ -61,7 +61,6 @@ export function ActivityLogger() {
 
   const createActivityMutation = trpc.fieldWorker.createActivityLog.useMutation({
     onSuccess: () => {
-      // Activity logged successfully
       setSubmitSuccess(true);
     },
     onError: (error) => {
@@ -70,66 +69,91 @@ export function ActivityLogger() {
     },
   });
 
+  // Initialize farm ID from user
   useEffect(() => {
-    // Get user's farm ID from profile or use default
     if (user?.id) {
-      // TODO: Fetch actual farm ID from user profile
-      setFarmId(1); // Placeholder - replace with actual farm ID from user profile
+      setFarmId(1);
     }
-  }, [user]);
+  }, [user?.id]);
 
   // Request GPS location on component mount
   useEffect(() => {
-    if (navigator.geolocation) {
-      setGpsLoading(true);
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setGpsLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          });
-          setGpsLoading(false);
-        },
-        (error) => {
-          setGpsError('Unable to get location. Please enable location services.');
-          setGpsLoading(false);
-        }
-      );
-    }
+    if (!navigator.geolocation) return;
+
+    setGpsLoading(true);
+    const timeoutId = setTimeout(() => {
+      setGpsLoading(false);
+      setGpsError('Location request timed out');
+    }, 10000);
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        clearTimeout(timeoutId);
+        setGpsLocation({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        });
+        setGpsLoading(false);
+      },
+      (error) => {
+        clearTimeout(timeoutId);
+        setGpsError('Unable to get location. Please enable location services.');
+        setGpsLoading(false);
+      }
+    );
   }, []);
 
-  const handleCameraCapture = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files) return;
+  // Redirect to dashboard after successful submission
+  useEffect(() => {
+    if (!submitSuccess) return;
 
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      
-      // Validate file before adding
-      const validation = validatePhotoFile(file);
-      if (!validation.valid) {
-        alert(validation.error);
-        continue;
+    const timer = setTimeout(() => {
+      navigate('/field-worker/dashboard');
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, [submitSuccess, navigate]);
+
+  // Cleanup photos on unmount
+  useEffect(() => {
+    return () => {
+      photos.forEach((photo) => URL.revokeObjectURL(photo.preview));
+    };
+  }, [photos]);
+
+  const handleCameraCapture = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = e.target.files;
+      if (!files) return;
+
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+
+        const validation = validatePhotoFile(file);
+        if (!validation.valid) {
+          alert(validation.error);
+          continue;
+        }
+
+        const preview = URL.createObjectURL(file);
+
+        const photo: Photo = {
+          file,
+          preview,
+          gpsData: gpsLocation
+            ? {
+                latitude: gpsLocation.lat,
+                longitude: gpsLocation.lng,
+                accuracy: 10,
+              }
+            : undefined,
+        };
+
+        setPhotos((prev) => [...prev, photo]);
       }
-
-      const preview = URL.createObjectURL(file);
-
-      // Attach GPS data to photo
-      const photo: Photo = {
-        file,
-        preview,
-        gpsData: gpsLocation
-          ? {
-              latitude: gpsLocation.lat,
-              longitude: gpsLocation.lng,
-              accuracy: 10, // meters
-            }
-          : undefined,
-      };
-
-      setPhotos((prev) => [...prev, photo]);
-    }
-  }, [gpsLocation]);
+    },
+    [gpsLocation]
+  );
 
   const removePhoto = (index: number) => {
     setPhotos((prev) => {
@@ -151,7 +175,6 @@ export function ActivityLogger() {
     setIsSubmitting(true);
 
     try {
-      // Upload photos to S3
       let photoUrls: string[] = [];
       if (photos.length > 0 && farmId) {
         const uploadedPhotos = await uploadPhotosToS3(
@@ -184,27 +207,21 @@ export function ActivityLogger() {
     }
   };
 
+  // Show loading state while farmId is being set
   if (!farmId) {
-    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Card className="w-full max-w-md">
+          <CardContent className="pt-8 text-center">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+            <p className="text-muted-foreground">Initializing activity logger...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
-  // Redirect to dashboard after successful submission
-  useEffect(() => {
-    if (submitSuccess) {
-      const timer = setTimeout(() => {
-        navigate('/field-worker/dashboard');
-      }, 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [submitSuccess, navigate]);
-
-  // Cleanup photos on unmount
-  useEffect(() => {
-    return () => {
-      photos.forEach((photo) => URL.revokeObjectURL(photo.preview));
-    };
-  }, [photos]);
-
+  // Show success state after submission
   if (submitSuccess) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -239,7 +256,16 @@ export function ActivityLogger() {
           </div>
         )}
 
-        {gpsLocation && (
+        {gpsLoading && (
+          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg flex items-start gap-3">
+            <Loader2 className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0 animate-spin" />
+            <div>
+              <p className="font-semibold text-blue-900">Getting your location...</p>
+            </div>
+          </div>
+        )}
+
+        {gpsLocation && !gpsError && (
           <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-start gap-3">
             <MapPin className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
             <div>
