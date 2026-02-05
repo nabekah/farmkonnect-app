@@ -10,6 +10,7 @@ export function useWebSocket() {
   const { user } = useAuth();
   const wsRef = useRef<WebSocket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
+  const [isReconnecting, setIsReconnecting] = useState(false);
   const [lastMessage, setLastMessage] = useState<WebSocketMessage | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const reconnectAttemptsRef = useRef<number>(0);
@@ -57,6 +58,7 @@ export function useWebSocket() {
 
       // Don't reconnect if closed intentionally (code 1000)
       if (event.code === 1000) {
+        setIsReconnecting(false);
         return;
       }
 
@@ -65,6 +67,7 @@ export function useWebSocket() {
       reconnectAttemptsRef.current++;
 
       console.log(`[WebSocket] Reconnecting in ${delay}ms (attempt ${reconnectAttemptsRef.current})`);
+      setIsReconnecting(true);
 
       reconnectTimeoutRef.current = setTimeout(() => {
         connect();
@@ -102,6 +105,7 @@ export function useWebSocket() {
 
   return {
     isConnected,
+    isReconnecting,
     lastMessage,
     sendMessage,
   };

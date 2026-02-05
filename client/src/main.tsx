@@ -10,6 +10,8 @@ import "./index.css";
 import { CartProvider } from "@/contexts/CartContext";
 import { ThemeColorProvider } from "@/contexts/ThemeColorContext";
 import { OfflineQueueProvider } from "@/contexts/OfflineQueueContext";
+import { ToastProvider } from "@/contexts/ToastContext";
+import { NotificationHistoryProvider } from "@/contexts/NotificationHistoryContext";
 
 const queryClient = new QueryClient();
 
@@ -59,11 +61,15 @@ createRoot(document.getElementById("root")!).render(
   <trpc.Provider client={trpcClient} queryClient={queryClient}>
     <QueryClientProvider client={queryClient}>
       <ThemeColorProvider>
-        <OfflineQueueProvider>
-          <CartProvider>
-            <App />
-          </CartProvider>
-        </OfflineQueueProvider>
+        <ToastProvider>
+          <NotificationHistoryProvider>
+            <OfflineQueueProvider>
+              <CartProvider>
+                <App />
+              </CartProvider>
+            </OfflineQueueProvider>
+          </NotificationHistoryProvider>
+        </ToastProvider>
       </ThemeColorProvider>
     </QueryClientProvider>
   </trpc.Provider>

@@ -39,6 +39,9 @@ import { GlobalSearch } from './GlobalSearch';
 import { Breadcrumbs } from './Breadcrumbs';
 import { ConnectionStatusIndicator } from './ConnectionStatusIndicator';
 import { RetryNotificationsContainer, OfflineQueueStatus } from './RetryNotification';
+import { ToastContainer } from './ToastContainer';
+import { WebSocketReconnectionUI } from './WebSocketReconnectionUI';
+import { NotificationHistoryPanel } from './NotificationHistoryPanel';
 
 const menuItems = getAllMenuItems();
 
@@ -291,16 +294,19 @@ function DashboardLayoutContent({
           </div>
         )}
         <main className="flex-1 p-4 flex flex-col">
-          {!isMobile && (
-            <div className="flex justify-end mb-4 gap-2">
-              <CartButton />
-              <NotificationCenter />
-            </div>
-          )}
+        {!isMobile && (
+          <div className="flex justify-end mb-4 gap-2">
+            <CartButton />
+            <NotificationCenter />
+            <NotificationHistoryPanel />
+          </div>
+        )}
           {children}
         </main>
       </SidebarInset>
       <RetryNotificationsContainer />
+      <ToastContainer />
+      <WebSocketReconnectionUI />
     </>
   );
 }
