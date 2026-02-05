@@ -2631,3 +2631,11 @@
 - [x] Fix activity list not showing created activities - FIXED with raw SQL
 - [x] Implement real database save for createActivityLog - Using raw SQL INSERT
 - [x] Implement real query for getActivityLogs - Using raw SQL SELECT
+
+
+## UI-Database Connection Fixes - Completed
+- [x] Fixed ViewAllActivities to use real getActivityLogs tRPC query
+- [x] Fixed ViewAllTasks to use real getTasks tRPC query
+- [x] Activities now display from database with proper filtering and sorting
+- [x] Tasks now display from database with proper filtering and sorting
+- [x] All 247 tests passing after UI fixes

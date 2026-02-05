@@ -12,17 +12,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Clock, CheckCircle2, AlertCircle, Trash2, ChevronLeft } from 'lucide-react';
+import { Clock, CheckCircle2, AlertCircle, Trash2, ChevronLeft, Loader2 } from 'lucide-react';
+import { trpc } from '@/lib/trpc';
 
 interface Task {
-  id: string;
+  taskId: string;
   title: string;
   description: string;
-  taskType: string;
   priority: 'low' | 'medium' | 'high' | 'urgent';
   status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
   dueDate: string;
   createdAt: string;
+  assignedToUserId?: number;
 }
 
 const TASK_TYPES = [
@@ -62,62 +63,31 @@ export function ViewAllTasks() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'dueDate' | 'priority' | 'status'>('dueDate');
 
-  // Mock data - replace with actual API call
+  // Get farm ID from user - default to 1 for now
+  const farmId = 1;
+
+  // Fetch real tasks from database
+  const { data: tasksData, isLoading } = trpc.fieldWorker.getTasks.useQuery(
+    { farmId },
+    { enabled: !!farmId }
+  );
+
+  // Update tasks when data changes
   useEffect(() => {
-    const mockTasks: Task[] = [
-      {
-        id: '1',
-        title: 'Monitor crop health in Field A',
-        description: 'Check for pests and diseases',
-        taskType: 'monitoring',
-        priority: 'high',
-        status: 'pending',
-        dueDate: new Date(Date.now() + 86400000).toISOString(),
-        createdAt: new Date().toISOString(),
-      },
-      {
-        id: '2',
-        title: 'Apply irrigation',
-        description: 'Water Field B for 2 hours',
-        taskType: 'irrigation',
-        priority: 'medium',
-        status: 'in_progress',
-        dueDate: new Date(Date.now() + 172800000).toISOString(),
-        createdAt: new Date().toISOString(),
-      },
-      {
-        id: '3',
-        title: 'Fertilizer application',
-        description: 'Apply NPK fertilizer to Field C',
-        taskType: 'fertilization',
-        priority: 'medium',
-        status: 'pending',
-        dueDate: new Date(Date.now() + 259200000).toISOString(),
-        createdAt: new Date().toISOString(),
-      },
-      {
-        id: '4',
-        title: 'Pest control treatment',
-        description: 'Spray pesticide on affected areas',
-        taskType: 'pest_control',
-        priority: 'urgent',
-        status: 'pending',
-        dueDate: new Date(Date.now() + 3600000).toISOString(),
-        createdAt: new Date().toISOString(),
-      },
-      {
-        id: '5',
-        title: 'Weed removal',
-        description: 'Remove weeds from Field D',
-        taskType: 'weed_control',
-        priority: 'low',
-        status: 'completed',
-        dueDate: new Date(Date.now() - 86400000).toISOString(),
-        createdAt: new Date(Date.now() - 172800000).toISOString(),
-      },
-    ];
-    setTasks(mockTasks);
-  }, []);
+    if (tasksData?.tasks) {
+      const mappedTasks: Task[] = tasksData.tasks.map((t: any) => ({
+        taskId: t.taskId,
+        title: t.title,
+        description: t.description || '',
+        priority: t.priority,
+        status: t.status,
+        dueDate: t.dueDate instanceof Date ? t.dueDate.toISOString() : t.dueDate,
+        createdAt: t.createdAt instanceof Date ? t.createdAt.toISOString() : t.createdAt,
+        assignedToUserId: t.assignedToUserId,
+      }));
+      setTasks(mappedTasks);
+    }
+  }, [tasksData]);
 
   // Filter and sort tasks
   useEffect(() => {
@@ -260,9 +230,17 @@ export function ViewAllTasks() {
           </CardContent>
         </Card>
 
+        {/* Loading State */}
+        {isLoading && (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            <p className="ml-2 text-muted-foreground">Loading tasks...</p>
+          </div>
+        )}
+
         {/* Tasks List */}
         <div className="space-y-4">
-          {filteredTasks.length === 0 ? (
+          {!isLoading && filteredTasks.length === 0 ? (
             <Card>
               <CardContent className="pt-12 pb-12 text-center">
                 <p className="text-muted-foreground">No tasks found matching your criteria</p>
@@ -272,7 +250,7 @@ export function ViewAllTasks() {
             filteredTasks.map((task) => {
               const StatusIcon = getStatusIcon(task.status);
               return (
-                <Card key={task.id} className="hover:shadow-md transition-shadow">
+                <Card key={task.taskId} className="hover:shadow-md transition-shadow">
                   <CardContent className="pt-6">
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1">
@@ -284,7 +262,6 @@ export function ViewAllTasks() {
                           </div>
                         </div>
                         <div className="flex flex-wrap items-center gap-2 mt-3">
-                          <Badge variant="outline">{task.taskType}</Badge>
                           <Badge className={`${getPriorityColor(task.priority)} text-white`}>
                             {task.priority}
                           </Badge>
@@ -295,7 +272,11 @@ export function ViewAllTasks() {
                         </div>
                       </div>
                       <div className="flex gap-2">
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => navigate(`/field-worker/tasks/${task.taskId}`)}
+                        >
                           View
                         </Button>
                         <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700">

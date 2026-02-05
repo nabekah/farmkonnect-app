@@ -12,18 +12,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { MapPin, Camera, ChevronLeft, Search, Calendar } from 'lucide-react';
+import { MapPin, Camera, ChevronLeft, Search, Calendar, Loader2 } from 'lucide-react';
+import { trpc } from '@/lib/trpc';
 
 interface Activity {
   id: string;
+  logId: string;
   title: string;
   description: string;
   activityType: string;
-  gpsLatitude?: number;
-  gpsLongitude?: number;
-  photoCount: number;
+  gpsLatitude?: number | null;
+  gpsLongitude?: number | null;
+  photoUrls?: string[];
   createdAt: string;
   fieldId?: number;
+  status?: string;
 }
 
 const ACTIVITY_TYPES = [
@@ -50,96 +53,33 @@ export function ViewAllActivities() {
   const [sortBy, setSortBy] = useState<'date' | 'photos'>('date');
   const [dateRange, setDateRange] = useState<'all' | 'today' | 'week' | 'month'>('all');
 
-  // Mock data - replace with actual API call
+  // Get farm ID from user - default to 1 for now
+  const farmId = 1;
+
+  // Fetch real activities from database
+  const { data: activitiesData, isLoading, refetch } = trpc.fieldWorker.getActivityLogs.useQuery(
+    { farmId, limit: 100 },
+    { enabled: !!farmId }
+  );
+
+  // Update activities when data changes
   useEffect(() => {
-    const mockActivities: Activity[] = [
-      {
-        id: '1',
-        title: 'Crop health check - Field A',
-        description: 'Observed healthy crop growth, no visible pests',
-        activityType: 'crop_health',
-        gpsLatitude: 40.7128,
-        gpsLongitude: -74.006,
-        photoCount: 3,
-        createdAt: new Date(Date.now() - 3600000).toISOString(),
-        fieldId: 1,
-      },
-      {
-        id: '2',
-        title: 'Pest monitoring - Field B',
-        description: 'Found some aphids on plants, applied treatment',
-        activityType: 'pest_monitoring',
-        gpsLatitude: 40.7150,
-        gpsLongitude: -74.0100,
-        photoCount: 5,
-        createdAt: new Date(Date.now() - 7200000).toISOString(),
-        fieldId: 2,
-      },
-      {
-        id: '3',
-        title: 'Irrigation setup - Field C',
-        description: 'Configured drip irrigation system for optimal water distribution',
-        activityType: 'irrigation',
-        gpsLatitude: 40.7180,
-        gpsLongitude: -74.0150,
-        photoCount: 2,
-        createdAt: new Date(Date.now() - 86400000).toISOString(),
-        fieldId: 3,
-      },
-      {
-        id: '4',
-        title: 'Fertilizer application - Field A',
-        description: 'Applied NPK fertilizer to improve soil nutrients',
-        activityType: 'fertilizer_application',
-        gpsLatitude: 40.7128,
-        gpsLongitude: -74.006,
-        photoCount: 4,
-        createdAt: new Date(Date.now() - 172800000).toISOString(),
-        fieldId: 1,
-      },
-      {
-        id: '5',
-        title: 'Weed removal - Field D',
-        description: 'Manually removed weeds from the field',
-        activityType: 'weed_control',
-        gpsLatitude: 40.7200,
-        gpsLongitude: -74.0200,
-        photoCount: 1,
-        createdAt: new Date(Date.now() - 259200000).toISOString(),
-        fieldId: 4,
-      },
-      {
-        id: '6',
-        title: 'Equipment check - Farm',
-        description: 'Inspected tractor and irrigation equipment',
-        activityType: 'equipment_check',
-        gpsLatitude: 40.7100,
-        gpsLongitude: -74.0000,
-        photoCount: 6,
-        createdAt: new Date(Date.now() - 345600000).toISOString(),
-      },
-      {
-        id: '7',
-        title: 'Soil test - Field B',
-        description: 'Collected soil samples for nutrient analysis',
-        activityType: 'soil_test',
-        gpsLatitude: 40.7150,
-        gpsLongitude: -74.0100,
-        photoCount: 2,
-        createdAt: new Date(Date.now() - 432000000).toISOString(),
-        fieldId: 2,
-      },
-      {
-        id: '8',
-        title: 'Weather observation',
-        description: 'Recorded temperature, humidity, and precipitation data',
-        activityType: 'weather_observation',
-        photoCount: 0,
-        createdAt: new Date(Date.now() - 518400000).toISOString(),
-      },
-    ];
-    setActivities(mockActivities);
-  }, []);
+    if (activitiesData?.logs) {
+      const mappedActivities: Activity[] = activitiesData.logs.map((log: any) => ({
+        id: log.id?.toString() || log.logId,
+        logId: log.logId,
+        title: log.title,
+        description: log.description || '',
+        activityType: log.activityType,
+        gpsLatitude: log.gpsLatitude,
+        gpsLongitude: log.gpsLongitude,
+        photoUrls: log.photoUrls || [],
+        createdAt: log.createdAt,
+        status: log.status,
+      }));
+      setActivities(mappedActivities);
+    }
+  }, [activitiesData]);
 
   // Filter and sort activities
   useEffect(() => {
@@ -176,7 +116,8 @@ export function ViewAllActivities() {
     if (sortBy === 'date') {
       filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     } else if (sortBy === 'photos') {
-      filtered.sort((a, b) => b.photoCount - a.photoCount);
+      const photoCount = (photos: string[] | undefined) => photos?.length || 0;
+      filtered.sort((a, b) => photoCount(b.photoUrls) - photoCount(a.photoUrls));
     }
 
     setFilteredActivities(filtered);
@@ -301,59 +242,70 @@ export function ViewAllActivities() {
           </CardContent>
         </Card>
 
+        {/* Loading State */}
+        {isLoading && (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            <p className="ml-2 text-muted-foreground">Loading activities...</p>
+          </div>
+        )}
+
         {/* Activities List */}
-        <div className="space-y-4">
-          {filteredActivities.length === 0 ? (
-            <Card>
-              <CardContent className="pt-12 pb-12 text-center">
-                <p className="text-muted-foreground">No activities found matching your criteria</p>
-              </CardContent>
-            </Card>
-          ) : (
-            filteredActivities.map((activity) => (
-              <Card key={activity.id} className="hover:shadow-md transition-shadow">
+        {!isLoading && filteredActivities.length === 0 ? (
+          <Card>
+            <CardContent className="py-12 text-center">
+              <p className="text-muted-foreground">No activities found. Start logging activities to see them here!</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid gap-4">
+            {filteredActivities.map((activity) => (
+              <Card key={activity.logId} className="hover:shadow-md transition-shadow">
                 <CardContent className="pt-6">
-                  <div className="flex items-start justify-between gap-4">
+                  <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
                     <div className="flex-1">
                       <div className="flex items-start gap-3 mb-2">
-                        <div className="flex-1">
-                          <h3 className="text-lg font-semibold">{activity.title}</h3>
-                          <p className="text-sm text-muted-foreground">{activity.description}</p>
-                        </div>
-                      </div>
-                      <div className="flex flex-wrap items-center gap-2 mt-3">
                         <Badge className={getActivityColor(activity.activityType)}>
                           {getActivityLabel(activity.activityType)}
                         </Badge>
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <Calendar className="h-3 w-3" />
-                          {formatDate(activity.createdAt)} at {formatTime(activity.createdAt)}
+                        {activity.status && (
+                          <Badge variant="outline" className="capitalize">
+                            {activity.status}
+                          </Badge>
+                        )}
+                      </div>
+                      <h3 className="text-lg font-semibold text-foreground mb-1">{activity.title}</h3>
+                      <p className="text-sm text-muted-foreground mb-3">{activity.description}</p>
+
+                      <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-1">
+                          <Calendar className="h-4 w-4" />
+                          <span>
+                            {formatDate(activity.createdAt)} at {formatTime(activity.createdAt)}
+                          </span>
                         </div>
                         {activity.gpsLatitude && activity.gpsLongitude && (
-                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                            <MapPin className="h-3 w-3" />
-                            GPS Tagged
+                          <div className="flex items-center gap-1">
+                            <MapPin className="h-4 w-4" />
+                            <span>
+                              {activity.gpsLatitude.toFixed(4)}, {activity.gpsLongitude.toFixed(4)}
+                            </span>
                           </div>
                         )}
-                        {activity.photoCount > 0 && (
-                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                            <Camera className="h-3 w-3" />
-                            {activity.photoCount} photo{activity.photoCount !== 1 ? 's' : ''}
+                        {activity.photoUrls && activity.photoUrls.length > 0 && (
+                          <div className="flex items-center gap-1">
+                            <Camera className="h-4 w-4" />
+                            <span>{activity.photoUrls.length} photo(s)</span>
                           </div>
                         )}
                       </div>
-                    </div>
-                    <div>
-                      <Button variant="outline" size="sm">
-                        View Details
-                      </Button>
                     </div>
                   </div>
                 </CardContent>
               </Card>
-            ))
-          )}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
