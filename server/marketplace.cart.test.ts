@@ -14,31 +14,31 @@ describe("Marketplace Cart Operations", () => {
     if (!db) throw new Error("Database connection failed");
 
     // Create test user
-    const userResult = await db
+    const [userResult] = await db
       .insert(users)
       .values({
         name: "Test Cart User",
         email: `cart-test-${Date.now()}@test.com`,
+        openId: `test-cart-${Date.now()}`,
         role: "user",
-      })
-      .returning({ id: users.id });
-    testUserId = userResult[0].id;
+      });
+    testUserId = userResult.insertId;
 
     // Create test product
-    const productResult = await db
+    const [productResult] = await db
       .insert(marketplaceProducts)
       .values({
         name: "Test Cart Product",
         description: "Test product for cart operations",
         category: "Seeds",
+        productType: "seed",
         price: "100.00",
         quantity: "50",
         unit: "kg",
         sellerId: testUserId,
         imageUrl: "https://example.com/test.jpg",
-      })
-      .returning({ id: marketplaceProducts.id });
-    testProductId = productResult[0].id;
+      });
+    testProductId = productResult.insertId;
   });
 
   afterAll(async () => {
@@ -53,18 +53,17 @@ describe("Marketplace Cart Operations", () => {
   });
 
   it("should add item to cart", async () => {
-    const result = await db
+    const [result] = await db
       .insert(marketplaceCart)
       .values({
         userId: testUserId,
         productId: testProductId,
         quantity: "5",
-      })
-      .returning({ id: marketplaceCart.id });
+      });
 
-    testCartId = result[0].id;
-    expect(result[0].id).toBeDefined();
-    expect(typeof result[0].id).toBe("number");
+    testCartId = result.insertId;
+    expect(result.insertId).toBeDefined();
+    expect(typeof result.insertId).toBe("number");
   });
 
   it("should retrieve cart with id field", async () => {
@@ -109,43 +108,40 @@ describe("Marketplace Cart Operations", () => {
 
   it("should handle multiple cart items with unique ids", async () => {
     // Add two items
-    const item1 = await db
+    const [item1Result] = await db
       .insert(marketplaceCart)
       .values({
         userId: testUserId,
         productId: testProductId,
         quantity: "2",
-      })
-      .returning({ id: marketplaceCart.id });
+      });
 
-    const item2 = await db
+    const [item2Result] = await db
       .insert(marketplaceCart)
       .values({
         userId: testUserId,
         productId: testProductId,
         quantity: "3",
-      })
-      .returning({ id: marketplaceCart.id });
+      });
 
-    expect(item1[0].id).not.toEqual(item2[0].id);
-    expect(typeof item1[0].id).toBe("number");
-    expect(typeof item2[0].id).toBe("number");
+    expect(item1Result.insertId).not.toEqual(item2Result.insertId);
+    expect(typeof item1Result.insertId).toBe("number");
+    expect(typeof item2Result.insertId).toBe("number");
 
     // Cleanup
     await db.delete(marketplaceCart).where(eq(marketplaceCart.userId, testUserId));
   });
 
   it("should validate cartId is a number not undefined", async () => {
-    const result = await db
+    const [result] = await db
       .insert(marketplaceCart)
       .values({
         userId: testUserId,
         productId: testProductId,
         quantity: "1",
-      })
-      .returning({ id: marketplaceCart.id });
+      });
 
-    const cartId = result[0].id;
+    const cartId = result.insertId;
 
     // This should not throw "Invalid input: expected number, received undefined"
     expect(cartId).toBeDefined();
