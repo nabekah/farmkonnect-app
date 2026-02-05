@@ -2024,3 +2024,33 @@ export const fieldWorkerDashboardPreferences = mysqlTable("fieldWorkerDashboardP
 
 export type FieldWorkerDashboardPreferences = typeof fieldWorkerDashboardPreferences.$inferSelect;
 export type InsertFieldWorkerDashboardPreferences = typeof fieldWorkerDashboardPreferences.$inferInsert;
+
+/**
+ * Task History
+ * Audit trail for all changes made to tasks
+ */
+export const taskHistory = mysqlTable("taskHistory", {
+  id: int("id").autoincrement().primaryKey(),
+  historyId: varchar("historyId", { length: 50 }).notNull().unique(),
+  taskId: varchar("taskId", { length: 50 }).notNull(), // Reference to fieldWorkerTasks.taskId
+  changedByUserId: int("changedByUserId").notNull(), // User who made the change
+  changeType: mysqlEnum("changeType", [
+    "created",
+    "status_changed",
+    "priority_changed",
+    "due_date_changed",
+    "reassigned",
+    "notes_added",
+    "completed",
+    "cancelled",
+    "edited"
+  ]).notNull(),
+  oldValue: text("oldValue"), // JSON: previous value
+  newValue: text("newValue"), // JSON: new value
+  fieldChanged: varchar("fieldChanged", { length: 100 }), // e.g., "status", "priority", "dueDate"
+  description: text("description"), // Human-readable description of change
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type TaskHistory = typeof taskHistory.$inferSelect;
+export type InsertTaskHistory = typeof taskHistory.$inferInsert;

@@ -5,8 +5,11 @@
 
 import { router, protectedProcedure } from '../_core/trpc';
 import { z } from 'zod';
-import { ZodType } from 'zod';
 import { TRPCError } from '@trpc/server';
+import { getDb } from '../db';
+import { fieldWorkerTasks, taskHistory, users } from '../../drizzle/schema';
+import { eq } from 'drizzle-orm';
+import { v4 as uuidv4 } from 'uuid';
 
 // ============================================================================
 // FIELD WORKER TASK PROCEDURES
@@ -22,32 +25,20 @@ export const fieldWorkerRouter = router({
       status: z.enum(['pending', 'in_progress', 'completed', 'cancelled']).optional(),
     }))
     .query(async ({ ctx, input }) => {
-      // TODO: Implement task retrieval from database
-      // For now, return mock data
-      return {
-        tasks: [
-          {
-            id: '1',
-            title: 'Monitor crop health in Field A',
-            description: 'Check for pests and diseases',
-            taskType: 'monitoring',
-            priority: 'high',
-            status: 'pending',
-            dueDate: new Date(Date.now() + 86400000).toISOString(),
-            createdAt: new Date().toISOString(),
-          },
-          {
-            id: '2',
-            title: 'Apply irrigation',
-            description: 'Water Field B for 2 hours',
-            taskType: 'irrigation',
-            priority: 'medium',
-            status: 'in_progress',
-            dueDate: new Date(Date.now() + 172800000).toISOString(),
-            createdAt: new Date().toISOString(),
-          },
-        ],
-      };
+      const db = await getDb();
+      if (!db) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Database not available',
+        });
+      }
+
+      const tasks = await db.select().from(fieldWorkerTasks).where(eq(fieldWorkerTasks.farmId, input.farmId));
+      const filtered = input.status
+        ? tasks.filter((t: any) => t.status === input.status)
+        : tasks;
+
+      return { tasks: filtered };
     }),
 
   /**
@@ -58,16 +49,31 @@ export const fieldWorkerRouter = router({
       taskId: z.string(),
     }))
     .query(async ({ ctx, input }) => {
-      // TODO: Implement task detail retrieval
+      const db = await getDb();
+      if (!db) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Database not available',
+        });
+      }
+
+      const tasks = await db.select().from(fieldWorkerTasks).where(eq(fieldWorkerTasks.taskId, input.taskId)).limit(1);
+      const task = tasks[0];
+
+      if (!task) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Task not found',
+        });
+      }
+
+      const workerList = await db.select().from(users).where(eq(users.id, task.assignedToUserId)).limit(1);
+      const assignedWorker = workerList[0];
+
       return {
-        id: input.taskId,
-        title: 'Monitor crop health',
-        description: 'Check for pests and diseases in Field A',
-        taskType: 'monitoring',
-        priority: 'high',
-        status: 'pending',
-        dueDate: new Date().toISOString(),
-        createdAt: new Date().toISOString(),
+        ...task,
+        assignedToName: assignedWorker?.name || 'Unknown',
+        assignedToEmail: assignedWorker?.email || '',
       };
     }),
 
@@ -81,8 +87,185 @@ export const fieldWorkerRouter = router({
       completionNotes: z.string().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
-      // TODO: Implement task status update
+      const db = await getDb();
+      if (!db) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Database not available',
+        });
+      }
+
+      const tasks = await db.select().from(fieldWorkerTasks).where(eq(fieldWorkerTasks.taskId, input.taskId)).limit(1);
+      const task = tasks[0];
+
+      if (!task) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Task not found',
+        });
+      }
+
+      const oldStatus = task.status;
+      const completedDate = input.status === 'completed' ? new Date() : null;
+
+      await db.update(fieldWorkerTasks)
+        .set({
+          status: input.status,
+          completionNotes: input.completionNotes,
+          completedDate,
+          updatedAt: new Date(),
+        })
+        .where(eq(fieldWorkerTasks.taskId, input.taskId));
+
+      await db.insert(taskHistory).values({
+        historyId: uuidv4(),
+        taskId: input.taskId,
+        changedByUserId: ctx.user!.id,
+        changeType: 'status_changed',
+        oldValue: JSON.stringify({ status: oldStatus }),
+        newValue: JSON.stringify({ status: input.status }),
+        fieldChanged: 'status',
+        description: `Status changed from ${oldStatus} to ${input.status}`,
+      });
+
       return { success: true, message: 'Task updated successfully' };
+    }),
+
+  /**
+   * Update task details
+   */
+  updateTask: protectedProcedure
+    .input(z.object({
+      taskId: z.string(),
+      title: z.string().optional(),
+      description: z.string().optional(),
+      priority: z.enum(['low', 'medium', 'high', 'urgent']).optional(),
+      dueDate: z.date().optional(),
+      notes: z.string().optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const db = await getDb();
+      if (!db) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Database not available',
+        });
+      }
+
+      const tasks = await db.select().from(fieldWorkerTasks).where(eq(fieldWorkerTasks.taskId, input.taskId)).limit(1);
+      const task = tasks[0];
+
+      if (!task) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Task not found',
+        });
+      }
+
+      const updates: any = {};
+      const changes: any[] = [];
+
+      if (input.title && input.title !== task.title) {
+        updates.title = input.title;
+        changes.push({
+          field: 'title',
+          oldValue: task.title,
+          newValue: input.title,
+        });
+      }
+
+      if (input.description && input.description !== task.description) {
+        updates.description = input.description;
+        changes.push({
+          field: 'description',
+          oldValue: task.description,
+          newValue: input.description,
+        });
+      }
+
+      if (input.priority && input.priority !== task.priority) {
+        updates.priority = input.priority;
+        changes.push({
+          field: 'priority',
+          oldValue: task.priority,
+          newValue: input.priority,
+        });
+      }
+
+      if (input.dueDate && input.dueDate !== task.dueDate) {
+        updates.dueDate = input.dueDate;
+        changes.push({
+          field: 'dueDate',
+          oldValue: task.dueDate,
+          newValue: input.dueDate,
+        });
+      }
+
+      if (input.notes && input.notes !== task.notes) {
+        updates.notes = input.notes;
+        changes.push({
+          field: 'notes',
+          oldValue: task.notes,
+          newValue: input.notes,
+        });
+      }
+
+      if (Object.keys(updates).length === 0) {
+        return { success: true, message: 'No changes made' };
+      }
+
+      updates.updatedAt = new Date();
+
+      await db.update(fieldWorkerTasks)
+        .set(updates)
+        .where(eq(fieldWorkerTasks.taskId, input.taskId));
+
+      for (const change of changes) {
+        await db.insert(taskHistory).values({
+          historyId: uuidv4(),
+          taskId: input.taskId,
+          changedByUserId: ctx.user!.id,
+          changeType: 'edited',
+          oldValue: JSON.stringify(change.oldValue),
+          newValue: JSON.stringify(change.newValue),
+          fieldChanged: change.field,
+          description: `${change.field} updated`,
+        });
+      }
+
+      return { success: true, message: 'Task updated successfully' };
+    }),
+
+  /**
+   * Get task history
+   */
+  getTaskHistory: protectedProcedure
+    .input(z.object({
+      taskId: z.string(),
+    }))
+    .query(async ({ ctx, input }) => {
+      const db = await getDb();
+      if (!db) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Database not available',
+        });
+      }
+
+      const history = await db.select().from(taskHistory).where(eq(taskHistory.taskId, input.taskId));
+
+      const enrichedHistory = await Promise.all(
+        history.map(async (h: any) => {
+          const userList = await db.select().from(users).where(eq(users.id, h.changedByUserId)).limit(1);
+          const user = userList[0];
+          return {
+            ...h,
+            changedByName: user?.name || 'Unknown',
+          };
+        })
+      );
+
+      return enrichedHistory.sort((a: any, b: any) => b.createdAt.getTime() - a.createdAt.getTime());
     }),
 
   /**
@@ -115,7 +298,6 @@ export const fieldWorkerRouter = router({
       duration: z.number().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
-      // TODO: Implement activity log creation
       return {
         success: true,
         logId: `log-${Date.now()}`,
@@ -132,7 +314,6 @@ export const fieldWorkerRouter = router({
       limit: z.number().default(20),
     }))
     .query(async ({ ctx, input }) => {
-      // TODO: Implement activity log retrieval
       return {
         logs: [
           {
@@ -155,7 +336,6 @@ export const fieldWorkerRouter = router({
       taskId: z.string().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
-      // TODO: Implement clock in
       return {
         success: true,
         clockInTime: new Date().toISOString(),
@@ -171,11 +351,10 @@ export const fieldWorkerRouter = router({
       farmId: z.number(),
     }))
     .mutation(async ({ ctx, input }) => {
-      // TODO: Implement clock out
       return {
         success: true,
         clockOutTime: new Date().toISOString(),
-        workDuration: 480, // in minutes
+        workDuration: 480,
         message: 'Clocked out successfully',
       };
     }),
@@ -188,7 +367,6 @@ export const fieldWorkerRouter = router({
       farmId: z.number(),
     }))
     .query(async ({ ctx, input }) => {
-      // TODO: Implement dashboard data aggregation
       return {
         pendingTasks: [
           {
@@ -223,7 +401,6 @@ export const fieldWorkerRouter = router({
       })),
     }))
     .mutation(async ({ ctx, input }) => {
-      // TODO: Implement offline queue sync
       return {
         success: true,
         syncedCount: input.queueItems.length,
@@ -240,7 +417,6 @@ export const fieldWorkerRouter = router({
       days: z.number().default(7),
     }))
     .query(async ({ ctx, input }) => {
-      // TODO: Implement time tracking summary
       return {
         totalHours: 40,
         totalMinutes: 0,

@@ -3,82 +3,12 @@ import { useLocation, useRoute } from 'wouter';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { AlertCircle, ArrowLeft, Clock, MapPin, User, Calendar, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Clock, MapPin, User, Calendar, CheckCircle2, AlertTriangle, Edit } from 'lucide-react';
 import { TaskCompletionWorkflow } from '@/components/TaskCompletionWorkflow';
-
-interface Task {
-  id: number;
-  title: string;
-  description: string;
-  taskType: string;
-  priority: 'low' | 'medium' | 'high' | 'urgent';
-  status: 'pending' | 'in_progress' | 'completed';
-  dueDate: Date;
-  assignedTo: string;
-  photoRequirements: number;
-  photosAttached: number;
-  notes?: string;
-  createdAt: Date;
-  completedAt?: Date;
-}
-
-// Mock task data - in production, this would come from tRPC
-const MOCK_TASKS: Record<number, Task> = {
-  1: {
-    id: 1,
-    title: 'Irrigation System Check',
-    description: 'Inspect and test the main irrigation system in Field A',
-    taskType: 'irrigation',
-    priority: 'high',
-    status: 'pending',
-    dueDate: new Date(Date.now() + 86400000),
-    assignedTo: 'John Doe',
-    photoRequirements: 3,
-    photosAttached: 0,
-    notes: 'Check for leaks and verify water pressure',
-    createdAt: new Date(Date.now() - 86400000),
-  },
-  2: {
-    id: 2,
-    title: 'Soil Testing',
-    description: 'Collect soil samples from Field B for nutrient analysis',
-    taskType: 'soil_testing',
-    priority: 'medium',
-    status: 'in_progress',
-    dueDate: new Date(Date.now() + 172800000),
-    assignedTo: 'Jane Smith',
-    photoRequirements: 2,
-    photosAttached: 1,
-    notes: 'Use the standard sampling kit',
-    createdAt: new Date(Date.now() - 172800000),
-  },
-  3: {
-    id: 3,
-    title: 'Pest Monitoring',
-    description: 'Monitor for crop pests and diseases in Field C',
-    taskType: 'pest_control',
-    priority: 'urgent',
-    status: 'pending',
-    dueDate: new Date(Date.now() + 3600000),
-    assignedTo: 'Mike Johnson',
-    photoRequirements: 4,
-    photosAttached: 0,
-    notes: 'Look for signs of aphids and spider mites',
-    createdAt: new Date(Date.now() - 259200000),
-  },
-};
-
-const TASK_TYPE_LABELS: Record<string, string> = {
-  irrigation: 'Irrigation',
-  soil_testing: 'Soil Testing',
-  pest_control: 'Pest Control',
-  monitoring: 'Monitoring',
-  planting: 'Planting',
-  fertilization: 'Fertilization',
-  weed_control: 'Weed Control',
-  harvest: 'Harvest',
-  equipment_maintenance: 'Equipment Maintenance',
-};
+import { TaskEditDialog } from '@/components/TaskEditDialog';
+import { TaskHistoryTimeline } from '@/components/TaskHistoryTimeline';
+import { trpc } from '@/lib/trpc';
+import { Loader2 } from 'lucide-react';
 
 const PRIORITY_COLORS: Record<string, string> = {
   low: 'bg-blue-100 text-blue-800',
@@ -91,21 +21,61 @@ const STATUS_COLORS: Record<string, string> = {
   pending: 'bg-gray-100 text-gray-800',
   in_progress: 'bg-blue-100 text-blue-800',
   completed: 'bg-green-100 text-green-800',
+  cancelled: 'bg-red-100 text-red-800',
+};
+
+const TASK_TYPE_LABELS: Record<string, string> = {
+  planting: 'Planting',
+  monitoring: 'Monitoring',
+  irrigation: 'Irrigation',
+  fertilization: 'Fertilization',
+  pest_control: 'Pest Control',
+  weed_control: 'Weed Control',
+  harvest: 'Harvest',
+  equipment_maintenance: 'Equipment Maintenance',
+  soil_testing: 'Soil Testing',
+  other: 'Other',
 };
 
 export function TaskDetail() {
   const [, navigate] = useLocation();
   const [match, params] = useRoute('/field-worker/tasks/:id');
   const [showCompletionDialog, setShowCompletionDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
 
   if (!match) {
     return <div>Task not found</div>;
   }
 
-  const taskId = parseInt(params?.id || '0', 10);
-  const task = MOCK_TASKS[taskId];
+  const taskId = params?.id || '';
+  const { data: task, isLoading, error, refetch } = trpc.fieldWorker.getTask.useQuery({
+    taskId,
+  });
 
-  if (!task) {
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background p-4 md:p-6">
+        <div className="max-w-4xl mx-auto">
+          <Button
+            variant="ghost"
+            onClick={() => navigate('/field-worker/tasks')}
+            className="mb-6"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Tasks
+          </Button>
+          <Card>
+            <CardContent className="pt-8 text-center">
+              <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+              <p className="text-muted-foreground">Loading task details...</p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !task) {
     return (
       <div className="min-h-screen bg-background p-4 md:p-6">
         <div className="max-w-4xl mx-auto">
@@ -129,12 +99,11 @@ export function TaskDetail() {
     );
   }
 
-  const isOverdue = task.dueDate < new Date() && task.status !== 'completed';
-  const photoCompliance = task.photosAttached >= task.photoRequirements;
+  const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'completed';
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-6">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-6">
           <Button
@@ -161,6 +130,16 @@ export function TaskDetail() {
                 </Badge>
               </div>
             </div>
+            {task.status !== 'completed' && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowEditDialog(true)}
+              >
+                <Edit className="mr-2 h-4 w-4" />
+                Edit
+              </Button>
+            )}
           </div>
         </div>
 
@@ -170,19 +149,7 @@ export function TaskDetail() {
             <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
             <div>
               <p className="font-semibold text-red-900">This task is overdue!</p>
-              <p className="text-sm text-red-700">Due date was {task.dueDate.toLocaleDateString()}</p>
-            </div>
-          </div>
-        )}
-
-        {!photoCompliance && task.status !== 'completed' && (
-          <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg flex items-start gap-3">
-            <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5 flex-shrink-0" />
-            <div>
-              <p className="font-semibold text-yellow-900">Photo requirements not met</p>
-              <p className="text-sm text-yellow-700">
-                {task.photosAttached} of {task.photoRequirements} photos attached
-              </p>
+              <p className="text-sm text-red-700">Due date was {new Date(task.dueDate).toLocaleDateString()}</p>
             </div>
           </div>
         )}
@@ -197,7 +164,7 @@ export function TaskDetail() {
                 <CardTitle>Description</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">{task.description}</p>
+                <p className="text-muted-foreground">{task.description || 'No description provided'}</p>
               </CardContent>
             </Card>
 
@@ -213,32 +180,8 @@ export function TaskDetail() {
               </Card>
             )}
 
-            {/* Photo Requirements */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Photo Documentation</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Photos Required</span>
-                    <span className="text-sm text-muted-foreground">{task.photoRequirements}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Photos Attached</span>
-                    <span className={`text-sm font-semibold ${photoCompliance ? 'text-green-600' : 'text-red-600'}`}>
-                      {task.photosAttached}
-                    </span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div
-                      className={`h-2 rounded-full transition-all ${photoCompliance ? 'bg-green-500' : 'bg-yellow-500'}`}
-                      style={{ width: `${Math.min((task.photosAttached / task.photoRequirements) * 100, 100)}%` }}
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            {/* Task History Timeline */}
+            <TaskHistoryTimeline taskId={taskId} />
           </div>
 
           {/* Sidebar */}
@@ -254,7 +197,7 @@ export function TaskDetail() {
                     <User className="h-4 w-4 text-muted-foreground" />
                     <div>
                       <p className="text-xs text-muted-foreground">Assigned To</p>
-                      <p className="text-sm font-medium">{task.assignedTo}</p>
+                      <p className="text-sm font-medium">{task.assignedToName || 'Unknown'}</p>
                     </div>
                   </div>
 
@@ -262,7 +205,7 @@ export function TaskDetail() {
                     <Calendar className="h-4 w-4 text-muted-foreground" />
                     <div>
                       <p className="text-xs text-muted-foreground">Due Date</p>
-                      <p className="text-sm font-medium">{task.dueDate.toLocaleDateString()}</p>
+                      <p className="text-sm font-medium">{new Date(task.dueDate).toLocaleDateString()}</p>
                     </div>
                   </div>
 
@@ -270,16 +213,16 @@ export function TaskDetail() {
                     <Clock className="h-4 w-4 text-muted-foreground" />
                     <div>
                       <p className="text-xs text-muted-foreground">Created</p>
-                      <p className="text-sm font-medium">{task.createdAt.toLocaleDateString()}</p>
+                      <p className="text-sm font-medium">{new Date(task.createdAt).toLocaleDateString()}</p>
                     </div>
                   </div>
 
-                  {task.completedAt && (
+                  {task.completedDate && (
                     <div className="flex items-center gap-3">
                       <CheckCircle2 className="h-4 w-4 text-green-600" />
                       <div>
                         <p className="text-xs text-muted-foreground">Completed</p>
-                        <p className="text-sm font-medium">{task.completedAt.toLocaleDateString()}</p>
+                        <p className="text-sm font-medium">{new Date(task.completedDate).toLocaleDateString()}</p>
                       </div>
                     </div>
                   )}
@@ -293,13 +236,9 @@ export function TaskDetail() {
                 <Button
                   onClick={() => setShowCompletionDialog(true)}
                   className="w-full"
-                  disabled={!photoCompliance}
                 >
                   {task.status === 'in_progress' ? 'Continue Task' : 'Start Task'}
                 </Button>
-                <p className="text-xs text-muted-foreground text-center">
-                  {!photoCompliance && 'Upload required photos to complete this task'}
-                </p>
               </div>
             )}
 
@@ -318,13 +257,31 @@ export function TaskDetail() {
       {/* Task Completion Workflow */}
       {showCompletionDialog && (
         <TaskCompletionWorkflow
-          taskId={task.id.toString()}
+          taskId={taskId}
           taskTitle={task.title}
-          taskDescription={task.description}
-          requiredPhotos={task.photoRequirements}
+          taskDescription={task.description || ''}
+          requiredPhotos={0}
           onComplete={async () => {
             setShowCompletionDialog(false);
+            await refetch();
             navigate('/field-worker/tasks');
+          }}
+        />
+      )}
+
+      {/* Task Edit Dialog */}
+      {showEditDialog && (
+        <TaskEditDialog
+          taskId={taskId}
+          title={task.title}
+          description={task.description || ''}
+          priority={task.priority}
+          dueDate={new Date(task.dueDate)}
+          notes={task.notes || ''}
+          isOpen={showEditDialog}
+          onClose={() => setShowEditDialog(false)}
+          onSuccess={() => {
+            refetch();
           }}
         />
       )}
