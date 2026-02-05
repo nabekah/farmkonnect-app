@@ -2661,3 +2661,11 @@
 - [x] Connect ViewAllTasks to real-time updates
 - [x] Emit WebSocket events from task/activity mutations
 - [x] Test real-time updates end-to-end - all 247 tests passing
+
+
+## Bug Fixes - Completed
+- [x] Debug: Failed to create task error - Fixed SQL parameter binding
+- [x] Debug: Failed to log activity error - Fixed SQL parameter binding
+- [x] Identify database type and connection - Using TiDB (MySQL-compatible)
+- [x] Fix SQL parameter binding in createActivityLog - Using template literals
+- [x] Fix SQL parameter binding in createTask - Using template literals

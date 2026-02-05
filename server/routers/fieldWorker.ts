@@ -235,11 +235,13 @@ export const fieldWorkerRouter = router({
       const now = new Date();
 
       try {
+        const photoUrlsJson = JSON.stringify(input.photoUrls || []);
         await db.execute(
           sql`INSERT INTO fieldWorkerActivityLogs (
             logId, farmId, fieldId, activityType, title, description, observations,
             gpsLatitude, gpsLongitude, photoUrls, createdAt, updatedAt
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+          ) VALUES (${logId}, ${input.farmId}, ${input.fieldId}, ${input.activityType}, ${input.title}, ${input.description}, ${input.observations},
+            ${input.gpsLatitude}, ${input.gpsLongitude}, ${photoUrlsJson}, ${now}, ${now})`
         );
 
         // Broadcast activity creation event to all connected clients
@@ -423,7 +425,8 @@ export const fieldWorkerRouter = router({
           sql`INSERT INTO fieldWorkerTasks (
             taskId, farmId, fieldId, title, description, taskType, priority, status,
             assignedToUserId, assignedByUserId, dueDate, createdAt, updatedAt
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+          ) VALUES (${taskId}, ${input.farmId}, ${input.fieldId}, ${input.title}, ${input.description}, ${input.taskType}, ${input.priority}, 'pending',
+            ${input.assignedToUserId}, ${ctx.user.id}, ${input.dueDate}, ${now}, ${now})`
         );
 
         // Broadcast task creation event
