@@ -3,6 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { BatchPhotoOperations } from '@/components/BatchPhotoOperations';
+import { PhotoAnnotationTools } from '@/components/PhotoAnnotationTools';
 import {
   Dialog,
   DialogContent,
@@ -54,6 +56,7 @@ export function ActivityPhotoGallery() {
   const [filterType, setFilterType] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState(0);
   const [sortBy, setSortBy] = useState<'date' | 'name'>('date');
+  const [annotatingPhotoId, setAnnotatingPhotoId] = useState<number | null>(null);
   const itemsPerPage = 12;
 
   // Mock data for demonstration
@@ -120,6 +123,24 @@ export function ActivityPhotoGallery() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const handleBatchDelete = async (photoIds: number[]) => {
+    setActivities((prev) =>
+      prev.map((activity) => ({
+        ...activity,
+        photos: activity.photos.filter((p) => !photoIds.includes(p.id)),
+      }))
+    );
+  };
+
+  const handleBatchDownload = async (photoIds: number[]) => {
+    photoIds.forEach((id) => {
+      const photo = allPhotos.find((p) => p.id === id);
+      if (photo) {
+        handleDownloadPhoto(photo);
+      }
+    });
   };
 
   const formatDate = (timestamp: number) => {
@@ -253,6 +274,15 @@ export function ActivityPhotoGallery() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Batch Operations */}
+        {paginatedPhotos.length > 0 && (
+          <BatchPhotoOperations
+            photos={paginatedPhotos}
+            onDelete={handleBatchDelete}
+            onDownload={handleBatchDownload}
+          />
+        )}
 
         {/* Photo Gallery */}
         {isLoading ? (
@@ -393,6 +423,13 @@ export function ActivityPhotoGallery() {
                     Download
                   </Button>
                   <Button
+                    variant="default"
+                    onClick={() => setAnnotatingPhotoId(selectedPhoto?.id || null)}
+                    className="gap-2"
+                  >
+                    Edit
+                  </Button>
+                  <Button
                     variant="destructive"
                     onClick={handleDeletePhoto}
                     className="gap-2 ml-auto"
@@ -402,6 +439,29 @@ export function ActivityPhotoGallery() {
                   </Button>
                 </div>
               </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Photo Annotation Dialog */}
+        <Dialog open={!!annotatingPhotoId} onOpenChange={(open) => !open && setAnnotatingPhotoId(null)}>
+          <DialogContent className="max-w-4xl">
+            <DialogHeader>
+              <DialogTitle>Annotate Photo</DialogTitle>
+              <DialogDescription>
+                Add drawings, text, and shapes to annotate your photo
+              </DialogDescription>
+            </DialogHeader>
+
+            {selectedPhoto && (
+              <PhotoAnnotationTools
+                imageUrl={selectedPhoto.url}
+                onSave={async (annotatedImageUrl) => {
+                  console.log("Annotated image saved:", annotatedImageUrl);
+                  setAnnotatingPhotoId(null);
+                }}
+                onClose={() => setAnnotatingPhotoId(null)}
+              />
             )}
           </DialogContent>
         </Dialog>
