@@ -19,6 +19,7 @@ import { uploadPhotosToS3, validatePhotoFile } from '@/lib/photoUpload';
 import { useFormValidation } from '@/hooks/useFormValidation';
 import { BatchPhotoUpload } from '@/components/BatchPhotoUpload';
 import { useValidationRuleSync } from '@/hooks/useValidationRuleSync';
+import { validateFieldAgainstRules, validateFormAgainstRules, hasValidationErrors } from '@/utils/validationRuleEnforcer';
 
 interface Photo {
   file: File;
@@ -110,6 +111,7 @@ export function ActivityLogger() {
   };
 
   const { errors, validateForm, clearError } = useFormValidation(buildValidationConfig());
+  const [validationErrors, setValidationErrors] = useState<Record<string, any>>({});
 
   const createActivityMutation = trpc.fieldWorker.createActivityLog.useMutation({
     onSuccess: () => {
@@ -132,8 +134,27 @@ export function ActivityLogger() {
   useEffect(() => {
     if (title || description) {
       validateForm({ title, description, activityType });
+      
+      // Apply validation rules from admin
+      const formData = { title, description, activityType };
+      const ruleErrors = validateFormAgainstRules(formData, validationRules);
+      setValidationErrors(ruleErrors);
     }
   }, [validationRules, validateForm, title, description, activityType]);
+
+  // Validate individual fields on change
+  const validateField = useCallback((fieldName: string, fieldValue: any) => {
+    const fieldErrors = validateFieldAgainstRules(fieldName, fieldValue, validationRules);
+    setValidationErrors((prev) => {
+      const updated = { ...prev };
+      if (fieldErrors.length > 0) {
+        updated[fieldName] = fieldErrors;
+      } else {
+        delete updated[fieldName];
+      }
+      return updated;
+    });
+  }, [validationRules]);
 
   // Request GPS location on component mount
   useEffect(() => {
@@ -204,6 +225,15 @@ export function ActivityLogger() {
     e.preventDefault();
 
     if (!validateForm({ title, description, activityType })) {
+      return;
+    }
+
+    // Check validation rules
+    const formData = { title, description, activityType };
+    const ruleErrors = validateFormAgainstRules(formData, validationRules);
+    if (hasValidationErrors(ruleErrors)) {
+      setValidationErrors(ruleErrors);
+      alert('Please fix validation errors before submitting');
       return;
     }
 

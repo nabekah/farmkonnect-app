@@ -134,6 +134,7 @@ export const navigationStructure: MenuGroup[] = [
       { icon: Brain, label: "Predictive Analytics", path: "/predictive-analytics" },
       { icon: PieChart, label: "Farm Analytics", path: "/analytics" },
       { icon: Clock, label: "Time Tracker", path: "/reporting/time-tracker" },
+      { icon: Users, label: "Worker Performance", path: "/reporting/worker-performance" },
       { icon: FileText, label: "Report Management", path: "/report-management" },
       { icon: FileText, label: "Report Templates", path: "/report-templates" },
       { icon: BarChart3, label: "Report Analytics", path: "/report-analytics" },
