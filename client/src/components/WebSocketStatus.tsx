@@ -66,22 +66,9 @@ export function WebSocketStatus({
     );
   }
 
+  // Don't show reconnecting toast - silently reconnect in background
   if (isReconnecting) {
-    return (
-      <div className="fixed top-16 right-4 flex items-center gap-2 px-3 py-2 bg-yellow-50 border border-yellow-200 rounded-lg shadow-sm z-50">
-        <AlertCircle className="w-4 h-4 text-yellow-600 animate-pulse" />
-        <span className="text-sm text-yellow-700 font-medium">
-          Reconnecting{reconnectAttempt > 0 ? ` (attempt ${reconnectAttempt})` : '...'}
-        </span>
-        <button
-          onClick={() => setIsDismissed(true)}
-          className="ml-2 text-yellow-600 hover:text-yellow-800 transition-colors"
-          aria-label="Dismiss"
-        >
-          <X className="w-4 h-4" />
-        </button>
-      </div>
-    );
+    return null;
   }
 
   return (

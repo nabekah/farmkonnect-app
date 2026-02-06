@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import { useToast } from '@/contexts/ToastContext';
 import { CheckCircle2, AlertCircle, AlertTriangle, Info, X } from 'lucide-react';
 import { Button } from './ui/button';
@@ -50,9 +51,21 @@ function ToastItem({
     }
   };
 
+  const [isClosing, setIsClosing] = useState(false);
+
+  const handleDismiss = () => {
+    setIsClosing(true);
+    // Wait for animation to complete before removing
+    setTimeout(() => {
+      onDismiss();
+    }, 150);
+  };
+
   return (
     <div
-      className={`flex items-start gap-3 p-4 rounded-lg border shadow-lg animate-in slide-in-from-right ${getStyles()}`}
+      className={`flex items-start gap-3 p-4 rounded-lg border shadow-lg transition-all duration-150 ${
+        isClosing ? 'animate-out slide-out-to-right' : 'animate-in slide-in-from-right'
+      } ${getStyles()}`}
       role="alert"
     >
       <div className="flex-shrink-0 mt-0.5">{getIcon()}</div>
@@ -71,9 +84,10 @@ function ToastItem({
         )}
       </div>
       <button
-        onClick={onDismiss}
-        className="flex-shrink-0 p-1 hover:bg-black/10 rounded transition-colors"
+        onClick={handleDismiss}
+        className="flex-shrink-0 p-1 hover:bg-black/10 rounded transition-colors cursor-pointer"
         aria-label="Dismiss"
+        type="button"
       >
         <X className="h-4 w-4" />
       </button>
