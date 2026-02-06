@@ -271,16 +271,18 @@ function AuthenticatedHome({ user, setLocation }: { user: any; setLocation: (pat
         />
       </div>
 
-      {/* Weather Widget */}
-      <div className="mb-8">
-        <div className="col-span-1 md:col-span-2 lg:col-span-3 xl:col-span-4">
-          <WeatherWidget
-            latitude={5.6037}
-            longitude={-0.1870}
-            showForecast={true}
-          />
+      {/* Weather Widget - Only show for specific farm */}
+      {selectedFarmId !== null && (
+        <div className="mb-8">
+          <div className="col-span-1 md:col-span-2 lg:col-span-3 xl:col-span-4">
+            <WeatherWidget
+              latitude={5.6037}
+              longitude={-0.1870}
+              showForecast={true}
+            />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Worker Quick Actions */}
       <WorkerQuickActions
