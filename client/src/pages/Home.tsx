@@ -88,8 +88,8 @@ function AuthenticatedHome({ user, setLocation }: { user: any; setLocation: (pat
   // Livestock data
   const { data: animals } = trpc.livestock.animals.list.useQuery({ farmId });
 
-  // Workforce data
-  const { data: workers } = trpc.workforce.workers.list.useQuery({ farmId });
+  // Workforce data - get all workers across all farms
+  const { data: workers } = trpc.workforce.workers.getAllWorkers.useQuery({});
 
   // Fish farming data
   const { data: ponds } = trpc.fishFarming.ponds.list.useQuery({ farmId });

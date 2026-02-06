@@ -2879,3 +2879,16 @@
 - [x] Implemented error handling tests for invalid IDs and missing data
 - [x] All 267 tests passing (20 new crop tracking tests + 247 existing tests)
 - [x] TypeScript: 0 errors
+
+
+## Bug Fix - Worker Display Issue - Completed
+- [x] Investigated home page worker display not showing all registered workers
+  * Found issue: home page was only fetching workers for first farm
+- [x] Added getAllWorkers procedure to workforce router
+  * New procedure retrieves all workers across all farms
+  * Supports optional status filtering
+- [x] Updated Home.tsx to use getAllWorkers instead of single farm query
+  * Changed from trpc.workforce.workers.list to trpc.workforce.workers.getAllWorkers
+  * Now displays all registered workers from all farms
+- [x] All 267 tests passing
+- [x] TypeScript: 0 errors

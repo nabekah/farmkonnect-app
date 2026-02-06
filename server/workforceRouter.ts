@@ -93,6 +93,19 @@ export const workforceRouter = router({
         const result = await db.select().from(farmWorkers).where(eq(farmWorkers.id, input.id));
         return result.length > 0 ? result[0] : null;
       }),
+    getAllWorkers: protectedProcedure
+      .input(z.object({
+        status: z.string().optional(),
+      }).optional())
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) return [];
+
+        if (input?.status) {
+          return await db.select().from(farmWorkers).where(eq(farmWorkers.status, input.status));
+        }
+        return await db.select().from(farmWorkers);
+      }),
   }),
 
   // ============================================================================
