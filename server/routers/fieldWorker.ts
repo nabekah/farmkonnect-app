@@ -320,45 +320,58 @@ export const fieldWorkerRouter = router({
       endDate: z.string().optional(),
     }))
     .query(async ({ ctx, input }) => {
-      // Mock data for time tracker logs
-      // In production, this would query from a timeTrackerLogs table
-      const mockEntries = [
-        {
-          id: '1',
-          workerId: 'worker1',
-          workerName: 'John Doe',
-          activityType: 'crop_health',
-          startTime: '08:00',
-          endTime: '09:30',
-          duration: 90,
-          date: new Date().toISOString().split('T')[0],
-          notes: 'Checked crop health in field A',
-        },
-        {
-          id: '2',
-          workerId: 'worker2',
-          workerName: 'Jane Smith',
-          activityType: 'irrigation',
-          startTime: '09:00',
-          endTime: '11:00',
-          duration: 120,
-          date: new Date().toISOString().split('T')[0],
-          notes: 'Set up irrigation system',
-        },
-        {
-          id: '3',
-          workerId: 'worker1',
-          workerName: 'John Doe',
-          activityType: 'pest_monitoring',
-          startTime: '14:00',
-          endTime: '15:30',
-          duration: 90,
-          date: new Date().toISOString().split('T')[0],
-          notes: 'Monitored for pests',
-        },
-      ];
+      const db = await getDb();
+      if (!db) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Database not available',
+        });
+      }
 
-      return { entries: mockEntries };
+      try {
+        // Query time tracker logs from database
+        let query = sql`SELECT ttl.id, ttl.workerId, u.name as workerName, ttl.activityType, 
+                  ttl.startTime, ttl.endTime, ttl.durationMinutes as duration, 
+                  DATE(ttl.startTime) as date, ttl.notes
+              FROM timeTrackerLogs ttl
+              LEFT JOIN users u ON ttl.workerId = u.id
+              WHERE ttl.farmId = ?`;
+        
+        const params: any[] = [input.farmId];
+        
+        if (input.startDate) {
+          query = sql`${query} AND DATE(ttl.startTime) >= ?`;
+          params.push(input.startDate);
+        }
+        
+        if (input.endDate) {
+          query = sql`${query} AND DATE(ttl.startTime) <= ?`;
+          params.push(input.endDate);
+        }
+        
+        query = sql`${query} ORDER BY ttl.startTime DESC LIMIT 1000`;
+
+        const logs = await db.execute(query);
+
+        // Format entries for frontend
+        const entries = (logs || []).map((log: any) => ({
+          id: log.id?.toString() || '',
+          workerId: log.workerId?.toString() || '',
+          workerName: log.workerName || 'Unknown Worker',
+          activityType: log.activityType || '',
+          startTime: log.startTime ? new Date(log.startTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '',
+          endTime: log.endTime ? new Date(log.endTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '',
+          duration: log.duration || 0,
+          date: log.date ? new Date(log.date).toISOString().split('T')[0] : '',
+          notes: log.notes || '',
+        }));
+
+        return { entries };
+      } catch (error) {
+        console.error('Failed to fetch time tracker logs:', error);
+        // Return empty array if table doesn't exist yet
+        return { entries: [] };
+      }
     }),
 
   /**

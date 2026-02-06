@@ -1,4 +1,3 @@
-import React, { useState, useRef } from 'react';
 import { useAuth } from '@/_core/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,8 +5,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { AlertCircle, Plus, Trash2, Edit2, Download, Upload } from 'lucide-react';
+import { AlertCircle, Plus, Trash2, Edit2, Download, Upload, Check, X } from 'lucide-react';
 import { exportToCSV, parseCSV } from '@/utils/csvUtils';
+import { useState, useRef } from 'react';
+import { trpc } from '@/lib/trpc';
+import { ValidationRulesManager } from '@/components/ValidationRulesManager';
 
 // Mock data for reference lists
 const ANIMAL_TYPES = [
@@ -269,13 +271,14 @@ export default function AdminDataSettings() {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="animals">Animal Types</TabsTrigger>
             <TabsTrigger value="crops">Crop Types</TabsTrigger>
             <TabsTrigger value="diseases">Diseases</TabsTrigger>
             <TabsTrigger value="treatments">Treatments</TabsTrigger>
             <TabsTrigger value="fertilizers">Fertilizers</TabsTrigger>
             <TabsTrigger value="equipment">Equipment</TabsTrigger>
+            <TabsTrigger value="validation">Validation Rules</TabsTrigger>
           </TabsList>
 
           <TabsContent value="animals" className="space-y-6">
@@ -360,6 +363,20 @@ export default function AdminDataSettings() {
                 <div className="text-center py-8 text-muted-foreground">
                   Equipment types management coming soon.
                 </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="validation" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Validation Rules</CardTitle>
+                <CardDescription>
+                  Manage data validation rules for form fields across the application.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ValidationRulesManager />
               </CardContent>
             </Card>
           </TabsContent>

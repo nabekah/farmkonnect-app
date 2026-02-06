@@ -2118,3 +2118,27 @@ export const bulkImportJobs = mysqlTable("bulkImportJobs", {
 
 export type BulkImportJob = typeof bulkImportJobs.$inferSelect;
 export type InsertBulkImportJob = typeof bulkImportJobs.$inferInsert;
+
+
+// ============================================================================
+// TIME TRACKER LOGS
+// ============================================================================
+export const timeTrackerLogs = mysqlTable("timeTrackerLogs", {
+  id: int("id").autoincrement().primaryKey(),
+  farmId: int("farmId").notNull(),
+  workerId: int("workerId").notNull(),
+  activityType: varchar("activityType", { length: 100 }).notNull(), // e.g., "crop_health", "irrigation"
+  startTime: timestamp("startTime").notNull(),
+  endTime: timestamp("endTime"),
+  durationMinutes: int("durationMinutes"), // Calculated duration in minutes
+  notes: text("notes"),
+  gpsLatitude: decimal("gpsLatitude", { precision: 10, scale: 8 }),
+  gpsLongitude: decimal("gpsLongitude", { precision: 11, scale: 8 }),
+  photoUrls: text("photoUrls"), // JSON array of photo URLs
+  isActive: boolean("isActive").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type TimeTrackerLog = typeof timeTrackerLogs.$inferSelect;
+export type InsertTimeTrackerLog = typeof timeTrackerLogs.$inferInsert;

@@ -69,6 +69,7 @@ import { ActivityAnalyticsDashboard } from "./pages/ActivityAnalyticsDashboard";
 import { GPSTracking } from "./pages/GPSTracking";
 import { ActivityPhotoGallery } from "./pages/ActivityPhotoGallery";
 import { TaskPerformanceAnalytics } from "./pages/TaskPerformanceAnalytics";
+import { TimeTrackerReporting } from "./pages/TimeTrackerReporting";
 import { TaskDetail } from "./pages/TaskDetail";
 import AdminDataSettings from "./pages/AdminDataSettings";
 import { NotificationProvider } from "./contexts/NotificationContext";
@@ -488,6 +489,13 @@ function Router() {
         {() => (
           <DashboardLayout>
             <ActivityPhotoGallery />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/reporting/time-tracker">
+        {() => (
+          <DashboardLayout>
+            <TimeTrackerReporting />
           </DashboardLayout>
         )}
       </Route>
