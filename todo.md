@@ -2910,3 +2910,16 @@
 - [x] Added WorkerStatusDashboard route to App.tsx
 - [x] All 267 tests passing
 - [x] TypeScript: 0 errors
+
+
+## Phase 6 - Consolidated Procedures & Owner Preferences - In Progress
+- [ ] Add allAnimals consolidated procedure to livestock router
+- [ ] Add allAssets consolidated procedure to asset router
+- [ ] Implement owner dashboard preferences (KPI selection, default farm)
+- [ ] Add localStorage persistence for dashboard preferences
+- [ ] Update livestock router to filter by owner
+- [ ] Update asset router to filter by owner
+- [ ] Update analytics router for owner-specific data
+- [ ] Update reporting router for owner-specific data
+- [ ] Update analytics-dashboard page for owner-specific filtering
+- [ ] Test all consolidated procedures end-to-end

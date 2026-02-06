@@ -1,11 +1,28 @@
 import { z } from "zod";
 import { getDb } from "./db";
 import { TRPCError } from "@trpc/server";
-import { eq, and, gte, lte } from "drizzle-orm";
+import { eq, and, gte, lte, inArray } from "drizzle-orm";
 import { animals, animalHealthRecords, breedingRecords, feedingRecords, performanceMetrics, farms } from "../drizzle/schema";
 import { router, protectedProcedure } from "./_core/trpc";
 
 export const livestockRouter = router({
+  // Consolidated data for all owner's farms
+  allAnimals: protectedProcedure.query(async ({ ctx }) => {
+    const db = await getDb();
+    if (!db) return [];
+    
+    // Get all farms for this owner
+    const ownerFarms = await db.select().from(farms).where(eq(farms.farmerUserId, ctx.user.id));
+    const farmIds = ownerFarms.map(f => f.id);
+    
+    if (farmIds.length === 0) return [];
+    
+    // Get all animals for all owner's farms
+    return await db.select().from(animals).where(
+      inArray(animals.farmId, farmIds)
+    );
+  }),
+
   // ============================================================================
   // FARM MANAGEMENT
   // ============================================================================

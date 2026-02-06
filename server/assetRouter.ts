@@ -2,10 +2,27 @@ import { router, protectedProcedure } from "./_core/trpc";
 import { z } from "zod";
 import { getDb } from "./db";
 import { TRPCError } from "@trpc/server";
-import { eq, and, gte, lte } from "drizzle-orm";
-import { farmAssets } from "../drizzle/schema";
+import { eq, and, gte, lte, inArray } from "drizzle-orm";
+import { farmAssets, farms } from "../drizzle/schema";
 
 export const assetRouter = router({
+  // Consolidated data for all owner's farms
+  allAssets: protectedProcedure.query(async ({ ctx }) => {
+    const db = await getDb();
+    if (!db) return [];
+    
+    // Get all farms for this owner
+    const ownerFarms = await db.select().from(farms).where(eq(farms.farmerUserId, ctx.user.id));
+    const farmIds = ownerFarms.map(f => f.id);
+    
+    if (farmIds.length === 0) return [];
+    
+    // Get all assets for all owner's farms
+    return await db.select().from(farmAssets).where(
+      inArray(farmAssets.farmId, farmIds)
+    );
+  }),
+
   // ============================================================================
   // ASSET MANAGEMENT
   // ============================================================================

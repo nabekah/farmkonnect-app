@@ -122,8 +122,10 @@ function AuthenticatedHome({ user, setLocation }: { user: any; setLocation: (pat
     ? trpc.financial.allRevenue.useQuery()
     : trpc.financial.revenue.list.useQuery({ farmId: queryFarmId });
 
-  // Livestock data
-  const { data: animals } = trpc.livestock.animals.list.useQuery({ farmId: queryFarmId });
+  // Livestock data - use consolidated query when All Farms selected
+  const { data: animals } = isAllFarmsSelected
+    ? trpc.livestock.allAnimals.useQuery()
+    : trpc.livestock.animals.list.useQuery({ farmId: queryFarmId });
 
   // Workforce data - always get all workers, filter based on selection
   const { data: allWorkers } = trpc.workforce.workers.getAllWorkers.useQuery({});
@@ -138,8 +140,10 @@ function AuthenticatedHome({ user, setLocation }: { user: any; setLocation: (pat
   // Fish farming data
   const { data: ponds } = trpc.fishFarming.ponds.list.useQuery({ farmId: queryFarmId });
 
-  // Assets data
-  const { data: assets } = trpc.assets.assets.list.useQuery({ farmId: queryFarmId });
+  // Assets data - use consolidated query when All Farms selected
+  const { data: assets } = isAllFarmsSelected
+    ? trpc.assets.allAssets.useQuery()
+    : trpc.assets.assets.list.useQuery({ farmId: queryFarmId });
 
   // Calculate KPIs
   const totalRevenue = revenue?.reduce((sum, r) => sum + parseFloat(r.amount || "0"), 0) || 0;
