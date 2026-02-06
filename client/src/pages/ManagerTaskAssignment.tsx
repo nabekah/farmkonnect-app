@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/dialog';
 import { Plus, Loader2, CheckCircle2, AlertCircle, Clock, Trash2 } from 'lucide-react';
 import { useLocation } from 'wouter';
+import { useFormValidation } from '@/hooks/useFormValidation';
 
 const TASK_TYPES = [
   { value: 'planting', label: 'Planting' },
@@ -73,6 +74,15 @@ export function ManagerTaskAssignment() {
   const [searchQuery, setSearchQuery] = useState('');
 
   const createTaskMutation = trpc.fieldWorker.createTask.useMutation();
+
+  const { errors, validateForm, clearError } = useFormValidation({
+    title: { required: true, minLength: 3 },
+    description: { required: true, minLength: 10 },
+    taskType: { required: true },
+    priority: { required: true },
+    dueDate: { required: true },
+    assignedToUserId: { required: true, custom: (val) => val > 0 },
+  });
 
   // Form state
   const [newTask, setNewTask] = useState<NewTask>({
@@ -144,8 +154,7 @@ export function ManagerTaskAssignment() {
   const handleCreateTask = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!newTask.title.trim() || newTask.assignedToUserId === 0) {
-      alert('Please fill in all required fields');
+    if (!validateForm(newTask)) {
       return;
     }
 
@@ -231,10 +240,17 @@ export function ManagerTaskAssignment() {
                   </label>
                   <Input
                     value={newTask.title}
-                    onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
+                    onChange={(e) => {
+                      setNewTask({ ...newTask, title: e.target.value });
+                      clearError('title');
+                    }}
                     placeholder="e.g., Monitor crop health in Field A"
                     required
+                    className={errors.title ? 'border-red-500' : ''}
                   />
+                  {errors.title && (
+                    <p className="text-sm text-red-500 mt-1">{errors.title}</p>
+                  )}
                 </div>
 
                 {/* Task Type */}
@@ -262,14 +278,21 @@ export function ManagerTaskAssignment() {
                 {/* Description */}
                 <div>
                   <label className="block text-sm font-medium mb-2 text-foreground">
-                    Description
+                    Description <span className="text-red-500">*</span>
                   </label>
                   <Textarea
                     value={newTask.description}
-                    onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
+                    onChange={(e) => {
+                      setNewTask({ ...newTask, description: e.target.value });
+                      clearError('description');
+                    }}
                     placeholder="Detailed instructions for the task"
                     rows={3}
+                    className={errors.description ? 'border-red-500' : ''}
                   />
+                  {errors.description && (
+                    <p className="text-sm text-red-500 mt-1">{errors.description}</p>
+                  )}
                 </div>
 
                 {/* Assign To */}

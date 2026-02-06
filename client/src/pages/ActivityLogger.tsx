@@ -16,6 +16,7 @@ import {
 import { AlertCircle, Camera, MapPin, Loader2, CheckCircle2, X } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { uploadPhotosToS3, validatePhotoFile } from '@/lib/photoUpload';
+import { useFormValidation } from '@/hooks/useFormValidation';
 
 interface Photo {
   file: File;
@@ -58,6 +59,12 @@ export function ActivityLogger() {
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const { errors, validateForm, clearError } = useFormValidation({
+    title: { required: true, minLength: 3 },
+    description: { required: true, minLength: 10 },
+    activityType: { required: true },
+  });
 
   const createActivityMutation = trpc.fieldWorker.createActivityLog.useMutation({
     onSuccess: () => {
@@ -167,8 +174,12 @@ export function ActivityLogger() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!farmId || !title.trim()) {
-      alert('Please fill in all required fields');
+    if (!validateForm({ title, description, activityType })) {
+      return;
+    }
+
+    if (!farmId) {
+      alert('Farm ID not initialized');
       return;
     }
 
@@ -320,22 +331,36 @@ export function ActivityLogger() {
                 </label>
                 <Input
                   value={title}
-                  onChange={(e) => setTitle(e.target.value)}
+                  onChange={(e) => {
+                    setTitle(e.target.value);
+                    clearError('title');
+                  }}
                   placeholder="e.g., Morning crop inspection in Field A"
                   required
+                  className={errors.title ? 'border-red-500' : ''}
                 />
+                {errors.title && (
+                  <p className="text-sm text-red-500 mt-1">{errors.title}</p>
+                )}
               </div>
 
               <div>
                 <label className="block text-sm font-medium mb-2 text-foreground">
-                  Description
+                  Description <span className="text-red-500">*</span>
                 </label>
                 <Textarea
                   value={description}
-                  onChange={(e) => setDescription(e.target.value)}
+                  onChange={(e) => {
+                    setDescription(e.target.value);
+                    clearError('description');
+                  }}
                   placeholder="What did you do?"
                   rows={3}
+                  className={errors.description ? 'border-red-500' : ''}
                 />
+                {errors.description && (
+                  <p className="text-sm text-red-500 mt-1">{errors.description}</p>
+                )}
               </div>
 
               <div>
