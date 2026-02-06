@@ -15,6 +15,7 @@ import {
 import { Clock, CheckCircle2, AlertCircle, Trash2, ChevronLeft, Loader2 } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
 import { useWebSocket } from '@/hooks/useWebSocket';
+import { useNotificationHelpers } from '@/contexts/NotificationContext';
 
 interface Task {
   taskId: string;
@@ -58,6 +59,7 @@ export function ViewAllTasks() {
   const { user } = useAuth();
   const [, navigate] = useLocation();
   const [tasks, setTasks] = useState<Task[]>([]);
+  const { success } = useNotificationHelpers();
   const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterPriority, setFilterPriority] = useState<string>('all');
@@ -75,7 +77,10 @@ export function ViewAllTasks() {
 
   // Set up WebSocket listeners for real-time updates
   useWebSocket({
-    onTaskCreated: () => refetch(),
+    onTaskCreated: (data: any) => {
+      refetch();
+      success('New Task', `Task assigned: ${data.title}`);
+    },
     onTaskUpdated: () => refetch(),
   });
 

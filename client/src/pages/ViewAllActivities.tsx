@@ -15,6 +15,7 @@ import {
 import { MapPin, Camera, ChevronLeft, Search, Calendar, Loader2 } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
 import { useWebSocket } from '@/hooks/useWebSocket';
+import { useNotificationHelpers } from '@/contexts/NotificationContext';
 
 interface Activity {
   id: string;
@@ -48,6 +49,7 @@ export function ViewAllActivities() {
   const { user } = useAuth();
   const [, navigate] = useLocation();
   const [activities, setActivities] = useState<Activity[]>([]);
+  const { success } = useNotificationHelpers();
   const [filteredActivities, setFilteredActivities] = useState<Activity[]>([]);
   const [filterType, setFilterType] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -65,7 +67,10 @@ export function ViewAllActivities() {
 
   // Set up WebSocket listeners for real-time updates
   useWebSocket({
-    onActivityCreated: () => refetch(),
+    onActivityCreated: (data: any) => {
+      refetch();
+      success('New Activity', `Activity logged: ${data.activityType}`);
+    },
     onActivityUpdated: () => refetch(),
   });
 

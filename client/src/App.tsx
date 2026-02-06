@@ -71,6 +71,12 @@ import { ActivityPhotoGallery } from "./pages/ActivityPhotoGallery";
 import { TaskPerformanceAnalytics } from "./pages/TaskPerformanceAnalytics";
 import { TaskDetail } from "./pages/TaskDetail";
 import AdminDataSettings from "./pages/AdminDataSettings";
+import { NotificationProvider } from "./contexts/NotificationContext";
+import { TimeTrackerProvider } from "./contexts/TimeTrackerContext";
+import { ActivityNotificationContainer } from "./components/ActivityNotificationToast";
+import { WebSocketStatus } from "./components/WebSocketStatus";
+import { useNotification } from "./contexts/NotificationContext";
+import { useWebSocket } from "./hooks/useWebSocket";
 
 function Router() {
   return (
@@ -509,7 +515,10 @@ function Router() {
 //   to keep consistent foreground/background color across components
 // - If you want to make theme switchable, pass `switchable` ThemeProvider and use `useTheme` hook
 
-function App() {
+function AppContent() {
+  const { notifications, removeNotification } = useNotification();
+  const { isConnected, isReconnecting } = useWebSocket();
+
   return (
     <ErrorBoundary>
       <DarkModeProvider>
@@ -520,11 +529,27 @@ function App() {
           <TooltipProvider>
             <Toaster />
             <FloatingElements />
+            <WebSocketStatus isConnected={isConnected} isReconnecting={isReconnecting} />
+            <ActivityNotificationContainer
+              notifications={notifications}
+              onDismiss={removeNotification}
+              position="top-right"
+            />
             <Router />
           </TooltipProvider>
         </ThemeProvider>
       </DarkModeProvider>
     </ErrorBoundary>
+  );
+}
+
+function App() {
+  return (
+    <NotificationProvider>
+      <TimeTrackerProvider>
+        <AppContent />
+      </TimeTrackerProvider>
+    </NotificationProvider>
   );
 }
 
