@@ -2741,3 +2741,39 @@
 - [ ] WebSocket reconnection logic may need improvement
 - [ ] Memory leaks from event listeners
 - [ ] Unnecessary re-renders
+
+
+## Database-UI Integration Bugs - In Progress
+
+### Livestock Data Issues
+- [ ] Livestock data not showing after save to database
+- [ ] Livestock farm type shows only as dropdown in crops page
+- [ ] Livestock records not linked to farm correctly
+- [ ] Livestock list page not fetching from database
+
+### Farm Type & Filtering Issues
+- [ ] Crops page shows livestock farms in dropdown when it shouldn't
+- [ ] Farm type filtering not working correctly
+- [ ] Farm-specific data not filtered in UI
+
+### Admin Settings Issues
+- [ ] Admin cannot add supporting data lists
+- [ ] No settings page for managing reference data
+- [ ] Supporting data tables not connected to UI
+
+### Database Query Validation
+- [ ] Livestock queries not returning saved data
+- [ ] Farm queries not filtering by type
+- [ ] Crop queries not filtering by farm type
+
+
+## Database-UI Integration Audit & Fixes - COMPLETED
+- [x] Audit all 40+ database tables against UI pages and routers
+- [x] Fix Livestock.tsx endpoint calls - Changed to correct tRPC paths
+- [x] Add farms.list procedure to livestockRouter
+- [x] Add healthRecords.delete procedure to livestockRouter
+- [x] Create AdminDataSettings page for managing reference data
+- [x] Implement admin panel for animal types, crop types, diseases, treatments, fertilizers
+- [x] Add /admin/data-settings route to App.tsx
+- [x] All 247 tests passing
+- [x] TypeScript: 0 errors

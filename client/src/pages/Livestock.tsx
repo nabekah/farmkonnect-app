@@ -29,27 +29,26 @@ export default function Livestock() {
   const [tabValue, setTabValue] = useState("animals");
 
   // Queries
-  const { data: farms = [] } = trpc.farms.list.useQuery();
-  const { data: animalsList = [] } = trpc.animals.list.useQuery(
+  const { data: farms = [] } = trpc.livestock.farms.list.useQuery();
+  const { data: animalsList = [] } = trpc.livestock.animals.list.useQuery(
     { farmId: selectedFarmId! },
     { enabled: !!selectedFarmId }
   );
-  const { data: healthRecords = [] } = trpc.healthRecords.list.useQuery(
+  const { data: healthRecords = [] } = trpc.livestock.healthRecords.list.useQuery(
     { animalId: selectedAnimalId! },
     { enabled: !!selectedAnimalId }
   );
-  const { data: performanceData = [] } = trpc.performanceMetrics.listByAnimal.useQuery(
+  const { data: performanceData = [] } = trpc.livestock.performanceMetrics.list.useQuery(
     { animalId: selectedAnimalId! },
     { enabled: !!selectedAnimalId }
   );
 
   // Mutations
-  const createAnimalMutation = trpc.animals.create.useMutation();
-  const updateAnimalMutation = trpc.animals.update.useMutation();
-  const createHealthRecordMutation = trpc.healthRecords.create.useMutation();
-  const deleteHealthRecordMutation = trpc.healthRecords.delete.useMutation();
-  const recordVaccinationMutation = trpc.vaccinations.record.useMutation();
-  const recordPerformanceMutation = trpc.performanceMetrics.record.useMutation();
+  const createAnimalMutation = trpc.livestock.animals.create.useMutation();
+  const updateAnimalMutation = trpc.livestock.animals.update.useMutation();
+  const createHealthRecordMutation = trpc.livestock.healthRecords.create.useMutation();
+  const deleteHealthRecordMutation = trpc.livestock.healthRecords.delete.useMutation();
+  const recordPerformanceMutation = trpc.livestock.performanceMetrics.create.useMutation();
 
   // Form states
   const [animalForm, setAnimalForm] = useState({
@@ -106,12 +105,12 @@ export default function Livestock() {
 
   const handleRecordVaccination = async () => {
     if (!selectedAnimalId || !vaccinationForm.vaccineType || !vaccinationForm.recordDate) return;
-    await recordVaccinationMutation.mutateAsync({
+    // Vaccination records are tracked through health records
+    await createHealthRecordMutation.mutateAsync({
       animalId: selectedAnimalId,
-      vaccineType: vaccinationForm.vaccineType,
       recordDate: new Date(vaccinationForm.recordDate),
-      nextDueDate: vaccinationForm.nextDueDate ? new Date(vaccinationForm.nextDueDate) : undefined,
-      details: vaccinationForm.details || undefined,
+      eventType: "vaccination",
+      details: `${vaccinationForm.vaccineType}: ${vaccinationForm.details || 'Vaccination administered'}`,
     });
     setVaccinationForm({ vaccineType: "", recordDate: "", nextDueDate: "", details: "" });
   };

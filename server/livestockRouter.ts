@@ -1,11 +1,32 @@
-import { router, protectedProcedure } from "./_core/trpc";
 import { z } from "zod";
 import { getDb } from "./db";
 import { TRPCError } from "@trpc/server";
 import { eq, and, gte, lte } from "drizzle-orm";
-import { animals, animalHealthRecords, breedingRecords, feedingRecords, performanceMetrics } from "../drizzle/schema";
+import { animals, animalHealthRecords, breedingRecords, feedingRecords, performanceMetrics, farms } from "../drizzle/schema";
+import { router, protectedProcedure } from "./_core/trpc";
 
 export const livestockRouter = router({
+  // ============================================================================
+  // FARM MANAGEMENT
+  // ============================================================================
+  farms: router({
+    list: protectedProcedure
+      .input(z.object({
+        farmType: z.enum(["livestock", "mixed"]).optional(),
+      }))
+      .query(async ({ input, ctx }) => {
+        const db = await getDb();
+        if (!db) return [];
+
+        let whereConditions = [eq(farms.farmerUserId, ctx.user?.id || 0)];
+        if (input.farmType) {
+          whereConditions.push(eq(farms.farmType, input.farmType));
+        }
+
+        return await db.select().from(farms).where(and(...whereConditions));
+      }),
+  }),
+
   // ============================================================================
   // ANIMAL MANAGEMENT
   // ============================================================================
@@ -111,6 +132,14 @@ export const livestockRouter = router({
         }
 
         return await db.select().from(animalHealthRecords).where(and(...whereConditions));
+      }),
+
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        return await db.delete(animalHealthRecords).where(eq(animalHealthRecords.id, input.id));
       }),
   }),
 

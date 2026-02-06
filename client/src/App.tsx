@@ -70,6 +70,7 @@ import { GPSTracking } from "./pages/GPSTracking";
 import { ActivityPhotoGallery } from "./pages/ActivityPhotoGallery";
 import { TaskPerformanceAnalytics } from "./pages/TaskPerformanceAnalytics";
 import { TaskDetail } from "./pages/TaskDetail";
+import AdminDataSettings from "./pages/AdminDataSettings";
 
 function Router() {
   return (
@@ -488,6 +489,13 @@ function Router() {
         {() => (
           <DashboardLayout>
             <TaskPerformanceAnalytics />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/admin/data-settings">
+        {() => (
+          <DashboardLayout>
+            <AdminDataSettings />
           </DashboardLayout>
         )}
       </Route>
