@@ -42,6 +42,7 @@ import { fertilizerManagementRouter } from "./routers/fertilizerManagement";
 import { navigationRouter } from "./routers/navigation";
 import { fieldWorkerRouter } from "./routers/fieldWorker";
 import { adminRouter } from "./routers/admin";
+import { farmPermissionsRouter } from "./farmPermissionsRouter";
 import { z } from "zod";
 import { getDb } from "./db";
 import { TRPCError } from "@trpc/server";
@@ -74,6 +75,7 @@ export const appRouter = router({
   workforce: workforceRouter,
   fishFarming: fishFarmingRouter,
   assets: assetRouter,
+  farmPermissions: farmPermissionsRouter,
   reporting: reportingRouter,
   analytics: analyticsRouter,
   notificationSettings: notificationSettingsRouter,

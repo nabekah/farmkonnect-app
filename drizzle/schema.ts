@@ -2142,3 +2142,23 @@ export const timeTrackerLogs = mysqlTable("timeTrackerLogs", {
 
 export type TimeTrackerLog = typeof timeTrackerLogs.$inferSelect;
 export type InsertTimeTrackerLog = typeof timeTrackerLogs.$inferInsert;
+
+
+// ============================================================================
+// FARM PERMISSIONS
+// ============================================================================
+export const farmPermissions = mysqlTable("farmPermissions", {
+  id: int("id").autoincrement().primaryKey(),
+  farmId: int("farmId").notNull(),
+  userId: int("userId").notNull(),
+  role: mysqlEnum("role", ["viewer", "editor", "admin"]).default("viewer").notNull(),
+  grantedBy: int("grantedBy").notNull(), // User ID who granted the permission
+  grantedAt: timestamp("grantedAt").defaultNow().notNull(),
+  expiresAt: timestamp("expiresAt"), // Optional expiration date
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type FarmPermission = typeof farmPermissions.$inferSelect;
+export type InsertFarmPermission = typeof farmPermissions.$inferInsert;

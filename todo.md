@@ -2923,3 +2923,14 @@
 - [ ] Update reporting router for owner-specific data
 - [ ] Update analytics-dashboard page for owner-specific filtering
 - [ ] Test all consolidated procedures end-to-end
+
+
+## Phase 7 - Settings Integration & Permissions - In Progress
+- [ ] Integrate DashboardPreferencesSettings into user account settings page
+- [ ] Create farm permission management UI component
+- [ ] Add farmPermissions table to database schema
+- [ ] Implement farm permission tRPC procedures (create, list, update, delete)
+- [ ] Add role-based access control (viewer, editor, admin) for farms
+- [ ] Implement data export with preference filtering
+- [ ] Add CSV/PDF export respecting selected KPIs and farms
+- [ ] Test all features end-to-end

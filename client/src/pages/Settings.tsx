@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { User, Bell, Shield, Palette, Key, Download, Copy, CheckCircle } from "lucide-react";
+import { User, Bell, Shield, Palette, Key, Download, Copy, CheckCircle, LayoutDashboard } from "lucide-react";
+import { DashboardPreferencesSettings } from "@/components/DashboardPreferencesSettings";
 import { trpc } from "../lib/trpc";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -371,6 +372,10 @@ export default function Settings() {
             <Palette className="h-4 w-4 mr-2" />
             Appearance
           </TabsTrigger>
+          <TabsTrigger value="dashboard">
+            <LayoutDashboard className="h-4 w-4 mr-2" />
+            Dashboard
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="profile" className="space-y-6">
@@ -496,6 +501,10 @@ export default function Settings() {
 
         <TabsContent value="appearance" className="space-y-6">
           <AppearanceTab />
+        </TabsContent>
+
+        <TabsContent value="dashboard" className="space-y-6">
+          <DashboardPreferencesSettings />
         </TabsContent>
       </Tabs>
     </div>
