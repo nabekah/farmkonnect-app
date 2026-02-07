@@ -44,6 +44,7 @@ import { fieldWorkerRouter } from "./routers/fieldWorker";
 import { adminRouter } from "./routers/admin";
 import { farmPermissionsRouter } from "./farmPermissionsRouter";
 import { activityApprovalRouter } from "./routers/activityApproval";
+import { animalBulkRegistrationRouter } from "./routers/animalBulkRegistration";
 import { z } from "zod";
 import { getDb } from "./db";
 import { TRPCError } from "@trpc/server";
@@ -94,6 +95,7 @@ export const appRouter = router({
   navigation: navigationRouter,
   fieldWorker: fieldWorkerRouter,
   admin: adminRouter,
+  animalBulkRegistration: animalBulkRegistrationRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {
