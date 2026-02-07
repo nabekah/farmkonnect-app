@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/_core/hooks/useAuth';
 import { trpc } from '@/lib/trpc';
 import { Button } from '@/components/ui/button';
@@ -61,7 +61,42 @@ export function ActivityLogger() {
     },
   });
 
-  // Get GPS location
+  // Auto-request GPS location on component mount
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      setGpsError('Geolocation is not supported by your browser');
+      return;
+    }
+
+    setGpsLoading(true);
+    setGpsError(null);
+
+    const timeoutId = setTimeout(() => {
+      setGpsLoading(false);
+      if (!gpsLocation) {
+        setGpsError('Location request timed out. You can try again manually.');
+      }
+    }, 10000);
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        clearTimeout(timeoutId);
+        setGpsLocation({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        });
+        setGpsLoading(false);
+        setGpsError(null);
+      },
+      (error) => {
+        clearTimeout(timeoutId);
+        setGpsError('Location services disabled. Enable to auto-capture GPS data.');
+        setGpsLoading(false);
+      }
+    );
+  }, []);
+
+  // Manual GPS location retry
   const handleGetLocation = () => {
     if (!navigator.geolocation) {
       setGpsError('Geolocation is not supported by your browser');
@@ -164,7 +199,47 @@ export function ActivityLogger() {
         {/* Header */}
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-foreground mb-2">Log Activity</h1>
-          <p className="text-muted-foreground">Record your field work and observations</p>
+            <p className="text-muted-foreground">Record your field work and observations</p>
+          </div>
+
+        {/* GPS Status */}
+        <div className="mb-6">
+          {gpsLoading && (
+            <Card className="border-blue-200 bg-blue-50">
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-3">
+                  <Loader2 className="h-5 w-5 text-blue-600 animate-spin" />
+                  <div>
+                    <p className="font-medium text-blue-900">Capturing GPS Location</p>
+                    <p className="text-sm text-blue-700">Please allow location access when prompted</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+          {gpsLocation && (
+            <Card className="border-green-200 bg-green-50">
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <MapPin className="h-5 w-5 text-green-600" />
+                    <div>
+                      <p className="font-medium text-green-900">GPS Location Captured</p>
+                      <p className="text-sm text-green-700">{gpsLocation.lat.toFixed(4)}, {gpsLocation.lng.toFixed(4)}</p>
+                    </div>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleGetLocation}
+                  >
+                    Update
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         {/* Error Alert */}
@@ -268,39 +343,7 @@ export function ActivityLogger() {
                 />
               </div>
 
-              {/* GPS Location */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium">GPS Location</label>
-                <div className="flex items-center gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={handleGetLocation}
-                    disabled={gpsLoading}
-                    className="flex items-center gap-2"
-                  >
-                    {gpsLoading ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        Getting location...
-                      </>
-                    ) : (
-                      <>
-                        <MapPin className="h-4 w-4" />
-                        Get Location
-                      </>
-                    )}
-                  </Button>
-                  {gpsLocation && (
-                    <Badge variant="secondary">
-                      {gpsLocation.lat.toFixed(4)}, {gpsLocation.lng.toFixed(4)}
-                    </Badge>
-                  )}
-                </div>
-                {gpsError && (
-                  <p className="text-sm text-amber-600">{gpsError}</p>
-                )}
-              </div>
+
 
               {/* Submit Button */}
               <div className="flex gap-2 pt-4">
