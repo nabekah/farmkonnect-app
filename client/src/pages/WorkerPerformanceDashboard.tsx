@@ -1,16 +1,27 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { TrendingUp, Clock, AlertCircle, Award } from 'lucide-react';
+import { TrendingUp, Clock, AlertCircle, Award, Download, FileText, Printer } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
+import { usePerformanceUpdates, PerformanceUpdate } from '@/hooks/usePerformanceUpdates';
+import { exportPerformanceCSV, exportPerformanceJSON, exportPerformanceHTML, printPerformanceReport } from '@/lib/performanceExport';
+
+interface WorkerMetric {
+  userId: number;
+  totalHours: string;
+  totalEntries: number;
+  avgDuration: string;
+  lastActive: Date;
+}
 
 export default function WorkerPerformanceDashboard() {
   const [farmId, setFarmId] = useState(1);
   const [startDate, setStartDate] = useState<Date | undefined>();
   const [endDate, setEndDate] = useState<Date | undefined>();
+  const [workerMetrics, setWorkerMetrics] = useState<Map<number, WorkerMetric>>(new Map());
 
   const { data: logsData, isLoading } = trpc.fieldWorker.getTimeTrackerLogs.useQuery({
     farmId,
@@ -20,48 +31,85 @@ export default function WorkerPerformanceDashboard() {
 
   const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#14b8a6'];
 
-  // Calculate performance metrics from time tracker logs
-  const performanceMetrics = useMemo(() => {
-    if (!logsData || typeof logsData !== 'object' || !Array.isArray(logsData)) {
-      return [];
+  // Initialize metrics from initial data
+  const initialMetrics = useMemo(() => {
+    const metricsMap = new Map<number, WorkerMetric>();
+    
+    if (logsData && Array.isArray(logsData)) {
+      (logsData as any[]).forEach((log: any) => {
+        const userId = log.userId;
+        if (!metricsMap.has(userId)) {
+          metricsMap.set(userId, {
+            userId,
+            totalHours: '0',
+            totalEntries: 0,
+            avgDuration: '0',
+            lastActive: new Date(),
+          });
+        }
+
+        const metric = metricsMap.get(userId)!;
+        const duration = log.durationMinutes || 0;
+        const totalMinutes = parseFloat(metric.totalHours) * 60 + duration;
+        const totalEntries = metric.totalEntries + 1;
+
+        metric.totalHours = (totalMinutes / 60).toFixed(2);
+        metric.totalEntries = totalEntries;
+        metric.avgDuration = (totalMinutes / totalEntries).toFixed(0);
+        metric.lastActive = new Date(log.clockInTime);
+      });
     }
 
-    const metricsMap = new Map<number, any>();
+    return metricsMap;
+  }, [logsData]);
 
-    (logsData as any[]).forEach((log: any) => {
-      const userId = log.userId;
-      if (!metricsMap.has(userId)) {
-        metricsMap.set(userId, {
-          userId,
-          totalMinutes: 0,
-          totalEntries: 0,
-          avgDuration: 0,
-          lastActive: null,
+  // Initialize worker metrics on mount
+  useMemo(() => {
+    setWorkerMetrics(initialMetrics);
+  }, [initialMetrics]);
+
+  // Handle real-time performance updates
+  const handlePerformanceUpdate = useCallback((update: PerformanceUpdate) => {
+    setWorkerMetrics((prev) => {
+      const newMetrics = new Map(prev);
+      const existing = newMetrics.get(update.userId);
+
+      if (existing) {
+        const totalMinutes = parseFloat(existing.totalHours) * 60 + update.avgDuration;
+        const totalEntries = existing.totalEntries + update.totalEntries;
+
+        newMetrics.set(update.userId, {
+          userId: update.userId,
+          totalHours: (totalMinutes / 60).toFixed(2),
+          totalEntries,
+          avgDuration: (totalMinutes / totalEntries).toFixed(0),
+          lastActive: update.lastActive,
+        });
+      } else {
+        newMetrics.set(update.userId, {
+          userId: update.userId,
+          totalHours: (update.totalHours).toFixed(2),
+          totalEntries: update.totalEntries,
+          avgDuration: update.avgDuration.toFixed(0),
+          lastActive: update.lastActive,
         });
       }
 
-      const metrics = metricsMap.get(userId);
-      const duration = log.durationMinutes || 0;
-      metrics.totalMinutes += duration;
-      metrics.totalEntries += 1;
-      metrics.lastActive = log.clockInTime;
+      return newMetrics;
     });
+  }, []);
 
-    return Array.from(metricsMap.values()).map((m: any) => ({
-      ...m,
-      totalHours: (m.totalMinutes / 60).toFixed(2),
-      avgDuration: (m.totalMinutes / m.totalEntries).toFixed(0),
-    }));
-  }, [logsData]);
+  // Set up real-time updates
+  usePerformanceUpdates({
+    onUpdate: handlePerformanceUpdate,
+    enabled: true,
+  });
 
   // Calculate daily hours distribution
   const dailyHours = useMemo(() => {
-    if (!logsData || typeof logsData !== 'object' || !Array.isArray(logsData)) {
-      return [];
-    }
+    if (!logsData || !Array.isArray(logsData)) return [];
 
     const dailyMap = new Map<string, number>();
-
     (logsData as any[]).forEach((log: any) => {
       const date = new Date(log.clockInTime).toLocaleDateString();
       const duration = log.durationMinutes || 0;
@@ -76,12 +124,10 @@ export default function WorkerPerformanceDashboard() {
 
   // Calculate activity distribution
   const activityDistribution = useMemo(() => {
-    if (!logsData || typeof logsData !== 'object' || !Array.isArray(logsData)) {
-      return [];
-    }
+    if (!logsData || !Array.isArray(logsData)) return [];
 
     const activityMap = new Map<string, number>();
-    (logsData as any[]).forEach((log: any) => {
+    (logsData as any[]).forEach(() => {
       activityMap.set('Clock In/Out', (activityMap.get('Clock In/Out') || 0) + 1);
     });
 
@@ -100,11 +146,72 @@ export default function WorkerPerformanceDashboard() {
     }
   };
 
+  // Export performance data as CSV
+  const handleExportCSV = useCallback(() => {
+    const metrics = Array.from(workerMetrics.values());
+    const headers = ['Worker ID', 'Total Hours', 'Total Entries', 'Avg Duration (min)', 'Last Active'];
+    const rows = metrics.map((m) => [
+      m.userId,
+      m.totalHours,
+      m.totalEntries,
+      m.avgDuration,
+      m.lastActive.toISOString(),
+    ]);
+
+    const csv = [headers, ...rows].map((row) => row.join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `performance-report-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  }, [workerMetrics]);
+
+  const performanceArray = Array.from(workerMetrics.values());
+  const totalHours = performanceArray.reduce((sum, m) => sum + parseFloat(m.totalHours), 0);
+
   return (
     <div className="min-h-screen bg-background p-6">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground mb-2">Worker Performance Dashboard</h1>
-        <p className="text-muted-foreground">Track and analyze worker productivity and time allocation</p>
+      <div className="mb-8 flex justify-between items-start">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground mb-2">Worker Performance Dashboard</h1>
+          <p className="text-muted-foreground">Real-time tracking and analytics for worker productivity</p>
+        </div>
+        <div className="flex gap-2">
+          <Button
+            onClick={() => exportPerformanceCSV(performanceArray)}
+            variant="outline"
+            className="gap-2"
+          >
+            <Download className="h-4 w-4" />
+            CSV
+          </Button>
+          <Button
+            onClick={() => exportPerformanceJSON(performanceArray, dailyHours)}
+            variant="outline"
+            className="gap-2"
+          >
+            <FileText className="h-4 w-4" />
+            JSON
+          </Button>
+          <Button
+            onClick={() => exportPerformanceHTML(performanceArray, dailyHours)}
+            variant="outline"
+            className="gap-2"
+          >
+            <FileText className="h-4 w-4" />
+            HTML
+          </Button>
+          <Button
+            onClick={() => printPerformanceReport(performanceArray, dailyHours)}
+            variant="outline"
+            className="gap-2"
+          >
+            <Printer className="h-4 w-4" />
+            Print
+          </Button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -133,10 +240,14 @@ export default function WorkerPerformanceDashboard() {
               />
             </div>
             <div className="flex items-end">
-              <Button onClick={() => {
-                setStartDate(undefined);
-                setEndDate(undefined);
-              }} variant="outline" className="w-full">
+              <Button
+                onClick={() => {
+                  setStartDate(undefined);
+                  setEndDate(undefined);
+                }}
+                variant="outline"
+                className="w-full"
+              >
                 Clear Filters
               </Button>
             </div>
@@ -154,9 +265,7 @@ export default function WorkerPerformanceDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {performanceMetrics.reduce((sum: number, m: any) => sum + parseFloat(m.totalHours || 0), 0).toFixed(1)}h
-            </div>
+            <div className="text-2xl font-bold">{totalHours.toFixed(1)}h</div>
           </CardContent>
         </Card>
 
@@ -168,7 +277,7 @@ export default function WorkerPerformanceDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{performanceMetrics.length}</div>
+            <div className="text-2xl font-bold">{performanceArray.length}</div>
           </CardContent>
         </Card>
 
@@ -181,8 +290,8 @@ export default function WorkerPerformanceDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {performanceMetrics.length > 0
-                ? (performanceMetrics.reduce((sum: number, m: any) => sum + parseFloat(m.avgDuration || 0), 0) / performanceMetrics.length).toFixed(0)
+              {performanceArray.length > 0
+                ? (performanceArray.reduce((sum, m) => sum + parseFloat(m.avgDuration), 0) / performanceArray.length).toFixed(0)
                 : 0}m
             </div>
           </CardContent>
@@ -197,7 +306,7 @@ export default function WorkerPerformanceDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {performanceMetrics.reduce((sum: number, m: any) => sum + m.totalEntries, 0)}
+              {performanceArray.reduce((sum, m) => sum + m.totalEntries, 0)}
             </div>
           </CardContent>
         </Card>
@@ -263,7 +372,7 @@ export default function WorkerPerformanceDashboard() {
           <Card>
             <CardHeader>
               <CardTitle>Worker Performance Metrics</CardTitle>
-              <CardDescription>Detailed metrics for each worker</CardDescription>
+              <CardDescription>Detailed metrics for each worker (Real-time updates)</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="overflow-x-auto">
@@ -278,23 +387,21 @@ export default function WorkerPerformanceDashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {performanceMetrics.length === 0 ? (
+                    {performanceArray.length === 0 ? (
                       <tr>
                         <td colSpan={5} className="text-center py-8 text-muted-foreground">
                           No performance data available
                         </td>
                       </tr>
                     ) : (
-                      performanceMetrics.map((metric: any) => (
+                      performanceArray.map((metric) => (
                         <tr key={metric.userId} className="border-b hover:bg-muted/50">
                           <td className="py-2 px-4">{metric.userId}</td>
                           <td className="py-2 px-4">{metric.totalHours}h</td>
                           <td className="py-2 px-4">{metric.totalEntries}</td>
                           <td className="py-2 px-4">{metric.avgDuration}m</td>
                           <td className="py-2 px-4">
-                            {metric.lastActive
-                              ? new Date(metric.lastActive).toLocaleDateString()
-                              : 'N/A'}
+                            {metric.lastActive.toLocaleDateString()}
                           </td>
                         </tr>
                       ))

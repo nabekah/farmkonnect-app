@@ -86,8 +86,8 @@ export function ViewAllTasks() {
 
   // Update tasks when data changes
   useEffect(() => {
-    if (tasksData?.tasks) {
-      const mappedTasks: Task[] = tasksData.tasks.map((t: any) => ({
+    if (tasksData && Array.isArray(tasksData)) {
+      const mappedTasks: Task[] = tasksData.map((t: any) => ({
         taskId: t.taskId,
         title: t.title,
         description: t.description || '',
