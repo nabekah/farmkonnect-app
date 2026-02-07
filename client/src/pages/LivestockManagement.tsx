@@ -7,7 +7,6 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { useState, useMemo } from "react";
 import { Plus, Trash2, Edit2, Heart, AlertTriangle, TrendingUp, Loader2, Copy, Download, Settings } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { BatchAnimalEditingModal } from "@/components/BatchAnimalEditingModal";

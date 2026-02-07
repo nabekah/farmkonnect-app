@@ -9,6 +9,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Search, Filter, Download, Save, Trash2, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
+import { useBulkNotifications } from "@/hooks/useBulkNotifications";
+import { useState } from "react";
 
 interface AnimalSearchDashboardProps {
   farmId: number;
@@ -27,6 +29,7 @@ export function AnimalSearchDashboard({ farmId, animals }: AnimalSearchDashboard
   const [showSavePreset, setShowSavePreset] = useState(false);
   const [selectedAnimals, setSelectedAnimals] = useState<number[]>([]);
   const [selectAll, setSelectAll] = useState(false);
+  const { notifyExportComplete } = useBulkNotifications();
 
   // Fetch filter options
   const { data: filterOptions } = trpc.animalSearchFilters.getFilterOptions.useQuery({ farmId });
@@ -46,11 +49,21 @@ export function AnimalSearchDashboard({ farmId, animals }: AnimalSearchDashboard
       setPresetName("");
       setShowSavePreset(false);
     },
+    onError: (error) => {
+      console.error("Save preset error:", error);
+    },
   });
 
   const deletePreset = trpc.animalSearchFilters.deletePreset.useMutation();
 
-  const exportResults = trpc.animalSearchFilters.exportSearchResults.useMutation();
+  const exportResults = trpc.animalSearchFilters.exportSearchResults.useMutation({
+    onSuccess: (data) => {
+      notifyExportComplete(data.format || "CSV", data.itemCount || 0);
+    },
+    onError: (error) => {
+      console.error("Export error:", error);
+    },
+  });
 
   // Filter animals
   let filteredAnimals = animals;

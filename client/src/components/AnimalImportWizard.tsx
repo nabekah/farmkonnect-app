@@ -10,6 +10,8 @@ import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertTriangle, CheckCircle, Upload, Eye, Download, Loader2, FileText } from "lucide-react";
 import { trpc } from "@/lib/trpc";
+import { useBulkNotifications } from "@/hooks/useBulkNotifications";
+import { useState } from "react";
 
 interface AnimalImportWizardProps {
   open: boolean;
@@ -25,6 +27,7 @@ export function AnimalImportWizard({ open, onOpenChange, farmId }: AnimalImportW
   const [validationResult, setValidationResult] = useState<any>(null);
   const [previewData, setPreviewData] = useState<any>(null);
   const [importResult, setImportResult] = useState<any>(null);
+  const { notifyImportComplete } = useBulkNotifications();
 
   // Mutations
   const validateFile = trpc.animalImportWizard.validateImportFile.useMutation({
@@ -50,7 +53,11 @@ export function AnimalImportWizard({ open, onOpenChange, farmId }: AnimalImportW
   const executeImport = trpc.animalImportWizard.executeImport.useMutation({
     onSuccess: (data) => {
       setImportResult(data);
+      notifyImportComplete(data.totalCount || 0, data.successCount || 0, data.failureCount || 0);
       setStep("complete");
+    },
+    onError: (error) => {
+      console.error("Import error:", error);
     },
   });
 

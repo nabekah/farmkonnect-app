@@ -10,6 +10,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { AlertCircle, CheckCircle, Clock, User, Loader2, ChevronDown, ChevronUp } from "lucide-react";
 import { trpc } from "@/lib/trpc";
+import { useBulkNotifications } from "@/hooks/useBulkNotifications";
+import { useState } from "react";
 
 interface BatchEditingModalProps {
   open: boolean;
@@ -26,6 +28,7 @@ export function BatchAnimalEditingModal({ open, onOpenChange, farmId, animals }:
   const [updateValue, setUpdateValue] = useState("");
   const [reason, setReason] = useState("");
   const [expandedRequest, setExpandedRequest] = useState<string | null>(null);
+  const { notifyBatchStart, notifyApprovalRequested, notifyApprovalResult } = useBulkNotifications();
 
   // Fetch pending requests
   const { data: pendingRequests = [] } = trpc.animalBatchEditing.getPendingBatchEditRequests.useQuery(
@@ -42,22 +45,32 @@ export function BatchAnimalEditingModal({ open, onOpenChange, farmId, animals }:
   // Mutations
   const createBatchEdit = trpc.animalBatchEditing.createBatchEditRequest.useMutation({
     onSuccess: () => {
+      notifyApprovalRequested(`${updateType} update`, selectedAnimals.length);
       setStep("review");
       setSelectedAnimals([]);
       setUpdateValue("");
       setReason("");
     },
+    onError: (error) => {
+      console.error("Batch edit error:", error);
+    },
   });
 
   const approveBatchEdit = trpc.animalBatchEditing.approveBatchEditRequest.useMutation({
-    onSuccess: () => {
-      // Refetch pending requests
+    onSuccess: (data) => {
+      notifyApprovalResult("Batch edit", true, data?.affectedCount || 0);
+    },
+    onError: (error) => {
+      console.error("Approval error:", error);
     },
   });
 
   const rejectBatchEdit = trpc.animalBatchEditing.rejectBatchEditRequest.useMutation({
-    onSuccess: () => {
-      // Refetch pending requests
+    onSuccess: (data) => {
+      notifyApprovalResult("Batch edit", false, data?.affectedCount || 0);
+    },
+    onError: (error) => {
+      console.error("Rejection error:", error);
     },
   });
 
