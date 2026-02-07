@@ -8,6 +8,9 @@ import { TrendingUp, Clock, AlertCircle, Award, Download, FileText, Printer } fr
 import { trpc } from '@/lib/trpc';
 import { usePerformanceUpdates, PerformanceUpdate } from '@/hooks/usePerformanceUpdates';
 import { exportPerformanceCSV, exportPerformanceJSON, exportPerformanceHTML, printPerformanceReport } from '@/lib/performanceExport';
+import { PerformanceAlerts } from '@/components/PerformanceAlerts';
+import { PerformanceTrendsChart } from '@/components/PerformanceTrendsChart';
+import { generatePerformanceAlerts } from '@/lib/performanceAlerts';
 
 interface WorkerMetric {
   userId: number;
@@ -22,6 +25,7 @@ export default function WorkerPerformanceDashboard() {
   const [startDate, setStartDate] = useState<Date | undefined>();
   const [endDate, setEndDate] = useState<Date | undefined>();
   const [workerMetrics, setWorkerMetrics] = useState<Map<number, WorkerMetric>>(new Map());
+  const [performanceAlerts, setPerformanceAlerts] = useState<any[]>([]);
 
   const { data: logsData, isLoading } = trpc.fieldWorker.getTimeTrackerLogs.useQuery({
     farmId,
@@ -104,6 +108,26 @@ export default function WorkerPerformanceDashboard() {
     onUpdate: handlePerformanceUpdate,
     enabled: true,
   });
+
+  // Generate performance alerts
+  const generatedAlerts = useMemo(() => {
+    const alerts: any[] = [];
+    Array.from(workerMetrics.values()).forEach((metric) => {
+      const workerAlerts = generatePerformanceAlerts(
+        metric.userId,
+        parseFloat(metric.totalHours),
+        parseFloat(metric.totalHours),
+        parseFloat(metric.avgDuration),
+        metric.lastActive
+      );
+      alerts.push(...workerAlerts);
+    });
+    return alerts;
+  }, [workerMetrics]);
+
+  useMemo(() => {
+    setPerformanceAlerts(generatedAlerts);
+  }, [generatedAlerts]);
 
   // Calculate daily hours distribution
   const dailyHours = useMemo(() => {
@@ -312,10 +336,16 @@ export default function WorkerPerformanceDashboard() {
         </Card>
       </div>
 
+      {/* Performance Alerts */}
+      {performanceAlerts.length > 0 && <PerformanceAlerts alerts={performanceAlerts} />}
+
       {isLoading ? (
         <div className="text-center py-12 text-muted-foreground">Loading performance data...</div>
       ) : (
         <>
+          {/* Performance Trends */}
+          <PerformanceTrendsChart dailyHours={dailyHours} />
+
           {/* Charts */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             {/* Daily Hours Chart */}

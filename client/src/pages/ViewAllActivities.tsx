@@ -76,8 +76,8 @@ export function ViewAllActivities() {
 
   // Update activities when data changes
   useEffect(() => {
-    if (activitiesData?.logs) {
-      const mappedActivities: Activity[] = activitiesData.logs.map((log: any) => ({
+    if (activitiesData && Array.isArray(activitiesData)) {
+      const mappedActivities: Activity[] = activitiesData.map((log: any) => ({
         id: log.id?.toString() || log.logId,
         logId: log.logId,
         title: log.title,
