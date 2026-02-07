@@ -155,17 +155,19 @@ export const appRouter = router({
           throw new TRPCError({ code: "FORBIDDEN", message: "You can only edit your own farms" });
         }
 
+        const updateData: any = {
+          farmName: input.farmName,
+          location: input.location,
+          gpsLatitude: input.gpsLatitude && input.gpsLatitude.trim() ? parseFloat(input.gpsLatitude) : null,
+          gpsLongitude: input.gpsLongitude && input.gpsLongitude.trim() ? parseFloat(input.gpsLongitude) : null,
+          sizeHectares: input.sizeHectares && input.sizeHectares.trim() ? parseFloat(input.sizeHectares) : null,
+          farmType: input.farmType || "mixed",
+          description: input.description,
+          photoUrl: input.photoUrl,
+        };
+        
         return await db.update(farms)
-          .set({
-            farmName: input.farmName,
-            location: input.location,
-            gpsLatitude: input.gpsLatitude as any,
-            gpsLongitude: input.gpsLongitude as any,
-            sizeHectares: input.sizeHectares as any,
-            farmType: input.farmType || "mixed",
-            description: input.description,
-            photoUrl: input.photoUrl,
-          })
+          .set(updateData)
           .where(eq(farms.id, input.id));
       }),
 
