@@ -56,8 +56,8 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-white">
+        <Loader2 className="h-8 w-8 animate-spin text-green-600" />
       </div>
     );
   }
@@ -184,400 +184,289 @@ function AuthenticatedHome({ user, setLocation }: { user: any; setLocation: (pat
       <div className="space-y-8">
         {/* Welcome Section */}
         <div className="space-y-2">
-        <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold">Welcome back, {user.name}!</h1>
-        <p className="text-base md:text-lg text-muted-foreground">Manage your agricultural operations efficiently with FarmKonnect</p>
-      </div>
-
-      {/* Farm Filter */}
-      <div className="flex items-center gap-2">
-        <label className="text-sm font-medium">Filter by Farm:</label>
-        <select
-          value={selectedFarmId || ""}
-          onChange={(e) => setSelectedFarmId(e.target.value ? parseInt(e.target.value) : null)}
-          className="px-3 py-2 border border-input rounded-md bg-background text-sm"
-        >
-          <option value="">All Farms</option>
-          {farms?.map((farm) => (
-            <option key={farm.id} value={farm.id}>
-              {farm.farmName}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5 lg:gap-6 animate-stagger-in">
-        <KPICard
-          title="Total Revenue"
-          value={`GH₵ ${totalRevenue.toLocaleString()}`}
-          trend={totalRevenue > totalExpenses ? "up" : "down"}
-          trendValue={totalRevenue > 0 ? `${((netProfit / totalRevenue) * 100).toFixed(1)}%` : "0%"}
-          icon={<DollarSign className="w-6 h-6" />}
-          color="text-green-600"
-          onClick={() => setLocation("/farm-finance")}
-        />
-        <KPICard
-          title="Total Expenses"
-          value={`GH₵ ${totalExpenses.toLocaleString()}`}
-          trend="neutral"
-          trendValue={`${expenses?.length || 0} transactions`}
-          icon={<Wallet className="w-6 h-6" />}
-          color="text-red-600"
-          onClick={() => setLocation("/farm-finance")}
-        />
-        <KPICard
-          title="Active Animals"
-          value={activeAnimals.toString()}
-          trend="neutral"
-          trendValue={`${animals?.length || 0} total`}
-          icon={<Beef className="w-6 h-6" />}
-          color="text-amber-600"
-          onClick={() => setLocation("/livestock-management")}
-        />
-        <KPICard
-          title="Active Workers"
-          value={activeWorkers.toString()}
-          trend="neutral"
-          trendValue={`${workers?.length || 0} total`}
-          icon={<Users className="w-6 h-6" />}
-          color="text-blue-600"
-          onClick={() => setLocation("/workforce-management")}
-        />
-        <KPICard
-          title="Fish Ponds"
-          value={activePonds.toString()}
-          trend="neutral"
-          trendValue={`${ponds?.length || 0} total`}
-          icon={<Fish className="w-6 h-6" />}
-          color="text-cyan-600"
-          onClick={() => setLocation("/fish-farming")}
-        />
-        <KPICard
-          title="Farm Assets"
-          value={activeAssets.toString()}
-          trend="neutral"
-          trendValue={`${assets?.length || 0} total`}
-          icon={<Wrench className="w-6 h-6" />}
-          color="text-purple-600"
-          onClick={() => setLocation("/asset-management")}
-        />
-        <KPICard
-          title="Net Profit"
-          value={`GH₵ ${netProfit.toLocaleString()}`}
-          trend={netProfit > 0 ? "up" : netProfit < 0 ? "down" : "neutral"}
-          trendValue={netProfit > 0 ? "Profitable" : netProfit < 0 ? "Loss" : "Break-even"}
-          icon={<TrendingUp className="w-6 h-6" />}
-          color={netProfit > 0 ? "text-green-600" : netProfit < 0 ? "text-red-600" : "text-gray-600"}
-          onClick={() => setLocation("/analytics-dashboard")}
-        />
-        <KPICard
-          title="Analytics"
-          value="View"
-          trend="neutral"
-          trendValue="Detailed insights"
-          icon={<PieChart className="w-6 h-6" />}
-          color="text-indigo-600"
-          onClick={() => setLocation("/analytics-dashboard")}
-        />
-      </div>
-
-      {/* Weather Widget - Only show for specific farm */}
-      {selectedFarmId !== null && (
-        <div className="mb-8">
-          <div className="col-span-1 md:col-span-2 lg:col-span-3 xl:col-span-4">
-            <WeatherWidget
-              latitude={5.6037}
-              longitude={-0.1870}
-              showForecast={true}
-            />
-          </div>
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900">Welcome back, {user.name}!</h1>
+          <p className="text-base md:text-lg text-gray-600">Manage your agricultural operations efficiently with FarmKonnect</p>
         </div>
-      )}
 
-      {/* Farm Recommendations - Only show for specific farm */}
-      {selectedFarmId !== null && (
-        <div className="mb-8">
-          <FarmRecommendations
-            farmId={selectedFarmId}
-            farmName={farms?.find(f => f.id === selectedFarmId)?.farmName || "Your Farm"}
-            cropType="Mixed Crops"
-            soilType="Loamy"
-            weatherCondition="Moderate"
-          />
+        {/* Farm Filter */}
+        <div className="flex items-center gap-2">
+          <label className="text-sm font-medium text-gray-700">Filter by Farm:</label>
+          <select
+            value={selectedFarmId || ""}
+            onChange={(e) => setSelectedFarmId(e.target.value ? parseInt(e.target.value) : null)}
+            className="px-3 py-2 border border-gray-300 rounded-md bg-white text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500"
+          >
+            <option value="">All Farms</option>
+            {farms?.map((farm) => (
+              <option key={farm.id} value={farm.id}>
+                {farm.farmName}
+              </option>
+            ))}
+          </select>
         </div>
-      )}
 
-      {/* Worker Quick Actions */}
-      <WorkerQuickActions
-        workers={workers}
-        onAssignTask={(worker) => {
-          console.log("Assign task to:", worker);
-        }}
-        onViewSchedule={(worker) => {
-          console.log("View schedule for:", worker);
-        }}
-      />
-
-      {/* Quick Actions Grid */}
-      <div className="space-y-4">
-        <h2 className="text-xl md:text-2xl lg:text-3xl font-bold">Quick Actions for Farm Management</h2>
+        {/* KPI Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5 lg:gap-6">
-          <QuickActionCard
-            icon={<Wallet className="w-8 h-8" />}
-            title="Farm Finance"
-            description="Track expenses and revenue"
+          <KPICard
+            title="Total Revenue"
+            value={`GH₵ ${totalRevenue.toLocaleString()}`}
+            trend={totalRevenue > totalExpenses ? "up" : "down"}
+            trendValue={totalRevenue > 0 ? `${((netProfit / totalRevenue) * 100).toFixed(1)}%` : "0%"}
+            icon={<DollarSign className="w-6 h-6" />}
+            color="text-green-600"
             onClick={() => setLocation("/farm-finance")}
-            color="bg-green-500"
           />
-          <QuickActionCard
-            icon={<Beef className="w-8 h-8" />}
-            title="Livestock Management"
-            description="Manage animals and health records"
+          <KPICard
+            title="Total Expenses"
+            value={`GH₵ ${totalExpenses.toLocaleString()}`}
+            trend="neutral"
+            trendValue={`${expenses?.length || 0} transactions`}
+            icon={<Wallet className="w-6 h-6" />}
+            color="text-red-600"
+            onClick={() => setLocation("/farm-finance")}
+          />
+          <KPICard
+            title="Active Animals"
+            value={activeAnimals.toString()}
+            trend="neutral"
+            trendValue={`${animals?.length || 0} total`}
+            icon={<Beef className="w-6 h-6" />}
+            color="text-amber-600"
             onClick={() => setLocation("/livestock-management")}
-            color="bg-amber-500"
           />
-          <QuickActionCard
-            icon={<UserCog className="w-8 h-8" />}
-            title="Workforce Management"
-            description="Manage workers and payroll"
+          <KPICard
+            title="Active Workers"
+            value={activeWorkers.toString()}
+            trend="neutral"
+            trendValue={`${workers?.length || 0} total`}
+            icon={<Users className="w-6 h-6" />}
+            color="text-blue-600"
             onClick={() => setLocation("/workforce-management")}
-            color="bg-blue-500"
           />
-          <QuickActionCard
-            icon={<Fish className="w-8 h-8" />}
-            title="Fish Farming"
-            description="Monitor ponds and water quality"
+          <KPICard
+            title="Fish Ponds"
+            value={activePonds.toString()}
+            trend="neutral"
+            trendValue={`${ponds?.length || 0} total`}
+            icon={<Fish className="w-6 h-6" />}
+            color="text-cyan-600"
             onClick={() => setLocation("/fish-farming")}
-            color="bg-cyan-500"
           />
-          <QuickActionCard
-            icon={<Wrench className="w-8 h-8" />}
-            title="Asset Management"
-            description="Track equipment and maintenance"
+          <KPICard
+            title="Farm Assets"
+            value={activeAssets.toString()}
+            trend="neutral"
+            trendValue={`${assets?.length || 0} total`}
+            icon={<Wrench className="w-6 h-6" />}
+            color="text-purple-600"
             onClick={() => setLocation("/asset-management")}
-            color="bg-purple-500"
           />
-          <QuickActionCard
-            icon={<PieChart className="w-8 h-8" />}
-            title="Analytics Dashboard"
-            description="View comprehensive insights"
+          <KPICard
+            title="Net Profit"
+            value={`GH₵ ${netProfit.toLocaleString()}`}
+            trend={netProfit > 0 ? "up" : netProfit < 0 ? "down" : "neutral"}
+            trendValue={netProfit > 0 ? "Profitable" : netProfit < 0 ? "Loss" : "Break-even"}
+            icon={<TrendingUp className="w-6 h-6" />}
+            color={netProfit > 0 ? "text-green-600" : netProfit < 0 ? "text-red-600" : "text-gray-600"}
             onClick={() => setLocation("/analytics-dashboard")}
-            color="bg-indigo-500"
           />
-          <QuickActionCard
-            icon={<Tractor className="w-8 h-8" />}
-            title="Manage Farms"
-            description="Register and manage your farms"
-            onClick={() => setLocation("/farms")}
-            color="bg-green-500"
-          />
-          <QuickActionCard
-            icon={<Sprout className="w-8 h-8" />}
-            title="Track Crops"
-            description="Monitor crop cycles and yields"
-            onClick={() => setLocation("/crops")}
-            color="bg-emerald-500"
-          />
-          <QuickActionCard
-            icon={<ShoppingCart className="w-8 h-8" />}
-            title="Agricultural Marketplace"
-            description="Buy and sell agricultural products"
-            onClick={() => setLocation("/marketplace")}
-            color="bg-blue-500"
-          />
-          <QuickActionCard
-            icon={<BarChart3 className="w-8 h-8" />}
+          <KPICard
             title="Analytics"
-            description="View farm performance analytics"
-            onClick={() => setLocation("/analytics")}
-            color="bg-violet-500"
-          />
-          <QuickActionCard
-            icon={<Cloud className="w-8 h-8" />}
-            title="Weather Alerts"
-            description="Monitor weather conditions"
-            onClick={() => setLocation("/weather-alerts")}
-            color="bg-sky-500"
-          />
-          <QuickActionCard
-            icon={<Shield className="w-8 h-8" />}
-            title="Security Dashboard"
-            description="Monitor system security"
-            onClick={() => setLocation("/security")}
-            color="bg-red-500"
+            value="View"
+            trend="neutral"
+            trendValue="Detailed insights"
+            icon={<PieChart className="w-6 h-6" />}
+            color="text-indigo-600"
+            onClick={() => setLocation("/analytics-dashboard")}
           />
         </div>
-      </div>
+
+        {/* Alerts Section */}
+        {visibleAlerts.length > 0 && (
+          <FarmAlertsCenter
+            alerts={visibleAlerts}
+            onDismiss={(id) => setDismissedAlerts(prev => new Set([...prev, id]))}
+          />
+        )}
+
+        {/* Weather Widget */}
+        <WeatherWidget farmId={queryFarmId} />
+
+        {/* Quick Actions */}
+        {user.role === "field_worker" && <WorkerQuickActions />}
+
+        {/* Farm Recommendations */}
+        <FarmRecommendations farmId={queryFarmId} />
+
+        {/* Farm Comparison */}
+        {isAllFarmsSelected && <FarmComparisonView />}
       </div>
     </>
   );
 }
 
-function KPICard({
-  title,
-  value,
-  trend,
-  trendValue,
-  icon,
-  color,
-  onClick,
-}: {
-  title: string;
-  value: string;
-  trend: "up" | "down" | "neutral";
-  trendValue: string;
-  icon: React.ReactNode;
-  color: string;
-  onClick: () => void;
-}) {
-  return (
-    <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={onClick}>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        <div className={color}>{icon}</div>
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
-        <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
-          {trend === "up" && <TrendingUp className="w-3 h-3 text-green-600" />}
-          {trend === "down" && <TrendingDown className="w-3 h-3 text-red-600" />}
-          <span>{trendValue}</span>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function QuickActionCard({
-  icon,
-  title,
-  description,
-  onClick,
-  color,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-  onClick: () => void;
-  color: string;
-}) {
-  return (
-    <Card
-      className="cursor-pointer hover:shadow-lg transition-all hover:scale-105"
-      onClick={onClick}
-    >
-      <CardHeader>
-        <div className={`w-12 h-12 rounded-lg ${color} text-white flex items-center justify-center mb-2`}>
-          {icon}
-        </div>
-        <CardTitle className="text-lg">{title}</CardTitle>
-        <CardDescription>{description}</CardDescription>
-      </CardHeader>
-    </Card>
-  );
-}
-
 function LandingPage() {
-  const [, setLocation] = useLocation();
+  const [showVideo, setShowVideo] = useState(false);
+  const loginUrl = getLoginUrl();
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-green-50 to-white">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-green-50">
       {/* Hero Section */}
-      <div className="container mx-auto px-4 py-16">
-        <div className="text-center space-y-6 max-w-3xl mx-auto">
-          <h1 className="text-5xl font-bold text-gray-900">
-            Welcome to <span className="text-green-600">FarmKonnect</span>
-          </h1>
-          <p className="text-xl text-gray-600">
-            Comprehensive agricultural management platform for modern farmers across Ghana and West Africa
-          </p>
-          <div className="flex gap-4 justify-center">
-            <Button
-              size="lg"
-              onClick={() => {
-                window.location.href = getLoginUrl();
-              }}
-              className="bg-green-600 hover:bg-green-700"
-            >
-              Get Started <ArrowRight className="ml-2 w-4 h-4" />
-            </Button>
-            <Button size="lg" variant="outline" onClick={() => setLocation("/marketplace")}>
-              Explore Marketplace
-            </Button>
+      <section className="relative py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            {/* Left: Text Content */}
+            <div className="space-y-8">
+              <div className="space-y-4">
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
+                  Manage Your Farm Efficiently
+                </h1>
+                <p className="text-lg md:text-xl text-gray-600">
+                  Real-time monitoring and analytics for modern farming
+                </p>
+              </div>
+              <a href={loginUrl}>
+                <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-6 text-lg rounded-lg">
+                  Get Started
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </a>
+            </div>
+
+            {/* Right: Hero Image Placeholder */}
+            <div className="relative h-96 bg-gradient-to-br from-green-200 to-green-100 rounded-2xl overflow-hidden shadow-xl">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center">
+                  <Tractor className="h-24 w-24 text-green-700 mx-auto mb-4" />
+                  <p className="text-green-700 font-semibold">Farm Management Illustration</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
+      </section>
 
-        {/* Features Grid */}
-        <div className="mt-20 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          <FeatureCard
-            icon={<Wallet className="w-10 h-10" />}
-            title="Financial Management"
-            description="Track expenses, revenue, and profitability with detailed financial analytics"
-          />
-          <FeatureCard
-            icon={<Beef className="w-10 h-10" />}
-            title="Livestock Management"
-            description="Monitor animal health, breeding records, and performance metrics"
-          />
-          <FeatureCard
-            icon={<Fish className="w-10 h-10" />}
-            title="Fish Farming"
-            description="Manage fish ponds, water quality, and harvest tracking"
-          />
-          <FeatureCard
-            icon={<UserCog className="w-10 h-10" />}
-            title="Workforce Management"
-            description="Manage workers, payroll, attendance, and performance"
-          />
-          <FeatureCard
-            icon={<Wrench className="w-10 h-10" />}
-            title="Asset Management"
-            description="Track equipment, maintenance schedules, and depreciation"
-          />
-          <FeatureCard
-            icon={<PieChart className="w-10 h-10" />}
-            title="Advanced Analytics"
-            description="Comprehensive insights with charts and predictive analytics"
-          />
-          <FeatureCard
-            icon={<Sprout className="w-10 h-10" />}
-            title="Crop Tracking"
-            description="Monitor crop cycles, soil health, and yield predictions"
-          />
-          <FeatureCard
-            icon={<ShoppingCart className="w-10 h-10" />}
-            title="Marketplace"
-            description="Buy and sell agricultural products with integrated payment"
-          />
-          <FeatureCard
-            icon={<Cloud className="w-10 h-10" />}
-            title="Weather Integration"
-            description="Real-time weather data and farming recommendations"
-          />
+      {/* Features Section */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 text-center mb-12">
+            Key Features
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Feature 1: Analytics */}
+            <Card className="border-l-4 border-l-green-600 hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <div className="flex items-center gap-3 mb-2">
+                  <BarChart3 className="h-8 w-8 text-green-600" />
+                  <CardTitle>Analytics</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600">
+                  Real-time monitoring and analytics for modern farming. Track your farm's performance with detailed insights.
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Feature 2: Livestock */}
+            <Card className="border-l-4 border-l-green-600 hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <div className="flex items-center gap-3 mb-2">
+                  <Beef className="h-8 w-8 text-green-600" />
+                  <CardTitle>Livestock</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600">
+                  Monitor and manage livestock to lower costs as modern farming. Track health, breeding, and productivity.
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Feature 3: Activity Tracking */}
+            <Card className="border-l-4 border-l-green-600 hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <div className="flex items-center gap-3 mb-2">
+                  <Zap className="h-8 w-8 text-green-600" />
+                  <CardTitle>Activity</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600">
+                  Farm analytics is a modern farm management platform. Track all activities and optimize operations.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
         </div>
-      </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-green-50">
+        <div className="max-w-4xl mx-auto text-center space-y-6">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+            Ready to Transform Your Farm?
+          </h2>
+          <p className="text-lg text-gray-600">
+            Join thousands of farmers using FarmKonnect to manage their operations more efficiently.
+          </p>
+          <a href={loginUrl}>
+            <Button size="lg" className="bg-green-600 hover:bg-green-700 text-white px-8 py-6 text-lg rounded-lg">
+              Start Your Free Trial
+            </Button>
+          </a>
+        </div>
+      </section>
     </div>
   );
 }
 
-function FeatureCard({
-  icon,
-  title,
-  description,
-}: {
-  icon: React.ReactNode;
+interface KPICardProps {
   title: string;
-  description: string;
-}) {
+  value: string;
+  trend?: "up" | "down" | "neutral";
+  trendValue?: string;
+  icon?: React.ReactNode;
+  color?: string;
+  onClick?: () => void;
+}
+
+function KPICard({
+  title,
+  value,
+  trend = "neutral",
+  trendValue,
+  icon,
+  color = "text-gray-600",
+  onClick,
+}: KPICardProps) {
   return (
-    <Card className="hover:shadow-lg transition-shadow">
-      <CardHeader>
-        <div className="w-16 h-16 rounded-lg bg-green-100 text-green-600 flex items-center justify-center mb-4">
-          {icon}
+    <Card
+      onClick={onClick}
+      className="cursor-pointer hover:shadow-lg transition-all duration-200 border-0 bg-white shadow-md hover:shadow-xl"
+    >
+      <CardHeader className="pb-3">
+        <div className="flex items-start justify-between">
+          <CardTitle className="text-sm font-semibold text-gray-700">{title}</CardTitle>
+          {icon && <div className={`${color} opacity-80`}>{icon}</div>}
         </div>
-        <CardTitle className="text-xl">{title}</CardTitle>
-        <CardDescription className="text-base">{description}</CardDescription>
       </CardHeader>
+      <CardContent className="space-y-2">
+        <div className="text-2xl md:text-3xl font-bold text-gray-900">{value}</div>
+        {trendValue && (
+          <div className="flex items-center gap-1">
+            {trend === "up" && <TrendingUp className="h-4 w-4 text-green-600" />}
+            {trend === "down" && <TrendingDown className="h-4 w-4 text-red-600" />}
+            <span className={`text-xs font-medium ${
+              trend === "up" ? "text-green-600" :
+              trend === "down" ? "text-red-600" :
+              "text-gray-600"
+            }`}>
+              {trendValue}
+            </span>
+          </div>
+        )}
+      </CardContent>
     </Card>
   );
 }
