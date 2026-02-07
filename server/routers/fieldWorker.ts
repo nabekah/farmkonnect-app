@@ -471,4 +471,52 @@ export const fieldWorkerRouter = router({
         });
       }
     }),
+
+  getTimeTrackerLogs: protectedProcedure
+    .input(z.object({
+      farmId: z.number(),
+      startDate: z.date().optional(),
+      endDate: z.date().optional(),
+    }))
+    .query(async ({ ctx, input }) => {
+      const db = await getDb();
+      if (!db) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Database not available',
+        });
+      }
+
+      try {
+        const query = db.execute(
+          sql`SELECT 
+                id,
+                userId,
+                farmId,
+                clockInTime,
+                clockOutTime,
+                CASE 
+                  WHEN clockOutTime IS NOT NULL 
+                  THEN TIMESTAMPDIFF(MINUTE, clockInTime, clockOutTime)
+                  ELSE TIMESTAMPDIFF(MINUTE, clockInTime, NOW())
+                END as durationMinutes,
+                createdAt,
+                updatedAt
+              FROM timeTrackerLogs
+              WHERE farmId = ${input.farmId}
+              AND userId = ${ctx.user.id}
+              ${input.startDate ? sql`AND DATE(clockInTime) >= ${input.startDate}` : sql``}
+              ${input.endDate ? sql`AND DATE(clockInTime) <= ${input.endDate}` : sql``}
+              ORDER BY clockInTime DESC
+              LIMIT 100`
+        );
+        return query;
+      } catch (error) {
+        console.error('Failed to fetch time tracker logs:', error);
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to fetch time tracker logs',
+        });
+      }
+    }),
 });

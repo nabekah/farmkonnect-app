@@ -9,8 +9,8 @@ import { trpc } from '@/lib/trpc';
 
 export default function WorkerPerformanceDashboard() {
   const [farmId, setFarmId] = useState(1);
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const [startDate, setStartDate] = useState<Date | undefined>();
+  const [endDate, setEndDate] = useState<Date | undefined>();
 
   const { data: logsData, isLoading } = trpc.fieldWorker.getTimeTrackerLogs.useQuery({
     farmId,
@@ -20,328 +20,292 @@ export default function WorkerPerformanceDashboard() {
 
   const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#14b8a6'];
 
-  // Calculate worker performance metrics
-  const workerMetrics = useMemo(() => {
-    if (!logsData?.entries) return [];
+  // Calculate performance metrics from time tracker logs
+  const performanceMetrics = useMemo(() => {
+    if (!logsData || typeof logsData !== 'object' || !Array.isArray(logsData)) {
+      return [];
+    }
 
-    const metricsMap = new Map<string, any>();
+    const metricsMap = new Map<number, any>();
 
-    logsData.entries.forEach((entry: any) => {
-      const key = `${entry.workerId}-${entry.workerName}`;
-      if (!metricsMap.has(key)) {
-        metricsMap.set(key, {
-          workerId: entry.workerId,
-          workerName: entry.workerName,
-          totalHours: 0,
+    (logsData as any[]).forEach((log: any) => {
+      const userId = log.userId;
+      if (!metricsMap.has(userId)) {
+        metricsMap.set(userId, {
+          userId,
+          totalMinutes: 0,
           totalEntries: 0,
           avgDuration: 0,
-          activityTypes: new Set<string>(),
           lastActive: null,
         });
       }
 
-      const metrics = metricsMap.get(key);
-      metrics.totalHours += (entry.duration || 0) / 60;
+      const metrics = metricsMap.get(userId);
+      const duration = log.durationMinutes || 0;
+      metrics.totalMinutes += duration;
       metrics.totalEntries += 1;
-      metrics.activityTypes.add(entry.activityType);
-      metrics.lastActive = entry.date;
+      metrics.lastActive = log.clockInTime;
     });
 
-    return Array.from(metricsMap.values())
-      .map((m) => ({
-        ...m,
-        avgDuration: (m.totalHours * 60) / m.totalEntries,
-        activityTypes: m.activityTypes.size,
-      }))
-      .sort((a, b) => b.totalHours - a.totalHours);
+    return Array.from(metricsMap.values()).map((m: any) => ({
+      ...m,
+      totalHours: (m.totalMinutes / 60).toFixed(2),
+      avgDuration: (m.totalMinutes / m.totalEntries).toFixed(0),
+    }));
   }, [logsData]);
 
-  // Calculate activity type distribution
+  // Calculate daily hours distribution
+  const dailyHours = useMemo(() => {
+    if (!logsData || typeof logsData !== 'object' || !Array.isArray(logsData)) {
+      return [];
+    }
+
+    const dailyMap = new Map<string, number>();
+
+    (logsData as any[]).forEach((log: any) => {
+      const date = new Date(log.clockInTime).toLocaleDateString();
+      const duration = log.durationMinutes || 0;
+      dailyMap.set(date, (dailyMap.get(date) || 0) + duration / 60);
+    });
+
+    return Array.from(dailyMap.entries()).map(([date, hours]) => ({
+      date,
+      hours: parseFloat(hours.toFixed(2)),
+    }));
+  }, [logsData]);
+
+  // Calculate activity distribution
   const activityDistribution = useMemo(() => {
-    if (!logsData?.entries) return [];
+    if (!logsData || typeof logsData !== 'object' || !Array.isArray(logsData)) {
+      return [];
+    }
 
-    const distributionMap = new Map<string, number>();
-    logsData.entries.forEach((entry: any) => {
-      const current = distributionMap.get(entry.activityType) || 0;
-      distributionMap.set(entry.activityType, current + (entry.duration || 0));
+    const activityMap = new Map<string, number>();
+    (logsData as any[]).forEach((log: any) => {
+      activityMap.set('Clock In/Out', (activityMap.get('Clock In/Out') || 0) + 1);
     });
 
-    return Array.from(distributionMap.entries())
-      .map(([name, value]) => ({
-        name: name.replace(/_/g, ' '),
-        value: Math.round(value / 60), // Convert to hours
-      }))
-      .sort((a, b) => b.value - a.value);
+    return Array.from(activityMap.entries()).map(([name, value]) => ({
+      name,
+      value,
+    }));
   }, [logsData]);
 
-  // Calculate daily activity trend
-  const dailyTrend = useMemo(() => {
-    if (!logsData?.entries) return [];
-
-    const trendMap = new Map<string, number>();
-    logsData.entries.forEach((entry: any) => {
-      const date = entry.date;
-      const current = trendMap.get(date) || 0;
-      trendMap.set(date, current + (entry.duration || 0) / 60);
-    });
-
-    return Array.from(trendMap.entries())
-      .map(([date, hours]) => ({
-        date,
-        hours: Math.round(hours * 10) / 10,
-      }))
-      .sort((a, b) => a.date.localeCompare(b.date))
-      .slice(-14); // Last 14 days
-  }, [logsData]);
-
-  // Calculate summary statistics
-  const summary = useMemo(() => {
-    if (!logsData?.entries) return { totalHours: 0, avgHoursPerWorker: 0, totalWorkers: 0, totalActivities: 0 };
-
-    const totalHours = logsData.entries.reduce((sum, entry: any) => sum + (entry.duration || 0) / 60, 0);
-    const totalWorkers = new Set(logsData.entries.map((e: any) => e.workerId)).size;
-    const totalActivities = logsData.entries.length;
-
-    return {
-      totalHours: Math.round(totalHours * 10) / 10,
-      avgHoursPerWorker: totalWorkers > 0 ? Math.round((totalHours / totalWorkers) * 10) / 10 : 0,
-      totalWorkers,
-      totalActivities,
-    };
-  }, [logsData]);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background p-4 md:p-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-            <p className="text-muted-foreground mt-4">Loading worker performance data...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const handleDateChange = (type: 'start' | 'end', value: string) => {
+    const date = value ? new Date(value) : undefined;
+    if (type === 'start') {
+      setStartDate(date);
+    } else {
+      setEndDate(date);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold">Worker Performance Dashboard</h1>
-          <p className="text-muted-foreground mt-2">Track worker productivity and activity metrics</p>
-        </div>
+    <div className="min-h-screen bg-background p-6">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-foreground mb-2">Worker Performance Dashboard</h1>
+        <p className="text-muted-foreground">Track and analyze worker productivity and time allocation</p>
+      </div>
 
-        {/* Filters */}
+      {/* Filters */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>Filters</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <Label htmlFor="start-date">Start Date</Label>
+              <Input
+                id="start-date"
+                type="date"
+                onChange={(e) => handleDateChange('start', e.target.value)}
+                className="mt-2"
+              />
+            </div>
+            <div>
+              <Label htmlFor="end-date">End Date</Label>
+              <Input
+                id="end-date"
+                type="date"
+                onChange={(e) => handleDateChange('end', e.target.value)}
+                className="mt-2"
+              />
+            </div>
+            <div className="flex items-end">
+              <Button onClick={() => {
+                setStartDate(undefined);
+                setEndDate(undefined);
+              }} variant="outline" className="w-full">
+                Clear Filters
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Filter Data</CardTitle>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+              <Clock className="h-4 w-4" />
+              Total Hours
+            </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div>
-                <Label>Farm ID</Label>
-                <Input
-                  type="number"
-                  value={farmId}
-                  onChange={(e) => setFarmId(parseInt(e.target.value) || 1)}
-                  placeholder="Farm ID"
-                />
-              </div>
-              <div>
-                <Label>Start Date</Label>
-                <Input
-                  type="date"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                />
-              </div>
-              <div>
-                <Label>End Date</Label>
-                <Input
-                  type="date"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                />
-              </div>
-              <div className="flex items-end">
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setStartDate('');
-                    setEndDate('');
-                  }}
-                >
-                  Clear Filters
-                </Button>
-              </div>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {performanceMetrics.reduce((sum: number, m: any) => sum + parseFloat(m.totalHours || 0), 0).toFixed(1)}h
             </div>
           </CardContent>
         </Card>
 
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Total Hours</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{summary.totalHours}</div>
-              <p className="text-xs text-muted-foreground mt-1">Hours logged</p>
-            </CardContent>
-          </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+              <Award className="h-4 w-4" />
+              Active Workers
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{performanceMetrics.length}</div>
+          </CardContent>
+        </Card>
 
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Active Workers</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{summary.totalWorkers}</div>
-              <p className="text-xs text-muted-foreground mt-1">Workers on farm</p>
-            </CardContent>
-          </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+              <TrendingUp className="h-4 w-4" />
+              Avg Duration
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {performanceMetrics.length > 0
+                ? (performanceMetrics.reduce((sum: number, m: any) => sum + parseFloat(m.avgDuration || 0), 0) / performanceMetrics.length).toFixed(0)
+                : 0}m
+            </div>
+          </CardContent>
+        </Card>
 
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Avg Hours/Worker</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{summary.avgHoursPerWorker}</div>
-              <p className="text-xs text-muted-foreground mt-1">Average per worker</p>
-            </CardContent>
-          </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+              <AlertCircle className="h-4 w-4" />
+              Total Entries
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {performanceMetrics.reduce((sum: number, m: any) => sum + m.totalEntries, 0)}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Total Activities</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{summary.totalActivities}</div>
-              <p className="text-xs text-muted-foreground mt-1">Log entries</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Worker Hours Chart */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Worker Hours</CardTitle>
-              <CardDescription>Total hours logged per worker</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div style={{ height: 300 }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={workerMetrics.slice(0, 8)}>
+      {isLoading ? (
+        <div className="text-center py-12 text-muted-foreground">Loading performance data...</div>
+      ) : (
+        <>
+          {/* Charts */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            {/* Daily Hours Chart */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Daily Hours Distribution</CardTitle>
+                <CardDescription>Hours logged per day</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={dailyHours}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="workerName" angle={-45} textAnchor="end" height={80} />
+                    <XAxis dataKey="date" />
                     <YAxis />
                     <Tooltip />
-                    <Bar dataKey="totalHours" fill="#3b82f6" name="Hours" />
-                  </BarChart>
+                    <Legend />
+                    <Line type="monotone" dataKey="hours" stroke="#3b82f6" name="Hours" />
+                  </LineChart>
                 </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
-          {/* Activity Distribution Chart */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Activity Distribution</CardTitle>
-              <CardDescription>Time spent on each activity type</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div style={{ height: 300 }}>
-                <ResponsiveContainer width="100%" height="100%">
+            {/* Activity Distribution */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Activity Distribution</CardTitle>
+                <CardDescription>Breakdown of activities</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
                   <PieChart>
                     <Pie
                       data={activityDistribution}
                       cx="50%"
                       cy="50%"
                       labelLine={false}
-                      label={({ name, value }) => `${name}: ${value}h`}
+                      label={({ name, value }) => `${name}: ${value}`}
                       outerRadius={80}
                       fill="#8884d8"
                       dataKey="value"
                     >
-                      {activityDistribution.map((entry, index) => (
+                      {activityDistribution.map((entry: any, index: number) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
                     <Tooltip />
                   </PieChart>
                 </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
 
-          {/* Daily Trend Chart */}
-          <Card className="lg:col-span-2">
+          {/* Worker Metrics Table */}
+          <Card>
             <CardHeader>
-              <CardTitle>Daily Activity Trend</CardTitle>
-              <CardDescription>Hours logged per day (last 14 days)</CardDescription>
+              <CardTitle>Worker Performance Metrics</CardTitle>
+              <CardDescription>Detailed metrics for each worker</CardDescription>
             </CardHeader>
             <CardContent>
-              <div style={{ height: 300 }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={dailyTrend}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Line type="monotone" dataKey="hours" stroke="#3b82f6" name="Hours" strokeWidth={2} />
-                  </LineChart>
-                </ResponsiveContainer>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left py-2 px-4 font-semibold">Worker ID</th>
+                      <th className="text-left py-2 px-4 font-semibold">Total Hours</th>
+                      <th className="text-left py-2 px-4 font-semibold">Entries</th>
+                      <th className="text-left py-2 px-4 font-semibold">Avg Duration</th>
+                      <th className="text-left py-2 px-4 font-semibold">Last Active</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {performanceMetrics.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="text-center py-8 text-muted-foreground">
+                          No performance data available
+                        </td>
+                      </tr>
+                    ) : (
+                      performanceMetrics.map((metric: any) => (
+                        <tr key={metric.userId} className="border-b hover:bg-muted/50">
+                          <td className="py-2 px-4">{metric.userId}</td>
+                          <td className="py-2 px-4">{metric.totalHours}h</td>
+                          <td className="py-2 px-4">{metric.totalEntries}</td>
+                          <td className="py-2 px-4">{metric.avgDuration}m</td>
+                          <td className="py-2 px-4">
+                            {metric.lastActive
+                              ? new Date(metric.lastActive).toLocaleDateString()
+                              : 'N/A'}
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
               </div>
             </CardContent>
           </Card>
-        </div>
-
-        {/* Worker Details Table */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Worker Performance Details</CardTitle>
-            <CardDescription>Individual worker metrics and statistics</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="border-b">
-                  <tr>
-                    <th className="text-left py-2 px-4 font-semibold">Worker Name</th>
-                    <th className="text-right py-2 px-4 font-semibold">Total Hours</th>
-                    <th className="text-right py-2 px-4 font-semibold">Entries</th>
-                    <th className="text-right py-2 px-4 font-semibold">Avg Duration</th>
-                    <th className="text-right py-2 px-4 font-semibold">Activity Types</th>
-                    <th className="text-left py-2 px-4 font-semibold">Last Active</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {workerMetrics.map((worker, idx) => (
-                    <tr key={idx} className="border-b hover:bg-muted/50">
-                      <td className="py-3 px-4">{worker.workerName}</td>
-                      <td className="text-right py-3 px-4 font-semibold">{worker.totalHours.toFixed(1)}h</td>
-                      <td className="text-right py-3 px-4">{worker.totalEntries}</td>
-                      <td className="text-right py-3 px-4">{Math.round(worker.avgDuration)} min</td>
-                      <td className="text-right py-3 px-4">{worker.activityTypes}</td>
-                      <td className="py-3 px-4 text-muted-foreground">{worker.lastActive || 'N/A'}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-
-              {workerMetrics.length === 0 && (
-                <div className="text-center py-8 text-muted-foreground">
-                  <AlertCircle className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                  <p>No worker data available for the selected filters</p>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+        </>
+      )}
     </div>
   );
 }
