@@ -59,6 +59,8 @@ import { bulkHealthOperationsRouter } from "./routers/bulkHealthOperations";
 import { healthAlertsRouter } from "./routers/healthAlerts";
 import { vetAppointmentsRouter } from "./routers/vetAppointments";
 import { healthReportsRouter } from "./routers/healthReports";
+import { medicationTrackingRouter } from "./routers/medicationTracking";
+import { healthTrendsAnalyticsRouter } from "./routers/healthTrendsAnalytics";
 import { z } from "zod";
 import { getDb } from "./db";
 import { TRPCError } from "@trpc/server";
@@ -124,6 +126,8 @@ export const appRouter = router({
   healthAlerts: healthAlertsRouter,
   vetAppointments: vetAppointmentsRouter,
   healthReports: healthReportsRouter,
+  medicationTracking: medicationTrackingRouter,
+  healthTrendsAnalytics: healthTrendsAnalyticsRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {
