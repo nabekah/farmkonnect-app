@@ -12,18 +12,11 @@ import { eq, desc, sql } from 'drizzle-orm';
 import { v4 as uuidv4 } from 'uuid';
 import { broadcastToFarm } from '../_core/websocket';
 
-// ============================================================================
-// FIELD WORKER TASK PROCEDURES
-// ============================================================================
-
 export const fieldWorkerRouter = router({
-  /**
-   * Get all tasks assigned to current user
-   */
   getTasks: protectedProcedure
     .input(z.object({
       farmId: z.number(),
-      status: z.enum(['pending', 'in_progress', 'completed', 'cancelled']).optional(),
+      status: z.enum(['pending', 'in_progress', 'completed']).optional(),
     }))
     .query(async ({ ctx, input }) => {
       const db = await getDb();
@@ -31,109 +24,68 @@ export const fieldWorkerRouter = router({
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
           message: 'Database not available',
-        });
-      }
-
-      const tasks = await db.select().from(fieldWorkerTasks).where(eq(fieldWorkerTasks.farmId, input.farmId));
-      const filtered = input.status
-        ? tasks.filter((t: any) => t.status === input.status)
-        : tasks;
-
-      return { tasks: filtered };
-    }),
-
-  /**
-   * Get task details
-   */
-  getTask: protectedProcedure
-    .input(z.object({
-      taskId: z.string(),
-    }))
-    .query(async ({ ctx, input }) => {
-      const db = await getDb();
-      if (!db) {
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'Database not available',
-        });
-      }
-
-      const tasks = await db.select().from(fieldWorkerTasks).where(eq(fieldWorkerTasks.taskId, input.taskId)).limit(1);
-      const task = tasks[0];
-
-      if (!task) {
-        throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'Task not found',
-        });
-      }
-
-      const workerList = await db.select().from(users).where(eq(users.id, task.assignedToUserId)).limit(1);
-      const assignedWorker = workerList[0];
-
-      return {
-        ...task,
-        assignedToName: assignedWorker?.name || 'Unknown',
-        assignedToEmail: assignedWorker?.email || '',
-      };
-    }),
-
-  /**
-   * Update task status
-   */
-  updateTaskStatus: protectedProcedure
-    .input(z.object({
-      taskId: z.string(),
-      status: z.enum(['pending', 'in_progress', 'completed', 'cancelled']),
-      completionNotes: z.string().optional(),
-    }))
-    .mutation(async ({ ctx, input }) => {
-      const db = await getDb();
-      if (!db) {
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'Database not available',
-        });
-      }
-
-      const tasks = await db.select().from(fieldWorkerTasks).where(eq(fieldWorkerTasks.taskId, input.taskId)).limit(1);
-      const task = tasks[0];
-
-      if (!task) {
-        throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'Task not found',
         });
       }
 
       try {
-        await db.execute(
-          sql`UPDATE fieldWorkerTasks SET status = ?, updatedAt = ? WHERE taskId = ?`
-        );
+        const tasks = await db
+          .select()
+          .from(fieldWorkerTasks)
+          .where(eq(fieldWorkerTasks.farmId, input.farmId))
+          .orderBy(desc(fieldWorkerTasks.createdAt));
 
-        return {
-          success: true,
-          taskId: input.taskId,
-          newStatus: input.status,
-        };
+        return tasks;
       } catch (error) {
+        console.error('Failed to fetch tasks:', error);
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
-          message: 'Failed to update task status',
+          message: 'Failed to fetch tasks',
         });
       }
     }),
 
-  /**
-   * Update task details
-   */
-  updateTask: protectedProcedure
+  getTaskDetails: protectedProcedure
     .input(z.object({
       taskId: z.string(),
-      title: z.string().optional(),
-      description: z.string().optional(),
-      priority: z.enum(['low', 'medium', 'high', 'urgent']).optional(),
-      dueDate: z.string().optional(),
+    }))
+    .query(async ({ ctx, input }) => {
+      const db = await getDb();
+      if (!db) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Database not available',
+        });
+      }
+
+      try {
+        const task = await db
+          .select()
+          .from(fieldWorkerTasks)
+          .where(eq(fieldWorkerTasks.taskId, input.taskId))
+          .limit(1);
+
+        if (task.length === 0) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'Task not found',
+          });
+        }
+
+        return task[0];
+      } catch (error) {
+        if (error instanceof TRPCError) throw error;
+        console.error('Failed to fetch task details:', error);
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to fetch task details',
+        });
+      }
+    }),
+
+  updateTaskStatus: protectedProcedure
+    .input(z.object({
+      taskId: z.string(),
+      status: z.enum(['pending', 'in_progress', 'completed']),
       notes: z.string().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
@@ -145,47 +97,51 @@ export const fieldWorkerRouter = router({
         });
       }
 
-      const tasks = await db.select().from(fieldWorkerTasks).where(eq(fieldWorkerTasks.taskId, input.taskId)).limit(1);
-      const task = tasks[0];
-
-      if (!task) {
-        throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'Task not found',
-        });
-      }
-
       try {
-        const updates: any = { updatedAt: new Date() };
-        if (input.title) updates.title = input.title;
-        if (input.description) updates.description = input.description;
-        if (input.priority) updates.priority = input.priority;
-        if (input.dueDate) updates.dueDate = input.dueDate;
-        if (input.notes) updates.notes = input.notes;
+        const now = new Date();
+        await db
+          .update(fieldWorkerTasks)
+          .set({
+            status: input.status,
+            updatedAt: now,
+          })
+          .where(eq(fieldWorkerTasks.taskId, input.taskId));
 
+        const historyId = uuidv4();
         await db.execute(
-          sql`UPDATE fieldWorkerTasks SET ${Object.keys(updates).map(k => `${k} = ?`).join(', ')} WHERE taskId = ?`
+          sql`INSERT INTO taskHistory (historyId, taskId, userId, action, notes, createdAt)
+              VALUES (${historyId}, ${input.taskId}, ${ctx.user.id}, ${input.status}, ${input.notes || null}, ${now})`
         );
 
-        return {
-          success: true,
-          taskId: input.taskId,
-          updatedFields: Object.keys(updates),
-        };
+        const updatedTask = await db
+          .select()
+          .from(fieldWorkerTasks)
+          .where(eq(fieldWorkerTasks.taskId, input.taskId))
+          .limit(1);
+
+        if (updatedTask.length > 0) {
+          broadcastToFarm(updatedTask[0].farmId, {
+            type: 'task_updated',
+            data: updatedTask[0],
+            timestamp: now.toISOString(),
+          });
+        }
+
+        return { success: true, message: 'Task status updated' };
       } catch (error) {
+        console.error('Failed to update task status:', error);
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
-          message: 'Failed to update task',
+          message: 'Failed to update task status',
         });
       }
     }),
 
-  /**
-   * Get task history
-   */
-  getTaskHistory: protectedProcedure
+  getActivityLogs: protectedProcedure
     .input(z.object({
-      taskId: z.string(),
+      farmId: z.number(),
+      limit: z.number().default(50),
+      offset: z.number().default(0),
     }))
     .query(async ({ ctx, input }) => {
       const db = await getDb();
@@ -197,19 +153,56 @@ export const fieldWorkerRouter = router({
       }
 
       try {
-        const history = await db.select().from(taskHistory).where(eq(taskHistory.taskId, input.taskId));
-        return { history };
+        const logs = await db.execute(
+          sql`SELECT * FROM fieldWorkerActivityLogs WHERE farmId = ${input.farmId} ORDER BY createdAt DESC LIMIT ${input.limit} OFFSET ${input.offset}`
+        );
+
+        return logs;
       } catch (error) {
+        console.error('Failed to fetch activity logs:', error);
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
-          message: 'Failed to fetch task history',
+          message: 'Failed to fetch activity logs',
         });
       }
     }),
 
-  /**
-   * Create activity log
-   */
+  getActivityLogDetails: protectedProcedure
+    .input(z.object({
+      logId: z.string(),
+    }))
+    .query(async ({ ctx, input }) => {
+      const db = await getDb();
+      if (!db) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Database not available',
+        });
+      }
+
+      try {
+        const logs = await db.execute(
+          sql`SELECT * FROM fieldWorkerActivityLogs WHERE logId = ${input.logId}`
+        );
+
+        if (logs.length === 0) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'Activity log not found',
+          });
+        }
+
+        return logs[0];
+      } catch (error) {
+        if (error instanceof TRPCError) throw error;
+        console.error('Failed to fetch activity log details:', error);
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to fetch activity log details',
+        });
+      }
+    }),
+
   createActivityLog: protectedProcedure
     .input(z.object({
       farmId: z.number(),
@@ -236,15 +229,19 @@ export const fieldWorkerRouter = router({
 
       try {
         const photoUrlsJson = JSON.stringify(input.photoUrls || []);
+        
         await db.execute(
           sql`INSERT INTO fieldWorkerActivityLogs (
-            logId, farmId, fieldId, activityType, title, description, observations,
+            logId, userId, farmId, fieldId, activityType, title, description, observations,
             gpsLatitude, gpsLongitude, photoUrls, createdAt, updatedAt
-          ) VALUES (${logId}, ${input.farmId}, ${input.fieldId}, ${input.activityType}, ${input.title}, ${input.description}, ${input.observations},
-            ${input.gpsLatitude}, ${input.gpsLongitude}, ${photoUrlsJson}, ${now}, ${now})`
+          ) VALUES (
+            ${logId}, ${ctx.user.id}, ${input.farmId}, ${input.fieldId ?? null}, 
+            ${input.activityType}, ${input.title}, ${input.description ?? null}, 
+            ${input.observations ?? null}, ${input.gpsLatitude ?? null}, 
+            ${input.gpsLongitude ?? null}, ${photoUrlsJson}, ${now}, ${now}
+          )`
         );
 
-        // Broadcast activity creation event to all connected clients
         broadcastToFarm(input.farmId, {
           type: 'activity_created',
           data: {
@@ -269,208 +266,23 @@ export const fieldWorkerRouter = router({
           message: 'Activity logged successfully',
         };
       } catch (error) {
-        console.error('Failed to create activity log:', error);
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        console.error('Failed to create activity log:', errorMessage);
+        console.error('Full error:', error);
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
-          message: 'Failed to log activity',
+          message: `Failed to log activity: ${errorMessage}`,
         });
       }
     }),
 
-  /**
-   * Get activity logs
-   */
-  getActivityLogs: protectedProcedure
+  updateActivityLog: protectedProcedure
     .input(z.object({
-      farmId: z.number(),
-      limit: z.number().default(50),
-      offset: z.number().default(0),
-    }))
-    .query(async ({ ctx, input }) => {
-      const db = await getDb();
-      if (!db) {
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'Database not available',
-        });
-      }
-
-      try {
-        const logs = await db.execute(
-          sql`SELECT * FROM fieldWorkerActivityLogs WHERE farmId = ? ORDER BY createdAt DESC LIMIT ? OFFSET ?`
-        );
-
-        return { logs: logs || [] };
-      } catch (error) {
-        console.error('Failed to fetch activity logs:', error);
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'Failed to fetch activity logs',
-        });
-      }
-    }),
-
-  /**
-   * Get time tracker logs for reporting
-   */
-  getTimeTrackerLogs: protectedProcedure
-    .input(z.object({
-      farmId: z.number(),
-      startDate: z.string().optional(),
-      endDate: z.string().optional(),
-    }))
-    .query(async ({ ctx, input }) => {
-      const db = await getDb();
-      if (!db) {
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'Database not available',
-        });
-      }
-
-      try {
-        // Query time tracker logs from database
-        let query = sql`SELECT ttl.id, ttl.workerId, u.name as workerName, ttl.activityType, 
-                  ttl.startTime, ttl.endTime, ttl.durationMinutes as duration, 
-                  DATE(ttl.startTime) as date, ttl.notes
-              FROM timeTrackerLogs ttl
-              LEFT JOIN users u ON ttl.workerId = u.id
-              WHERE ttl.farmId = ?`;
-        
-        const params: any[] = [input.farmId];
-        
-        if (input.startDate) {
-          query = sql`${query} AND DATE(ttl.startTime) >= ?`;
-          params.push(input.startDate);
-        }
-        
-        if (input.endDate) {
-          query = sql`${query} AND DATE(ttl.startTime) <= ?`;
-          params.push(input.endDate);
-        }
-        
-        query = sql`${query} ORDER BY ttl.startTime DESC LIMIT 1000`;
-
-        const logs = await db.execute(query);
-
-        // Format entries for frontend
-        const entries = (logs || []).map((log: any) => ({
-          id: log.id?.toString() || '',
-          workerId: log.workerId?.toString() || '',
-          workerName: log.workerName || 'Unknown Worker',
-          activityType: log.activityType || '',
-          startTime: log.startTime ? new Date(log.startTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '',
-          endTime: log.endTime ? new Date(log.endTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '',
-          duration: log.duration || 0,
-          date: log.date ? new Date(log.date).toISOString().split('T')[0] : '',
-          notes: log.notes || '',
-        }));
-
-        return { entries };
-      } catch (error) {
-        console.error('Failed to fetch time tracker logs:', error);
-        // Return empty array if table doesn't exist yet
-        return { entries: [] };
-      }
-    }),
-
-  /**
-   * Clock in
-   */
-  clockIn: protectedProcedure
-    .input(z.object({ farmId: z.number() }))
-    .mutation(async ({ ctx, input }) => {
-      return { success: true, clockedInAt: new Date() };
-    }),
-
-  /**
-   * Clock out
-   */
-  clockOut: protectedProcedure
-    .input(z.object({ farmId: z.number() }))
-    .mutation(async ({ ctx, input }) => {
-      return { success: true, clockedOutAt: new Date() };
-    }),
-
-  /**
-   * Get dashboard data
-   */
-  getDashboardData: protectedProcedure
-    .input(z.object({ farmId: z.number() }))
-    .query(async ({ ctx, input }) => {
-      const db = await getDb();
-      if (!db) {
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'Database not available',
-        });
-      }
-
-      try {
-        const pendingTasks = await db.select().from(fieldWorkerTasks).where(eq(fieldWorkerTasks.farmId, input.farmId));
-        const recentActivities = await db.execute(
-          sql`SELECT * FROM fieldWorkerActivityLogs WHERE farmId = ? ORDER BY createdAt DESC LIMIT 5`
-        );
-
-        return {
-          pendingTasks: pendingTasks || [],
-          recentActivities: recentActivities || [],
-          workHoursToday: { hours: 8, minutes: 0 },
-        };
-      } catch (error) {
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'Failed to fetch dashboard data',
-        });
-      }
-    }),
-
-  /**
-   * Sync offline queue
-   */
-  syncOfflineQueue: protectedProcedure
-    .input(z.object({
-      queueItems: z.array(z.any()),
-    }))
-    .mutation(async ({ ctx, input }) => {
-      return {
-        success: true,
-        syncedCount: input.queueItems.length,
-        message: 'Offline queue synced successfully',
-      };
-    }),
-
-  /**
-   * Get time tracking summary
-   */
-  getTimeTrackingSummary: protectedProcedure
-    .input(z.object({
-      farmId: z.number(),
-      days: z.number().default(7),
-    }))
-    .query(async ({ ctx, input }) => {
-      return {
-        totalHours: 40,
-        totalMinutes: 0,
-        dailyBreakdown: [
-          { date: new Date().toISOString(), hours: 8, minutes: 0 },
-        ],
-      };
-    }),
-
-  /**
-   * Create a new task
-   */
-  createTask: protectedProcedure
-    .input(z.object({
-      farmId: z.number(),
-      title: z.string(),
+      logId: z.string(),
+      title: z.string().optional(),
       description: z.string().optional(),
-      taskType: z.string(),
-      priority: z.enum(['low', 'medium', 'high', 'urgent']),
-      dueDate: z.string(),
-      assignedToUserId: z.number(),
-      fieldId: z.number().optional(),
+      observations: z.string().optional(),
+      photoUrls: z.array(z.string()).optional(),
     }))
     .mutation(async ({ ctx, input }) => {
       const db = await getDb();
@@ -481,43 +293,53 @@ export const fieldWorkerRouter = router({
         });
       }
 
-      const taskId = uuidv4();
-      const now = new Date();
+      try {
+        const now = new Date();
+        const updates: string[] = ['updatedAt = NOW()'];
+
+        if (input.title) updates.push(`title = '${input.title}'`);
+        if (input.description) updates.push(`description = '${input.description}'`);
+        if (input.observations) updates.push(`observations = '${input.observations}'`);
+        if (input.photoUrls) updates.push(`photoUrls = '${JSON.stringify(input.photoUrls)}'`);
+
+        await db.execute(
+          sql`UPDATE fieldWorkerActivityLogs SET ${sql.raw(updates.join(', '))} WHERE logId = ${input.logId}`
+        );
+
+        return { success: true, message: 'Activity log updated' };
+      } catch (error) {
+        console.error('Failed to update activity log:', error);
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to update activity log',
+        });
+      }
+    }),
+
+  deleteActivityLog: protectedProcedure
+    .input(z.object({
+      logId: z.string(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const db = await getDb();
+      if (!db) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Database not available',
+        });
+      }
 
       try {
         await db.execute(
-          sql`INSERT INTO fieldWorkerTasks (
-            taskId, farmId, fieldId, title, description, taskType, priority, status,
-            assignedToUserId, assignedByUserId, dueDate, createdAt, updatedAt
-          ) VALUES (${taskId}, ${input.farmId}, ${input.fieldId}, ${input.title}, ${input.description}, ${input.taskType}, ${input.priority}, 'pending',
-            ${input.assignedToUserId}, ${ctx.user.id}, ${input.dueDate}, ${now}, ${now})`
+          sql`DELETE FROM fieldWorkerActivityLogs WHERE logId = ${input.logId}`
         );
 
-        // Broadcast task creation event
-        broadcastToFarm(input.farmId, {
-          type: 'task_created',
-          data: {
-            taskId,
-            farmId: input.farmId,
-            title: input.title,
-            priority: input.priority,
-            dueDate: input.dueDate,
-            status: 'pending',
-            createdAt: now.toISOString(),
-          },
-          timestamp: now.toISOString(),
-        });
-
-        return {
-          success: true,
-          taskId,
-          message: 'Task created successfully',
-        };
+        return { success: true, message: 'Activity log deleted' };
       } catch (error) {
-        console.error('Failed to create task:', error);
+        console.error('Failed to delete activity log:', error);
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
-          message: 'Failed to create task',
+          message: 'Failed to delete activity log',
         });
       }
     }),
