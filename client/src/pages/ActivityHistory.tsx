@@ -239,7 +239,7 @@ export function ActivityHistory() {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-sm">
-                        {new Date(activity.createdAt).toLocaleString()}
+                        {activity.createdAt ? new Date(activity.createdAt).toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'N/A'}
                       </TableCell>
                       <TableCell>
                         <Button
