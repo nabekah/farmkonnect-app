@@ -69,6 +69,8 @@ import { ActivityAnalyticsDashboard } from "./pages/ActivityAnalyticsDashboard";
 import { GPSTracking } from "./pages/GPSTracking";
 import { ActivityPhotoGallery } from "./pages/ActivityPhotoGallery";
 import { TaskPerformanceAnalytics } from "./pages/TaskPerformanceAnalytics";
+import { ActivityHistory } from "./pages/ActivityHistory";
+import { ActivityApprovalManager } from "./pages/ActivityApprovalManager";
 import { TimeTrackerReporting } from "./pages/TimeTrackerReporting";
 import WorkerPerformanceDashboard from "./pages/WorkerPerformanceDashboard";
 import WorkerStatusDashboard from "./pages/WorkerStatusDashboard";
@@ -456,6 +458,20 @@ function Router() {
         {() => (
           <DashboardLayout>
             <ViewAllActivities />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/field-worker/activity-history">
+        {() => (
+          <DashboardLayout>
+            <ActivityHistory />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/field-worker/activity-approval">
+        {() => (
+          <DashboardLayout>
+            <ActivityApprovalManager />
           </DashboardLayout>
         )}
       </Route>

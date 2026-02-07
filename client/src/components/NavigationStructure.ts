@@ -77,6 +77,8 @@ export const navigationStructure: MenuGroup[] = [
     items: [
       { icon: LayoutDashboard, label: "Dashboard", path: "/field-worker/dashboard" },
       { icon: Camera, label: "Activity Logger", path: "/field-worker/activity-log" },
+      { icon: History, label: "Activity History", path: "/field-worker/activity-history" },
+      { icon: ListTodo, label: "All Activities", path: "/field-worker/activities" },
       { icon: Clock, label: "Time Tracking", path: "/field-worker/dashboard" },
       { icon: MapPin, label: "GPS Tracking", path: "/field-worker/gps-tracking" },
       { icon: ImageIcon, label: "Photo Gallery", path: "/field-worker/photo-gallery" },
