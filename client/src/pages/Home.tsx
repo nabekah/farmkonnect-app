@@ -310,23 +310,23 @@ function LandingPage() {
   const loginUrl = getLoginUrl();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-green-50">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-green-50 dark:from-green-950 dark:via-gray-900 dark:to-green-950">
       {/* Hero Section */}
-      <section className="relative py-20 px-4 sm:px-6 lg:px-8">
+      <section className="relative py-12 sm:py-16 md:py-20 lg:py-24 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-center">
             {/* Left: Text Content */}
-            <div className="space-y-8">
-              <div className="space-y-4">
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
+            <div className="space-y-6 md:space-y-8 order-2 lg:order-1 scroll-animate fade-left">
+              <div className="space-y-3 md:space-y-4">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white leading-tight">
                   Manage Your Farm Efficiently
                 </h1>
-                <p className="text-lg md:text-xl text-gray-600">
+                <p className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300">
                   Real-time monitoring and analytics for modern farming
                 </p>
               </div>
-              <a href={loginUrl}>
-                <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-6 text-lg rounded-lg">
+              <a href={loginUrl} className="inline-block">
+                <Button size="lg" className="bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700 text-white px-6 sm:px-8 py-4 sm:py-6 text-base sm:text-lg rounded-lg w-full sm:w-auto">
                   Get Started
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
@@ -334,11 +334,11 @@ function LandingPage() {
             </div>
 
             {/* Right: Hero Image Placeholder */}
-            <div className="relative h-96 bg-gradient-to-br from-green-200 to-green-100 rounded-2xl overflow-hidden shadow-xl">
+            <div className="relative h-64 sm:h-80 md:h-96 bg-gradient-to-br from-green-200 to-green-100 dark:from-green-900 dark:to-green-800 rounded-2xl overflow-hidden shadow-xl order-1 lg:order-2 scroll-animate fade-right">
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-center">
-                  <Tractor className="h-24 w-24 text-green-700 mx-auto mb-4" />
-                  <p className="text-green-700 font-semibold">Farm Management Illustration</p>
+                  <Tractor className="h-20 sm:h-24 w-20 sm:w-24 text-green-700 dark:text-green-300 mx-auto mb-3 sm:mb-4" />
+                  <p className="text-green-700 dark:text-green-300 font-semibold text-sm sm:text-base">Farm Management Illustration</p>
                 </div>
               </div>
             </div>
@@ -347,14 +347,14 @@ function LandingPage() {
       </section>
 
       {/* Features Section */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-white">
+      <section className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-900">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 text-center mb-12">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white text-center mb-8 md:mb-12">
             Key Features
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 animate-stagger-in">
             {/* Feature 1: Analytics */}
-            <Card className="border-l-4 border-l-green-600 hover:shadow-lg transition-shadow">
+            <Card className="border-l-4 border-l-green-600 hover:shadow-lg transition-shadow scroll-animate fade-up">
               <CardHeader>
                 <div className="flex items-center gap-3 mb-2">
                   <BarChart3 className="h-8 w-8 text-green-600" />
@@ -369,7 +369,7 @@ function LandingPage() {
             </Card>
 
             {/* Feature 2: Livestock */}
-            <Card className="border-l-4 border-l-green-600 hover:shadow-lg transition-shadow">
+            <Card className="border-l-4 border-l-green-600 hover:shadow-lg transition-shadow scroll-animate fade-up">
               <CardHeader>
                 <div className="flex items-center gap-3 mb-2">
                   <Beef className="h-8 w-8 text-green-600" />
@@ -384,7 +384,7 @@ function LandingPage() {
             </Card>
 
             {/* Feature 3: Activity Tracking */}
-            <Card className="border-l-4 border-l-green-600 hover:shadow-lg transition-shadow">
+            <Card className="border-l-4 border-l-green-600 hover:shadow-lg transition-shadow scroll-animate fade-up">
               <CardHeader>
                 <div className="flex items-center gap-3 mb-2">
                   <Zap className="h-8 w-8 text-green-600" />
@@ -402,16 +402,16 @@ function LandingPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-green-50">
-        <div className="max-w-4xl mx-auto text-center space-y-6">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+      <section className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-green-50 dark:bg-green-950">
+        <div className="max-w-4xl mx-auto text-center space-y-4 md:space-y-6">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">
             Ready to Transform Your Farm?
           </h2>
-          <p className="text-lg text-gray-600">
+          <p className="text-base sm:text-lg text-gray-600 dark:text-gray-300">
             Join thousands of farmers using FarmKonnect to manage their operations more efficiently.
           </p>
-          <a href={loginUrl}>
-            <Button size="lg" className="bg-green-600 hover:bg-green-700 text-white px-8 py-6 text-lg rounded-lg">
+          <a href={loginUrl} className="inline-block">
+            <Button size="lg" className="bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700 text-white px-6 sm:px-8 py-4 sm:py-6 text-base sm:text-lg rounded-lg w-full sm:w-auto">
               Start Your Free Trial
             </Button>
           </a>
