@@ -9,9 +9,9 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertTriangle, CheckCircle, Upload, Eye, Download, Loader2, FileText } from "lucide-react";
+import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { useBulkNotifications } from "@/hooks/useBulkNotifications";
-import { useState } from "react";
 
 interface AnimalImportWizardProps {
   open: boolean;

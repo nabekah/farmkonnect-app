@@ -9,9 +9,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { AlertCircle, CheckCircle, Clock, User, Loader2, ChevronDown, ChevronUp } from "lucide-react";
+import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { useBulkNotifications } from "@/hooks/useBulkNotifications";
-import { useState } from "react";
 
 interface BatchEditingModalProps {
   open: boolean;
