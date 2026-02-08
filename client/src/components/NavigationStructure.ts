@@ -41,6 +41,7 @@ import {
   Upload,
   Image as ImageIcon,
   Zap,
+  Layers,
 } from "lucide-react";
 
 export interface MenuItem {
@@ -109,6 +110,9 @@ export const navigationStructure: MenuGroup[] = [
       { icon: Sprout, label: "Crop Planning", path: "/crop-planning" },
       { icon: Users, label: "Livestock", path: "/livestock" },
       { icon: Fish, label: "Fish Farming", path: "/fish-farming" },
+      { icon: Users, label: "Multi-Species Management", path: "/multi-species" },
+      { icon: TrendingUp, label: "Species Production", path: "/species-production-dashboard" },
+      { icon: Brain, label: "Breed Comparison", path: "/breed-comparison" },
       { icon: CloudRain, label: "Weather Alerts", path: "/weather-alerts" },
       { icon: LineChart, label: "Weather Trends", path: "/weather-trends" },
       { icon: Heart, label: "Health Alerts", path: "/health-alerts" },
@@ -148,6 +152,7 @@ export const navigationStructure: MenuGroup[] = [
       { icon: Palette, label: "Report Customization", path: "/report-template-customization" },
       { icon: LineChart, label: "Health Trends", path: "/health-trends" },
       { icon: Brain, label: "Breeding Recommendations", path: "/breeding-recommendations" },
+      { icon: Brain, label: "Species Selection Wizard", path: "/species-wizard" },
     ],
   },
 

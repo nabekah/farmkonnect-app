@@ -76,6 +76,9 @@ import WorkerPerformanceDashboard from "./pages/WorkerPerformanceDashboard";
 import WorkerStatusDashboard from "./pages/WorkerStatusDashboard";
 import { TaskDetail } from "./pages/TaskDetail";
 import AdminDataSettings from "./pages/AdminDataSettings";
+import { SpeciesSelectionWizard } from "./components/SpeciesSelectionWizard";
+import { SpeciesProductionDashboard } from "./pages/SpeciesProductionDashboard";
+import { BreedComparison } from "./pages/BreedComparison";
 import { NotificationProvider } from "./contexts/NotificationContext";
 import { TimeTrackerProvider } from "./contexts/TimeTrackerContext";
 import { ActivityNotificationContainer } from "./components/ActivityNotificationToast";
@@ -185,6 +188,34 @@ function Router() {
         {() => (
           <DashboardLayout>
             <Livestock />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/multi-species">
+        {() => (
+          <DashboardLayout>
+            <Livestock />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/species-production-dashboard">
+        {() => (
+          <DashboardLayout>
+            <SpeciesProductionDashboard />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/breed-comparison">
+        {() => (
+          <DashboardLayout>
+            <BreedComparison />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/species-wizard">
+        {() => (
+          <DashboardLayout>
+            <SpeciesSelectionWizard onComplete={() => {}} onCancel={() => {}} />
           </DashboardLayout>
         )}
       </Route>
