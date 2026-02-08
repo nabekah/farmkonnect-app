@@ -115,12 +115,20 @@ export const financialManagementRouter = router({
       const db = await getDb();
       if (!db) throw new Error("Database not available");
       
+      const revenueDateStr = input.revenueDate instanceof Date 
+        ? input.revenueDate.toISOString().split('T')[0]
+        : input.revenueDate.toString();
+      
+      const paymentDateStr = input.paymentDate && input.paymentDate instanceof Date
+        ? input.paymentDate.toISOString().split('T')[0]
+        : input.paymentDate?.toString();
+      
       const [result] = await db.insert(revenue).values({
         farmId: parseInt(input.farmId),
         revenueType: input.revenueType,
         description: input.description,
         amount: input.amount.toString(),
-        revenueDate: input.revenueDate,
+        revenueDate: revenueDateStr,
         animalId: input.animalId ? parseInt(input.animalId) : undefined,
         cropId: input.cropId ? parseInt(input.cropId) : undefined,
         quantity: input.quantity ? input.quantity.toString() : undefined,
@@ -128,7 +136,7 @@ export const financialManagementRouter = router({
         buyer: input.buyer,
         invoiceNumber: input.invoiceNumber,
         paymentStatus: input.paymentStatus || "pending",
-        paymentDate: input.paymentDate,
+        paymentDate: paymentDateStr,
         notes: input.notes
       });
 
