@@ -1,7 +1,4 @@
-import pdfMake from "pdfmake/build/pdfmake";
-import pdfFonts from "pdfmake/build/vfs_fonts";
-
-pdfMake.vfs = pdfFonts.pdfMake.vfs;
+// PDF generation utility - using simple text format for now
 
 interface InvoiceItem {
   description: string;
@@ -22,300 +19,99 @@ interface InvoiceData {
 }
 
 export const generateInvoicePDF = (invoice: InvoiceData) => {
-  const docDefinition: any = {
-    content: [
-      // Header
-      {
-        columns: [
-          {
-            text: "INVOICE",
-            fontSize: 24,
-            bold: true,
-            color: "#2c3e50"
-          },
-          {
-            text: [
-              { text: "Invoice #: ", bold: true },
-              invoice.invoiceNumber,
-              "\n",
-              { text: "Date: ", bold: true },
-              new Date(invoice.createdAt || new Date()).toLocaleDateString(),
-              "\n",
-              { text: "Due Date: ", bold: true },
-              new Date(invoice.dueDate).toLocaleDateString()
-            ],
-            alignment: "right",
-            fontSize: 11
-          }
-        ],
-        marginBottom: 20
-      },
-
-      // Divider
-      {
-        canvas: [
-          {
-            type: "line",
-            x1: 0,
-            y1: 5,
-            x2: 515,
-            y2: 5,
-            lineWidth: 1,
-            lineColor: "#cccccc"
-          }
-        ],
-        marginBottom: 20
-      },
-
-      // From and Bill To
-      {
-        columns: [
-          {
-            text: [
-              { text: "FROM:\n", bold: true, fontSize: 12 },
-              { text: invoice.farmName || "Farm", fontSize: 11 },
-              "\n\n",
-              { text: "Ghana", fontSize: 10, color: "#666666" }
-            ],
-            width: "50%"
-          },
-          {
-            text: [
-              { text: "BILL TO:\n", bold: true, fontSize: 12 },
-              { text: invoice.clientName, fontSize: 11 }
-            ],
-            width: "50%"
-          }
-        ],
-        marginBottom: 30
-      },
-
-      // Items Table
-      {
-        table: {
-          headerRows: 1,
-          widths: ["*", 80, 100, 100],
-          body: [
-            // Header row
-            [
-              { text: "Description", bold: true, color: "white", fillColor: "#2c3e50", alignment: "left" },
-              { text: "Qty", bold: true, color: "white", fillColor: "#2c3e50", alignment: "center" },
-              { text: "Unit Price", bold: true, color: "white", fillColor: "#2c3e50", alignment: "right" },
-              { text: "Amount", bold: true, color: "white", fillColor: "#2c3e50", alignment: "right" }
-            ],
-            // Item rows
-            ...invoice.items.map((item) => [
-              { text: item.description, alignment: "left" },
-              { text: item.quantity.toString(), alignment: "center" },
-              { text: `GHS ${item.unitPrice.toFixed(2)}`, alignment: "right" },
-              { text: `GHS ${item.amount.toFixed(2)}`, alignment: "right", bold: true }
-            ]),
-            // Subtotal row
-            [
-              { text: "", colSpan: 2 },
-              {},
-              { text: "Subtotal:", alignment: "right", bold: true },
-              { text: `GHS ${invoice.totalAmount.toFixed(2)}`, alignment: "right" }
-            ],
-            // Total row
-            [
-              { text: "", colSpan: 2 },
-              {},
-              { text: "TOTAL:", alignment: "right", bold: true, fontSize: 12, fillColor: "#ecf0f1" },
-              { text: `GHS ${invoice.totalAmount.toFixed(2)}`, alignment: "right", bold: true, fontSize: 12, fillColor: "#ecf0f1" }
-            ]
-          ]
-        },
-        marginBottom: 30
-      },
-
-      // Notes
-      ...(invoice.notes
-        ? [
-            {
-              text: [
-                { text: "Notes:\n", bold: true },
-                invoice.notes
-              ],
-              marginBottom: 20,
-              fontSize: 10,
-              color: "#666666"
-            }
-          ]
-        : []),
-
-      // Footer
-      {
-        text: "Thank you for your business!",
-        alignment: "center",
-        fontSize: 10,
-        color: "#999999",
-        marginTop: 30
-      },
-      {
-        text: `Generated on ${new Date().toLocaleString()}`,
-        alignment: "center",
-        fontSize: 8,
-        color: "#cccccc"
-      }
-    ],
-    styles: {
-      header: {
-        fontSize: 16,
-        bold: true,
-        margin: [0, 0, 0, 10]
-      }
-    },
-    defaultStyle: {
-      font: "Helvetica"
-    }
-  };
-
-  // Generate and download PDF
-  pdfMake.createPdf(docDefinition).download(`invoice-${invoice.invoiceNumber}.pdf`);
+  // Generate simple text invoice
+  const lines: string[] = [];
+  lines.push("=".repeat(60));
+  lines.push("INVOICE".padEnd(40) + "Invoice #: " + invoice.invoiceNumber);
+  lines.push("=".repeat(60));
+  lines.push("");
+  lines.push("FROM: " + (invoice.farmName || "Farm"));
+  lines.push("Ghana");
+  lines.push("");
+  lines.push("BILL TO: " + invoice.clientName);
+  lines.push("");
+  lines.push("Date: " + new Date(invoice.createdAt || new Date()).toLocaleDateString());
+  lines.push("Due Date: " + new Date(invoice.dueDate).toLocaleDateString());
+  lines.push("");
+  lines.push("-".repeat(60));
+  lines.push("DESCRIPTION".padEnd(30) + "QTY".padEnd(10) + "UNIT PRICE".padEnd(15) + "AMOUNT");
+  lines.push("-".repeat(60));
+  
+  invoice.items.forEach(item => {
+    lines.push(
+      item.description.substring(0, 30).padEnd(30) +
+      item.quantity.toString().padEnd(10) +
+      "₵" + item.unitPrice.toFixed(2).padEnd(14) +
+      "₵" + item.amount.toFixed(2)
+    );
+  });
+  
+  lines.push("-".repeat(60));
+  lines.push("TOTAL".padEnd(50) + "₵" + invoice.totalAmount.toFixed(2));
+  lines.push("-".repeat(60));
+  
+  if (invoice.notes) {
+    lines.push("");
+    lines.push("NOTES:");
+    lines.push(invoice.notes);
+  }
+  
+  lines.push("");
+  lines.push("Thank you for your business!");
+  
+  const textContent = lines.join("\n");
+  const blob = new Blob([textContent], { type: "text/plain" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `invoice-${invoice.invoiceNumber}.txt`;
+  a.click();
+  URL.revokeObjectURL(url);
 };
 
-export const generateTaxReportPDF = (data: {
-  taxYear: number;
-  totalIncome: number;
-  totalExpenses: number;
-  taxableIncome: number;
-  estimatedTax: number;
-  farmName?: string;
-}) => {
-  const docDefinition: any = {
-    content: [
-      // Header
-      {
-        text: "TAX REPORT",
-        fontSize: 24,
-        bold: true,
-        color: "#2c3e50",
-        alignment: "center",
-        marginBottom: 10
-      },
-      {
-        text: `Tax Year: ${data.taxYear}`,
-        fontSize: 14,
-        alignment: "center",
-        marginBottom: 30,
-        color: "#666666"
-      },
-
-      // Farm Info
-      {
-        text: [
-          { text: "Farm Name: ", bold: true },
-          data.farmName || "N/A"
-        ],
-        marginBottom: 10,
-        fontSize: 11
-      },
-      {
-        text: [
-          { text: "Report Generated: ", bold: true },
-          new Date().toLocaleString()
-        ],
-        marginBottom: 30,
-        fontSize: 11
-      },
-
-      // Divider
-      {
-        canvas: [
-          {
-            type: "line",
-            x1: 0,
-            y1: 5,
-            x2: 515,
-            y2: 5,
-            lineWidth: 1,
-            lineColor: "#cccccc"
-          }
-        ],
-        marginBottom: 20
-      },
-
-      // Summary Table
-      {
-        table: {
-          widths: ["*", 150],
-          body: [
-            [
-              { text: "Total Income", bold: true, fontSize: 12 },
-              { text: `GHS ${data.totalIncome.toFixed(2)}`, alignment: "right", fontSize: 12 }
-            ],
-            [
-              { text: "Total Deductible Expenses", bold: true },
-              { text: `GHS ${data.totalExpenses.toFixed(2)}`, alignment: "right" }
-            ],
-            [
-              { text: "Taxable Income", bold: true, fillColor: "#ecf0f1" },
-              { text: `GHS ${data.taxableIncome.toFixed(2)}`, alignment: "right", fillColor: "#ecf0f1", bold: true }
-            ],
-            [
-              { text: "Tax Rate", bold: true },
-              { text: "15%", alignment: "right" }
-            ],
-            [
-              { text: "Estimated Tax Liability", bold: true, fontSize: 12, fillColor: "#fff3cd" },
-              { text: `GHS ${data.estimatedTax.toFixed(2)}`, alignment: "right", fontSize: 12, bold: true, fillColor: "#fff3cd", color: "#856404" }
-            ]
-          ]
-        },
-        marginBottom: 30
-      },
-
-      // Disclaimer
-      {
-        text: "IMPORTANT NOTICE",
-        bold: true,
-        fontSize: 12,
-        marginBottom: 10,
-        color: "#d32f2f"
-      },
-      {
-        text: "This tax report is generated for informational purposes only. Please consult with a qualified tax professional or accountant to ensure compliance with Ghana's Internal Revenue Authority (IRA) regulations. This report does not constitute professional tax advice.",
-        fontSize: 10,
-        color: "#666666",
-        alignment: "justify",
-        marginBottom: 20
-      },
-
-      // Ghana Tax Information
-      {
-        text: "Ghana Tax Information",
-        bold: true,
-        fontSize: 11,
-        marginBottom: 10
-      },
-      {
-        text: [
-          { text: "Tax Year: ", bold: true },
-          `${data.taxYear}\n`,
-          { text: "Filing Deadline: ", bold: true },
-          "March 31 (following tax year)\n",
-          { text: "Tax Authority: ", bold: true },
-          "Internal Revenue Authority (IRA)\n",
-          { text: "Standard Tax Rate: ", bold: true },
-          "15% for agricultural income"
-        ],
-        fontSize: 10,
-        color: "#666666"
-      }
-    ],
-    styles: {
-      header: {
-        fontSize: 16,
-        bold: true,
-        margin: [0, 0, 0, 10]
-      }
-    },
-    defaultStyle: {
-      font: "Helvetica"
-    }
-  };
-
-  // Generate and download PDF
-  pdfMake.createPdf(docDefinition).download(`tax-report-${data.taxYear}.pdf`);
+export const generateTaxReportPDF = (farmName: string, taxableIncome: number, expenses: number) => {
+  const lines: string[] = [];
+  lines.push("=".repeat(60));
+  lines.push("TAX REPORT - GHANA");
+  lines.push("=".repeat(60));
+  lines.push("");
+  lines.push("Farm Name: " + farmName);
+  lines.push("Report Date: " + new Date().toLocaleDateString());
+  lines.push("");
+  lines.push("-".repeat(60));
+  lines.push("FINANCIAL SUMMARY");
+  lines.push("-".repeat(60));
+  lines.push("Gross Income: ₵" + taxableIncome.toFixed(2));
+  lines.push("Deductible Expenses: ₵" + expenses.toFixed(2));
+  lines.push("Taxable Income: ₵" + Math.max(0, taxableIncome - expenses).toFixed(2));
+  lines.push("");
+  lines.push("-".repeat(60));
+  lines.push("TAX CALCULATION (Ghana - 15% Standard Rate)");
+  lines.push("-".repeat(60));
+  
+  const netIncome = Math.max(0, taxableIncome - expenses);
+  const taxAmount = netIncome * 0.15;
+  
+  lines.push("Taxable Income: ₵" + netIncome.toFixed(2));
+  lines.push("Tax Rate: 15%");
+  lines.push("Estimated Tax Due: ₵" + taxAmount.toFixed(2));
+  lines.push("");
+  lines.push("-".repeat(60));
+  lines.push("COMPLIANCE INFORMATION");
+  lines.push("-".repeat(60));
+  lines.push("Ghana Revenue Authority (GRA) Filing Deadline: December 31");
+  lines.push("Tax Year: January 1 - December 31");
+  lines.push("Payment Due: On or before March 31 of following year");
+  lines.push("");
+  lines.push("Note: This is an estimated tax report for planning purposes.");
+  lines.push("Please consult with a tax professional for accurate calculations.");
+  
+  const textContent = lines.join("\n");
+  const blob = new Blob([textContent], { type: "text/plain" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `tax-report-${new Date().getFullYear()}.txt`;
+  a.click();
+  URL.revokeObjectURL(url);
 };
