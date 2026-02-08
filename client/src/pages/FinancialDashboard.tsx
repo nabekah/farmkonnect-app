@@ -35,16 +35,18 @@ export const FinancialDashboard: React.FC = () => {
     category: "feed",
     description: "",
     amount: "",
-    date: new Date().toISOString().split('T')[0],
+    expenseDate: new Date().toISOString().split('T')[0],
+    vendor: "",
     animalId: ""
   });
 
   // Revenue form state
   const [revenueForm, setRevenueForm] = useState({
-    source: "animal_sales",
+    revenueType: "animal_sale",
     description: "",
     amount: "",
-    date: new Date().toISOString().split('T')[0],
+    revenueDate: new Date().toISOString().split('T')[0],
+    buyer: "",
     animalId: ""
   });
 
@@ -88,7 +90,8 @@ export const FinancialDashboard: React.FC = () => {
         category: "feed",
         description: "",
         amount: "",
-        date: new Date().toISOString().split('T')[0],
+        expenseDate: new Date().toISOString().split('T')[0],
+        vendor: "",
         animalId: ""
       });
       setIsAddExpenseOpen(false);
@@ -102,10 +105,11 @@ export const FinancialDashboard: React.FC = () => {
     onSuccess: () => {
       toast.success("Revenue recorded successfully!");
       setRevenueForm({
-        source: "animal_sales",
+        revenueType: "animal_sale",
         description: "",
         amount: "",
-        date: new Date().toISOString().split('T')[0],
+        revenueDate: new Date().toISOString().split('T')[0],
+        buyer: "",
         animalId: ""
       });
       setIsAddRevenueOpen(false);
@@ -126,7 +130,8 @@ export const FinancialDashboard: React.FC = () => {
       category: expenseForm.category as any,
       description: expenseForm.description,
       amount: parseFloat(expenseForm.amount),
-      date: new Date(expenseForm.date),
+      expenseDate: new Date(expenseForm.expenseDate),
+      vendor: expenseForm.vendor || undefined,
       animalId: expenseForm.animalId || undefined
     });
   };
@@ -139,10 +144,11 @@ export const FinancialDashboard: React.FC = () => {
 
     await createRevenueMutation.mutateAsync({
       farmId,
-      source: revenueForm.source as any,
+      revenueType: revenueForm.revenueType as any,
       description: revenueForm.description,
       amount: parseFloat(revenueForm.amount),
-      date: new Date(revenueForm.date),
+      revenueDate: new Date(revenueForm.revenueDate),
+      buyer: revenueForm.buyer || undefined,
       animalId: revenueForm.animalId || undefined
     });
   };
@@ -294,6 +300,15 @@ export const FinancialDashboard: React.FC = () => {
                   <option value="equipment">Equipment</option>
                   <option value="utilities">Utilities</option>
                   <option value="transport">Transport</option>
+                  <option value="veterinary">Veterinary</option>
+                  <option value="fertilizer">Fertilizer</option>
+                  <option value="seeds">Seeds</option>
+                  <option value="pesticides">Pesticides</option>
+                  <option value="water">Water</option>
+                  <option value="rent">Rent</option>
+                  <option value="insurance">Insurance</option>
+                  <option value="maintenance">Maintenance</option>
+                  <option value="other">Other</option>
                 </select>
               </div>
               <div>
@@ -302,7 +317,7 @@ export const FinancialDashboard: React.FC = () => {
                   id="description"
                   value={expenseForm.description}
                   onChange={(e) => setExpenseForm({ ...expenseForm, description: e.target.value })}
-                  placeholder="Expense description"
+                  placeholder="e.g., Chicken feed purchase"
                 />
               </div>
               <div>
@@ -310,19 +325,27 @@ export const FinancialDashboard: React.FC = () => {
                 <Input
                   id="amount"
                   type="number"
-                  step="0.01"
                   value={expenseForm.amount}
                   onChange={(e) => setExpenseForm({ ...expenseForm, amount: e.target.value })}
                   placeholder="0.00"
                 />
               </div>
               <div>
-                <Label htmlFor="date">Date</Label>
+                <Label htmlFor="expenseDate">Date</Label>
                 <Input
-                  id="date"
+                  id="expenseDate"
                   type="date"
-                  value={expenseForm.date}
-                  onChange={(e) => setExpenseForm({ ...expenseForm, date: e.target.value })}
+                  value={expenseForm.expenseDate}
+                  onChange={(e) => setExpenseForm({ ...expenseForm, expenseDate: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="vendor">Vendor (Optional)</Label>
+                <Input
+                  id="vendor"
+                  value={expenseForm.vendor}
+                  onChange={(e) => setExpenseForm({ ...expenseForm, vendor: e.target.value })}
+                  placeholder="e.g., John's Farm Supplies"
                 />
               </div>
               <Button onClick={handleAddExpense} className="w-full">
@@ -334,7 +357,7 @@ export const FinancialDashboard: React.FC = () => {
 
         <Dialog open={isAddRevenueOpen} onOpenChange={setIsAddRevenueOpen}>
           <DialogTrigger asChild>
-            <Button variant="outline">
+            <Button>
               <Plus className="h-4 w-4 mr-2" />
               Add Revenue
             </Button>
@@ -342,52 +365,63 @@ export const FinancialDashboard: React.FC = () => {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Record Revenue</DialogTitle>
-              <DialogDescription>Add a new farm revenue source</DialogDescription>
+              <DialogDescription>Add a new farm revenue</DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div>
-                <Label htmlFor="source">Source</Label>
+                <Label htmlFor="revenueType">Revenue Source</Label>
                 <select
-                  id="source"
-                  value={revenueForm.source}
-                  onChange={(e) => setRevenueForm({ ...revenueForm, source: e.target.value })}
+                  id="revenueType"
+                  value={revenueForm.revenueType}
+                  onChange={(e) => setRevenueForm({ ...revenueForm, revenueType: e.target.value })}
                   className="w-full border rounded px-3 py-2"
                 >
-                  <option value="animal_sales">Animal Sales</option>
+                  <option value="animal_sale">Animal Sale</option>
                   <option value="milk_production">Milk Production</option>
-                  <option value="eggs">Eggs</option>
-                  <option value="meat">Meat</option>
-                  <option value="breeding">Breeding</option>
+                  <option value="egg_production">Egg Production</option>
+                  <option value="wool_production">Wool Production</option>
+                  <option value="meat_sale">Meat Sale</option>
+                  <option value="crop_sale">Crop Sale</option>
+                  <option value="produce_sale">Produce Sale</option>
+                  <option value="breeding_service">Breeding Service</option>
                   <option value="other">Other</option>
                 </select>
               </div>
               <div>
-                <Label htmlFor="rev-description">Description</Label>
+                <Label htmlFor="rev_description">Description</Label>
                 <Input
-                  id="rev-description"
+                  id="rev_description"
                   value={revenueForm.description}
                   onChange={(e) => setRevenueForm({ ...revenueForm, description: e.target.value })}
-                  placeholder="Revenue description"
+                  placeholder="e.g., Sold 5 chickens"
                 />
               </div>
               <div>
-                <Label htmlFor="rev-amount">Amount (GHS)</Label>
+                <Label htmlFor="rev_amount">Amount (GHS)</Label>
                 <Input
-                  id="rev-amount"
+                  id="rev_amount"
                   type="number"
-                  step="0.01"
                   value={revenueForm.amount}
                   onChange={(e) => setRevenueForm({ ...revenueForm, amount: e.target.value })}
                   placeholder="0.00"
                 />
               </div>
               <div>
-                <Label htmlFor="rev-date">Date</Label>
+                <Label htmlFor="revenueDate">Date</Label>
                 <Input
-                  id="rev-date"
+                  id="revenueDate"
                   type="date"
-                  value={revenueForm.date}
-                  onChange={(e) => setRevenueForm({ ...revenueForm, date: e.target.value })}
+                  value={revenueForm.revenueDate}
+                  onChange={(e) => setRevenueForm({ ...revenueForm, revenueDate: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="buyer">Buyer (Optional)</Label>
+                <Input
+                  id="buyer"
+                  value={revenueForm.buyer}
+                  onChange={(e) => setRevenueForm({ ...revenueForm, buyer: e.target.value })}
+                  placeholder="e.g., Local Market"
                 />
               </div>
               <Button onClick={handleAddRevenue} className="w-full">
@@ -399,102 +433,78 @@ export const FinancialDashboard: React.FC = () => {
       </div>
 
       {/* Charts */}
-      <Tabs defaultValue="breakdown" className="w-full">
-        <TabsList>
-          <TabsTrigger value="breakdown">Expense Breakdown</TabsTrigger>
-          <TabsTrigger value="revenue">Revenue Breakdown</TabsTrigger>
-          <TabsTrigger value="costanalysis">Cost Per Animal</TabsTrigger>
-        </TabsList>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Expense Breakdown</CardTitle>
+            <CardDescription>Distribution by category</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {expenseChartData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={expenseChartData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percentage }) => `${name}: ${percentage}%`}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {expenseChartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="text-gray-500">No expense data available</p>
+            )}
+          </CardContent>
+        </Card>
 
-        <TabsContent value="breakdown">
-          <Card>
-            <CardHeader>
-              <CardTitle>Expense Breakdown by Category</CardTitle>
-              <CardDescription>Distribution of farm expenses</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {expenseChartData.length > 0 ? (
-                <div className="h-80">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={expenseChartData}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        label={({ name, percentage }) => `${name}: ${percentage}%`}
-                        outerRadius={100}
-                        fill="#8884d8"
-                        dataKey="value"
-                      >
-                        {expenseChartData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip formatter={(value) => `GHS ${value.toLocaleString('en-US', { maximumFractionDigits: 2 })}`} />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-              ) : (
-                <div className="h-80 flex items-center justify-center text-gray-500">
-                  No expense data available
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
+        <Card>
+          <CardHeader>
+            <CardTitle>Revenue Breakdown</CardTitle>
+            <CardDescription>Distribution by source</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {revenueChartData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={revenueChartData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="value" fill="#10b981" />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="text-gray-500">No revenue data available</p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
-        <TabsContent value="revenue">
-          <Card>
-            <CardHeader>
-              <CardTitle>Revenue Breakdown by Source</CardTitle>
-              <CardDescription>Income distribution across sources</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {revenueChartData.length > 0 ? (
-                <div className="h-80">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={revenueChartData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" />
-                      <YAxis />
-                      <Tooltip formatter={(value) => `GHS ${value.toLocaleString('en-US', { maximumFractionDigits: 2 })}`} />
-                      <Bar dataKey="value" fill="#10b981" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              ) : (
-                <div className="h-80 flex items-center justify-center text-gray-500">
-                  No revenue data available
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="costanalysis">
-          <Card>
-            <CardHeader>
-              <CardTitle>Cost Per Animal Analysis</CardTitle>
-              <CardDescription>Average costs for livestock</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm text-gray-600">Total Animals Tracked</p>
-                    <p className="text-2xl font-bold">{costPerAnimal?.totalAnimals || 0}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Average Cost Per Animal</p>
-                    <p className="text-2xl font-bold">GHS {costPerAnimal?.averageCostPerAnimal?.toLocaleString('en-US', { maximumFractionDigits: 2 }) || '0'}</p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+      {/* Cost Analysis */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Cost Analysis</CardTitle>
+          <CardDescription>Cost per animal breakdown</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <p><strong>Total Animals:</strong> {costPerAnimal?.totalAnimals || 0}</p>
+            <p><strong>Average Cost Per Animal:</strong> GHS {costPerAnimal?.averageCostPerAnimal?.toLocaleString('en-US', { maximumFractionDigits: 2 }) || '0'}</p>
+            <p><strong>Total Expenses:</strong> GHS {costPerAnimal?.totalExpenses?.toLocaleString('en-US', { maximumFractionDigits: 2 }) || '0'}</p>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
+
+export default FinancialDashboard;

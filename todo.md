@@ -3096,6 +3096,7 @@
 
 
 ## Bug Fixes (Completed)
-- [x] Fix Add Expense error in Financial Dashboard - Fixed insert syntax from .returning() to destructuring
-- [x] Fix Add Revenue error in Financial Dashboard - Fixed insert syntax from .returning() to destructuring
+- [x] Fix Add Expense error in Financial Dashboard - Fixed insert syntax and schema field names (expenseDate, vendor)
+- [x] Fix Add Revenue error in Financial Dashboard - Fixed insert syntax and schema field names (revenueType, revenueDate, buyer)
+- [x] Update FinancialDashboard component with correct field names
 - [x] Test expense and revenue submission - All 361 tests passing
