@@ -302,6 +302,13 @@
       "when": 1770550444794,
       "tag": "0042_volatile_captain_stacy",
       "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "5",
+      "when": 1770555685299,
+      "tag": "0043_complex_captain_cross",
+      "breakpoints": true
     }
   ]
 }

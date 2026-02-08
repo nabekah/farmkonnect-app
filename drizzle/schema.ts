@@ -2279,3 +2279,50 @@ export const trendingSearches = mysqlTable("trendingSearches", {
 
 export type TrendingSearches = typeof trendingSearches.$inferSelect;
 export type InsertTrendingSearches = typeof trendingSearches.$inferInsert;
+
+
+// ============================================================================
+// SAVED QUERIES (User's saved searches for quick access)
+// ============================================================================
+export const savedQueries = mysqlTable("savedQueries", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  name: varchar("name", { length: 255 }).notNull(), // e.g., "My Active Cattle"
+  description: text("description"),
+  query: varchar("query", { length: 255 }).notNull(),
+  filters: text("filters"), // JSON stringified filters
+  category: varchar("category", { length: 50 }), // "animal", "farm", "crop"
+  icon: varchar("icon", { length: 50 }), // icon name for UI
+  isPinned: boolean("isPinned").default(false).notNull(),
+  usageCount: int("usageCount").default(0).notNull(),
+  lastUsedAt: timestamp("lastUsedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type SavedQueries = typeof savedQueries.$inferSelect;
+export type InsertSavedQueries = typeof savedQueries.$inferInsert;
+
+// ============================================================================
+// SEARCH FEEDBACK (User feedback on search results for ranking improvement)
+// ============================================================================
+export const searchFeedback = mysqlTable("searchFeedback", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  searchId: int("searchId"), // Reference to searchAnalytics
+  query: varchar("query", { length: 255 }).notNull(),
+  resultId: int("resultId"), // ID of the result (animal, farm, crop)
+  resultType: varchar("resultType", { length: 50 }).notNull(), // "animal", "farm", "crop"
+  resultTitle: varchar("resultTitle", { length: 255 }),
+  rating: int("rating"), // 1-5 star rating
+  helpful: boolean("helpful"), // thumbs up/down
+  relevanceScore: decimal("relevanceScore", { precision: 5, scale: 2 }), // calculated score
+  clickedAt: timestamp("clickedAt"),
+  feedbackType: varchar("feedbackType", { length: 50 }), // "thumbsUp", "thumbsDown", "rating"
+  comment: text("comment"), // optional user comment
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type SearchFeedback = typeof searchFeedback.$inferSelect;
+export type InsertSearchFeedback = typeof searchFeedback.$inferInsert;
