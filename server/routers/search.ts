@@ -21,8 +21,8 @@ export const searchRouter = router({
         query: z.string().min(1).max(100),
         limit: z.number().min(1).max(50).default(10),
         filters: z.object({
-          type: z.string().optional(), // animal type, farm type, crop type
-          status: z.string().optional(), // active, inactive, etc.
+          type: z.string().optional(),
+          status: z.string().optional(),
           category: z.enum(["animal", "farm", "crop"]).optional(),
         }).optional(),
         sessionId: z.string().optional(),
@@ -35,8 +35,18 @@ export const searchRouter = router({
       const startTime = Date.now();
 
       try {
-        // Search animals
-        let animalQuery = db
+        // Search animals - build where conditions dynamically
+        const animalConditions: any[] = [like(animals.animalName, searchTerm)];
+        
+        if (input.filters?.type) {
+          animalConditions.push(eq(animals.animalType, input.filters.type));
+        }
+        
+        if (input.filters?.status) {
+          animalConditions.push(eq(animals.status, input.filters.status));
+        }
+
+        const animalResults = await db
           .select({
             id: animals.id,
             name: animals.animalName,
@@ -45,27 +55,8 @@ export const searchRouter = router({
             farmId: animals.farmId,
           })
           .from(animals)
-          .where(like(animals.animalName, searchTerm));
-
-        if (input.filters?.type) {
-          animalQuery = animalQuery.where(
-            and(
-              like(animals.animalName, searchTerm),
-              eq(animals.animalType, input.filters.type)
-            )
-          );
-        }
-
-        if (input.filters?.status) {
-          animalQuery = animalQuery.where(
-            and(
-              like(animals.animalName, searchTerm),
-              eq(animals.status, input.filters.status)
-            )
-          );
-        }
-
-        const animalResults = await animalQuery.limit(input.limit);
+          .where(animalConditions.length > 1 ? and(...animalConditions) : animalConditions[0])
+          .limit(input.limit);
 
         // Search farms
         const farmResults = await db
@@ -317,39 +308,25 @@ export const searchRouter = router({
       const farmId = input.farmId || user.farmId;
 
       try {
-        let query = db
-          .select()
-          .from(animals)
-          .where(like(animals.animalName, searchTerm));
+        const conditions: any[] = [like(animals.animalName, searchTerm)];
 
         if (farmId) {
-          query = query.where(
-            and(
-              like(animals.animalName, searchTerm),
-              eq(animals.farmId, farmId)
-            )
-          );
+          conditions.push(eq(animals.farmId, farmId));
         }
 
         if (input.type) {
-          query = query.where(
-            and(
-              like(animals.animalName, searchTerm),
-              eq(animals.animalType, input.type)
-            )
-          );
+          conditions.push(eq(animals.animalType, input.type));
         }
 
         if (input.status) {
-          query = query.where(
-            and(
-              like(animals.animalName, searchTerm),
-              eq(animals.status, input.status)
-            )
-          );
+          conditions.push(eq(animals.status, input.status));
         }
 
-        const results = await query.limit(input.limit);
+        const results = await db
+          .select()
+          .from(animals)
+          .where(conditions.length > 1 ? and(...conditions) : conditions[0])
+          .limit(input.limit);
 
         return {
           success: true,
