@@ -70,6 +70,8 @@ import { veterinaryIntegrationRouter } from "./routers/veterinaryIntegration";
 import { csvImportRouter } from "./routers/csvImport";
 import { ghanaExtensionServicesRouter } from "./routers/ghanaExtensionServices";
 import { financialManagementRouter } from "./routers/financialManagement";
+import { recurringExpensesRouter } from "./routers/recurringExpenses";
+import { accountingExportRouter } from "./routers/accountingExport";
 import { z } from "zod";
 import { getDb } from "./db";
 import { TRPCError } from "@trpc/server";
@@ -146,6 +148,8 @@ export const appRouter = router({
   csvImport: csvImportRouter,
   ghanaExtensionServices: ghanaExtensionServicesRouter,
   financialManagement: financialManagementRouter,
+  recurringExpenses: recurringExpensesRouter,
+  accountingExport: accountingExportRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {
