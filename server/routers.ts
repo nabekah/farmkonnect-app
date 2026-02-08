@@ -78,6 +78,7 @@ import { vetDirectoryRouter } from "./routers/vetDirectory";
 import { prescriptionManagementRouter } from "./routers/prescriptionManagement";
 import { telemedicineManagementRouter } from "./routers/telemedicineManagement";
 import { insuranceClaimTrackingRouter } from "./routers/insuranceClaimTracking";
+import { prescriptionNotificationsRouter } from "./routers/prescriptionNotifications";
 import { z } from "zod";
 import { getDb } from "./db";
 import { TRPCError } from "@trpc/server";
@@ -162,6 +163,7 @@ export const appRouter = router({
   prescriptionManagement: prescriptionManagementRouter,
   telemedicineManagement: telemedicineManagementRouter,
   insuranceClaims: insuranceClaimTrackingRouter,
+  prescriptionNotifications: prescriptionNotificationsRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {
