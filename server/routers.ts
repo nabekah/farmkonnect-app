@@ -67,6 +67,7 @@ import { multiSpeciesRouter } from "./routers/multiSpecies";
 import { animalMigrationRouter } from "./routers/animalMigration";
 import { speciesReportsRouter } from "./routers/speciesReports";
 import { veterinaryIntegrationRouter } from "./routers/veterinaryIntegration";
+import { csvImportRouter } from "./routers/csvImport";
 import { z } from "zod";
 import { getDb } from "./db";
 import { TRPCError } from "@trpc/server";
@@ -140,6 +141,7 @@ export const appRouter = router({
   animalMigration: animalMigrationRouter,
   speciesReports: speciesReportsRouter,
   veterinaryIntegration: veterinaryIntegrationRouter,
+  csvImport: csvImportRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {

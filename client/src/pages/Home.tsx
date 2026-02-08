@@ -48,6 +48,7 @@ import { WorkerQuickActions } from "@/components/WorkerQuickActions";
 import { FarmComparisonView } from "@/components/FarmComparisonView";
 import { FarmAlertsCenter, type FarmAlert } from "@/components/FarmAlertsCenter";
 import { FarmRecommendations } from "@/components/FarmRecommendations";
+import { FarmQuickActions } from "@/components/FarmQuickActions";
 import { trpc } from "@/lib/trpc";
 
 export default function Home() {
@@ -345,6 +346,10 @@ function AuthenticatedHome({ user, setLocation }: { user: any; setLocation: (pat
           </div>
 
           {/* Quick Actions */}
+          <div className="mb-8">
+            <FarmQuickActions />
+          </div>
+
           {user.role === "field_worker" && (
             <div className="mb-8">
               <WorkerQuickActions />

@@ -80,6 +80,7 @@ import { SpeciesSelectionWizard } from "./components/SpeciesSelectionWizard";
 import { SpeciesProductionDashboard } from "./pages/SpeciesProductionDashboard";
 import { BreedComparison } from "./pages/BreedComparison";
 import { BulkAnimalRegistration } from "./pages/BulkAnimalRegistration";
+import { AnimalInventory } from "./pages/AnimalInventory";
 import { NotificationProvider } from "./contexts/NotificationContext";
 import { TimeTrackerProvider } from "./contexts/TimeTrackerContext";
 import { ActivityNotificationContainer } from "./components/ActivityNotificationToast";
@@ -196,6 +197,13 @@ function Router() {
         {() => (
           <DashboardLayout>
             <BulkAnimalRegistration />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/animal-inventory">
+        {() => (
+          <DashboardLayout>
+            <AnimalInventory />
           </DashboardLayout>
         )}
       </Route>

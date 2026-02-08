@@ -3019,3 +3019,10 @@
 - [ ] Build herd health dashboard with species-specific metrics
 - [ ] Implement feed optimization engine
 - [ ] Test and validate all new features
+
+
+## Quick Actions & Animal Management (In Progress)
+- [ ] Add quick action buttons to home dashboard (Register Animals, View Inventory)
+- [ ] Implement CSV import for bulk animal registration with validation
+- [ ] Create animal inventory dashboard with statistics by species/gender
+- [ ] Test and validate all implementations
