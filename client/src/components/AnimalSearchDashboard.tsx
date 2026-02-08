@@ -8,7 +8,6 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Search, Filter, Download, Save, Trash2, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
-import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { useBulkNotifications } from "@/hooks/useBulkNotifications";
 

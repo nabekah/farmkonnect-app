@@ -9,7 +9,6 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertTriangle, CheckCircle, Upload, Eye, Download, Loader2, FileText } from "lucide-react";
-import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { useBulkNotifications } from "@/hooks/useBulkNotifications";
 
@@ -53,7 +52,8 @@ export function AnimalImportWizard({ open, onOpenChange, farmId }: AnimalImportW
   const executeImport = trpc.animalImportWizard.executeImport.useMutation({
     onSuccess: (data) => {
       setImportResult(data);
-      notifyImportComplete(data.totalCount || 0, data.successCount || 0, data.failureCount || 0);
+      const results = data.results;
+      notifyImportComplete(results.totalRecords || 0, results.successfulImports || 0, results.failedImports || 0);
       setStep("complete");
     },
     onError: (error) => {

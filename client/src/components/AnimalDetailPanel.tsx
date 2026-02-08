@@ -27,13 +27,13 @@ export function AnimalDetailPanel({ animalId, onClose }: AnimalDetailPanelProps)
   );
 
   // Fetch vaccinations
-  const { data: vaccinations = [] } = trpc.livestock.getAnimalVaccinations.useQuery(
+  const { data: vaccinations = [] } = trpc.healthAlerts.getAnimalVaccinations.useQuery(
     { animalId },
     { enabled: !!animalId }
   );
 
   // Fetch performance metrics
-  const { data: performanceMetrics = [] } = trpc.livestock.getAnimalPerformanceMetrics.useQuery(
+  const { data: performanceMetrics = [] } = trpc.healthTrendsAnalytics.getAnimalPerformanceMetrics.useQuery(
     { animalId },
     { enabled: !!animalId }
   );

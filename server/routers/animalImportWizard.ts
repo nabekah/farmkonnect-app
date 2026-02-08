@@ -86,7 +86,7 @@ export const animalImportWizardRouter = router({
         tagIds: z.array(z.string()),
       })
     )
-    .query(async ({ input }) => {
+    .mutation(async ({ input }) => {
       const db = await getDb();
       if (!db) {
         throw new TRPCError({
@@ -139,7 +139,7 @@ export const animalImportWizardRouter = router({
         ),
       })
     )
-    .query(async ({ input }) => {
+    .mutation(async ({ input }) => {
       const db = await getDb();
       if (!db) {
         throw new TRPCError({

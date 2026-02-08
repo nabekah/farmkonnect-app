@@ -40,7 +40,10 @@ export class RetryService {
     errorMessage: string,
     backoffMultiplier: number = this.config.backoffMultiplier
   ) {
-    const db = getDb();
+    const db = await getDb();
+    if (!db) {
+      return { success: false, nextRetryAt: new Date(), delayMs: 0 };
+    }
     const delay = this.calculateNextRetryDelay(retryAttempt, backoffMultiplier);
     const nextRetryAt = new Date(Date.now() + delay);
 
@@ -60,7 +63,8 @@ export class RetryService {
    * Check if an operation should be retried
    */
   async shouldRetry(operationId: string): Promise<boolean> {
-    const db = getDb();
+    const db = await getDb();
+    if (!db) return false;
 
     const operation = await db
       .select()
@@ -80,7 +84,8 @@ export class RetryService {
    * Get pending retries
    */
   async getPendingRetries() {
-    const db = getDb();
+    const db = await getDb();
+    if (!db) return [];
     const now = new Date();
 
     const pendingRetries = await db
@@ -104,7 +109,8 @@ export class RetryService {
    * Mark retry as in-progress
    */
   async markRetryInProgress(retryLogId: number) {
-    const db = getDb();
+    const db = await getDb();
+    if (!db) return { success: false };
 
     const result = await db
       .update(operationRetryLog)
@@ -118,7 +124,8 @@ export class RetryService {
    * Mark retry as completed
    */
   async markRetryCompleted(retryLogId: number, operationId: string) {
-    const db = getDb();
+    const db = await getDb();
+    if (!db) return { success: false };
 
     // Update retry log
     await db
@@ -139,7 +146,8 @@ export class RetryService {
    * Mark retry as failed
    */
   async markRetryFailed(retryLogId: number, operationId: string, errorMessage: string) {
-    const db = getDb();
+    const db = await getDb();
+    if (!db) return { success: false };
 
     // Update retry log
     const retryLog = await db
@@ -196,7 +204,8 @@ export class RetryService {
    * Get retry history for an operation
    */
   async getRetryHistory(operationId: string) {
-    const db = getDb();
+    const db = await getDb();
+    if (!db) return [];
 
     const retries = await db
       .select()
@@ -210,7 +219,8 @@ export class RetryService {
    * Get operation retry status
    */
   async getRetryStatus(operationId: string) {
-    const db = getDb();
+    const db = await getDb();
+    if (!db) return null;
 
     const operation = await db
       .select()
@@ -240,7 +250,10 @@ export class RetryService {
    * Manually retry a failed operation
    */
   async manualRetry(operationId: string) {
-    const db = getDb();
+    const db = await getDb();
+    if (!db) {
+      return { success: false, error: "Database not available" };
+    }
 
     const operation = await db
       .select()
