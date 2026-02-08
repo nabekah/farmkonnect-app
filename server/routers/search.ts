@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
 import { getDb } from "../db";
-import { animals, farms, crops, activities } from "../../drizzle/schema";
+import { animals, farms, crops } from "../../drizzle/schema";
 import { eq, like, and } from "drizzle-orm";
 
 export const searchRouter = router({
@@ -18,6 +18,7 @@ export const searchRouter = router({
     .query(async ({ input, ctx }) => {
       const db = getDb();
       const searchTerm = `%${input.query}%`;
+      const user = ctx.user as any;
 
       try {
         // Search animals
@@ -27,13 +28,12 @@ export const searchRouter = router({
             name: animals.animalName,
             type: animals.animalType,
             status: animals.status,
-            category: z.literal("animal"),
             farmId: animals.farmId,
           })
           .from(animals)
           .where(
             and(
-              eq(animals.farmId, ctx.user.farmId || 0),
+              eq(animals.farmId, user.farmId || 0),
               like(animals.animalName, searchTerm)
             )
           )
@@ -45,14 +45,12 @@ export const searchRouter = router({
             id: farms.id,
             name: farms.farmName,
             location: farms.location,
-            status: z.literal("active"),
-            category: z.literal("farm"),
             farmId: farms.id,
           })
           .from(farms)
           .where(
             and(
-              eq(farms.farmerUserId, ctx.user.id),
+              eq(farms.farmerUserId, user.id),
               like(farms.farmName, searchTerm)
             )
           )
@@ -64,9 +62,6 @@ export const searchRouter = router({
             id: crops.id,
             name: crops.cropName,
             variety: crops.variety,
-            status: z.literal("active"),
-            category: z.literal("crop"),
-            farmId: z.literal(0),
           })
           .from(crops)
           .where(like(crops.cropName, searchTerm))
@@ -75,19 +70,25 @@ export const searchRouter = router({
         // Combine results
         const results = [
           ...animalResults.map((r) => ({
-            ...r,
+            id: r.id,
+            name: r.name,
             category: "animal" as const,
             path: `/livestock-management?animal=${r.id}`,
+            type: r.type,
           })),
           ...farmResults.map((r) => ({
-            ...r,
+            id: r.id,
+            name: r.name,
             category: "farm" as const,
             path: `/farms`,
+            location: r.location,
           })),
           ...cropResults.map((r) => ({
-            ...r,
+            id: r.id,
+            name: r.name,
             category: "crop" as const,
             path: `/crops`,
+            variety: r.variety,
           })),
         ];
 
@@ -121,7 +122,8 @@ export const searchRouter = router({
     .query(async ({ input, ctx }) => {
       const db = getDb();
       const searchTerm = `%${input.query}%`;
-      const farmId = input.farmId || ctx.user.farmId;
+      const user = ctx.user as any;
+      const farmId = input.farmId || user.farmId;
 
       try {
         const results = await db
@@ -164,6 +166,7 @@ export const searchRouter = router({
     .query(async ({ input, ctx }) => {
       const db = getDb();
       const searchTerm = `%${input.query}%`;
+      const user = ctx.user as any;
 
       try {
         const results = await db
@@ -171,7 +174,7 @@ export const searchRouter = router({
           .from(farms)
           .where(
             and(
-              eq(farms.farmerUserId, ctx.user.id),
+              eq(farms.farmerUserId, user.id),
               like(farms.farmName, searchTerm)
             )
           )
