@@ -1670,3 +1670,139 @@ export const yieldRecords = mysqlTable("yieldRecords", {
 	notes: text(),
 	createdAt: timestamp({ mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
 });
+
+// Medication Compliance Tracking
+export const medicationCompliance = mysqlTable("medication_compliance", {
+	id: int().autoincrement().notNull(),
+	prescriptionId: varchar({ length: 50 }).notNull().references(() => prescriptions.id, { onDelete: "cascade" }),
+	animalId: int().notNull().references(() => animals.id, { onDelete: "cascade" }),
+	farmId: int().notNull().references(() => farms.id, { onDelete: "cascade" }),
+	medicationName: varchar({ length: 255 }).notNull(),
+	scheduledDate: date({ mode: 'string' }).notNull(),
+	scheduledTime: varchar({ length: 10 }),
+	administeredDate: date({ mode: 'string' }),
+	administeredTime: varchar({ length: 10 }),
+	dosageGiven: varchar({ length: 100 }),
+	administeredBy: int().references(() => users.id),
+	status: mysqlEnum(['pending', 'administered', 'missed', 'skipped']).default('pending'),
+	notes: text(),
+	sideEffects: text(),
+	createdAt: timestamp({ mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
+	updatedAt: timestamp({ mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+},
+(table) => [
+	index("idx_prescriptionId").on(table.prescriptionId),
+	index("idx_animalId_status").on(table.animalId, table.status),
+	index("idx_farmId").on(table.farmId),
+	index("idx_scheduledDate").on(table.scheduledDate),
+]);
+
+// Medication Compliance Summary
+export const medicationComplianceSummary = mysqlTable("medication_compliance_summary", {
+	id: int().autoincrement().notNull(),
+	prescriptionId: varchar({ length: 50 }).notNull().references(() => prescriptions.id, { onDelete: "cascade" }),
+	animalId: int().notNull().references(() => animals.id, { onDelete: "cascade" }),
+	farmId: int().notNull().references(() => farms.id, { onDelete: "cascade" }),
+	totalScheduled: int().default(0),
+	totalAdministered: int().default(0),
+	totalMissed: int().default(0),
+	totalSkipped: int().default(0),
+	compliancePercentage: decimal({ precision: 5, scale: 2 }).default('0'),
+	startDate: date({ mode: 'string' }).notNull(),
+	endDate: date({ mode: 'string' }).notNull(),
+	lastUpdated: timestamp({ mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+	createdAt: timestamp({ mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
+},
+(table) => [
+	index("idx_prescriptionId").on(table.prescriptionId),
+	index("idx_animalId").on(table.animalId),
+	index("idx_farmId").on(table.farmId),
+]);
+
+// Veterinary Directory
+export const veterinaryDirectory = mysqlTable("veterinary_directory", {
+	id: int().autoincrement().notNull(),
+	veterinarianId: varchar({ length: 50 }).notNull().references(() => veterinarians.id, { onDelete: "cascade" }),
+	name: varchar({ length: 255 }).notNull(),
+	specialty: varchar({ length: 100 }).notNull(),
+	region: varchar({ length: 100 }).notNull(),
+	phone: varchar({ length: 20 }).notNull(),
+	email: varchar({ length: 255 }).notNull(),
+	clinicName: varchar({ length: 255 }),
+	licenseNumber: varchar({ length: 100 }),
+	yearsOfExperience: int(),
+	averageRating: decimal({ precision: 3, scale: 2 }).default('0'),
+	totalReviews: int().default(0),
+	verified: tinyint().default(0),
+	availabilityStatus: mysqlEnum(['available', 'unavailable', 'on_leave']).default('available'),
+	consultationFee: decimal({ precision: 10, scale: 2 }),
+	emergencyAvailable: tinyint().default(1),
+	emergencyFee: decimal({ precision: 10, scale: 2 }),
+	bio: text(),
+	qualifications: text(),
+	languages: varchar({ length: 255 }),
+	workingHours: json(),
+	serviceRadius: int(),
+	createdAt: timestamp({ mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
+	updatedAt: timestamp({ mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+},
+(table) => [
+	index("idx_region").on(table.region),
+	index("idx_specialty").on(table.specialty),
+	index("idx_verified").on(table.verified),
+	index("idx_averageRating").on(table.averageRating),
+]);
+
+// Veterinary Reviews and Ratings
+export const veterinaryReviews = mysqlTable("veterinary_reviews", {
+	id: int().autoincrement().notNull(),
+	veterinarianId: varchar({ length: 50 }).notNull().references(() => veterinarians.id, { onDelete: "cascade" }),
+	farmerId: int().notNull().references(() => users.id, { onDelete: "cascade" }),
+	appointmentId: varchar({ length: 50 }).references(() => appointments.id, { onDelete: "set null" }),
+	rating: int().notNull(),
+	title: varchar({ length: 255 }).notNull(),
+	review: text().notNull(),
+	professionalism: int(),
+	communication: int(),
+	timeliness: int(),
+	valueForMoney: int(),
+	verified: tinyint().default(0),
+	createdAt: timestamp({ mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
+	updatedAt: timestamp({ mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+},
+(table) => [
+	index("idx_veterinarianId").on(table.veterinarianId),
+	index("idx_farmerId").on(table.farmerId),
+	index("idx_rating").on(table.rating),
+]);
+
+// Veterinary Availability Schedule
+export const veterinaryAvailability = mysqlTable("veterinary_availability", {
+	id: int().autoincrement().notNull(),
+	veterinarianId: varchar({ length: 50 }).notNull().references(() => veterinarians.id, { onDelete: "cascade" }),
+	dayOfWeek: mysqlEnum(['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']).notNull(),
+	startTime: varchar({ length: 10 }).notNull(),
+	endTime: varchar({ length: 10 }).notNull(),
+	isAvailable: tinyint().default(1),
+	createdAt: timestamp({ mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
+	updatedAt: timestamp({ mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+},
+(table) => [
+	index("idx_veterinarianId").on(table.veterinarianId),
+]);
+
+// Veterinary Services Offered
+export const veterinaryServices = mysqlTable("veterinary_services", {
+	id: int().autoincrement().notNull(),
+	veterinarianId: varchar({ length: 50 }).notNull().references(() => veterinarians.id, { onDelete: "cascade" }),
+	serviceName: varchar({ length: 255 }).notNull(),
+	description: text(),
+	basePrice: decimal({ precision: 10, scale: 2 }).notNull(),
+	estimatedDuration: int(),
+	isAvailable: tinyint().default(1),
+	createdAt: timestamp({ mode: 'string' }).default('CURRENT_TIMESTAMP').notNull(),
+	updatedAt: timestamp({ mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+},
+(table) => [
+	index("idx_veterinarianId").on(table.veterinarianId),
+]);

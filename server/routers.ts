@@ -64,6 +64,8 @@ import { expenseNotifications } from "./routers/expenseNotifications";
 import { farmAnalytics } from "./routers/farmAnalytics";
 import { veterinaryAppointmentsRouter } from "./routers/veterinaryAppointments";
 import { prescriptionsRouter } from "./routers/prescriptionsRouter";
+import { medicationComplianceRouter } from "./routers/medicationComplianceRouter";
+import { veterinaryDirectoryRouter } from "./routers/veterinaryDirectoryRouter";
 import { z } from "zod";
 import { getDb } from "./db";
 import { TRPCError } from "@trpc/server";
@@ -804,6 +806,8 @@ export const appRouter = router({
   activityApproval: activityApprovalRouter,
   veterinaryAppointments: veterinaryAppointmentsRouter,
   prescriptions: prescriptionsRouter,
+  medicationCompliance: medicationComplianceRouter,
+  veterinaryDirectory: veterinaryDirectoryRouter,
 });
 
 export type AppRouter = typeof appRouter;
