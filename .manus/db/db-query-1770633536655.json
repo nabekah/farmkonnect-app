@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE IF NOT EXISTS audit_logs (\n  id BIGINT AUTO_INCREMENT PRIMARY KEY,\n  userId VARCHAR(255) NOT NULL,\n  farmId INT,\n  action VARCHAR(255) NOT NULL,\n  resourceType VARCHAR(100) NOT NULL,\n  resourceId VARCHAR(255),\n  oldValue JSON,\n  newValue JSON,\n  ipAddress VARCHAR(45),\n  userAgent TEXT,\n  status ENUM('success', 'failure') DEFAULT 'success',\n  errorMessage TEXT,\n  createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n  INDEX idx_userId (userId),\n  INDEX idx_farmId (farmId),\n  INDEX idx_action (action),\n  INDEX idx_createdAt (createdAt),\n  INDEX idx_resourceType (resourceType),\n  INDEX idx_composite (userId, farmId, createdAt)\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2kNF22PapS9mysw.root --database WZQk4bD8DnsRHwYBkmh7FN --execute CREATE TABLE IF NOT EXISTS audit_logs (\n  id BIGINT AUTO_INCREMENT PRIMARY KEY,\n  userId VARCHAR(255) NOT NULL,\n  farmId INT,\n  action VARCHAR(255) NOT NULL,\n  resourceType VARCHAR(100) NOT NULL,\n  resourceId VARCHAR(255),\n  oldValue JSON,\n  newValue JSON,\n  ipAddress VARCHAR(45),\n  userAgent TEXT,\n  status ENUM('success', 'failure') DEFAULT 'success',\n  errorMessage TEXT,\n  createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n  INDEX idx_userId (userId),\n  INDEX idx_farmId (farmId),\n  INDEX idx_action (action),\n  INDEX idx_createdAt (createdAt),\n  INDEX idx_resourceType (resourceType),\n  INDEX idx_composite (userId, farmId, createdAt)\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 121
+}

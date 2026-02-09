@@ -29,6 +29,9 @@ import { reportingRouter } from "./reportingRouter";
 import { analyticsRouter } from "./analyticsRouter";
 import { notificationSettingsRouter } from "./notificationSettingsRouter";
 import { rbacRouter } from "./routers/rbac";
+import { invitationsRouter } from "./routers/invitations";
+import { auditLogsRouter } from "./routers/auditLogs";
+import { workerPerformanceRouter } from "./routers/workerPerformance";
 import { exportRouter } from "./exportRouter";
 import { alertHistoryRouter } from "./alertHistoryRouter";
 import { fertilizerRouter } from "./fertilizerRouter";
@@ -109,6 +112,9 @@ import { eq } from "drizzle-orm";
 export const appRouter = router({
   system: systemRouter,
   rbac: rbacRouter,
+  invitations: invitationsRouter,
+  auditLogs: auditLogsRouter,
+  workerPerformance: workerPerformanceRouter,
   upload: uploadRouter,
   financial: financialRouter,
   livestock: livestockRouter,
