@@ -1,1 +1,207 @@
-import React, { useState } from "react";\nimport { trpc } from "@/lib/trpc\";\nimport { Card, CardContent, CardDescription, CardHeader, CardTitle } from \"@/components/ui/card\";\nimport { Button } from \"@/components/ui/button\";\nimport { Badge } from \"@/components/ui/badge\";\nimport { Tabs, TabsContent, TabsList, TabsTrigger } from \"@/components/ui/tabs\";\nimport { AlertCircle, AlertTriangle, CheckCircle, Clock, Zap } from \"lucide-react\";\n\ninterface IncidentResponseDashboardProps {\n  farmId: string;\n}\n\nexport const IncidentResponseDashboard: React.FC<IncidentResponseDashboardProps> = ({ farmId }) => {\n  const [selectedPlaybook, setSelectedPlaybook] = useState<number | null>(null);\n\n  const { data: playbooks = [] } = trpc.incidentPlaybooks.getPlaybooks.useQuery(\n    { farmId },\n    { enabled: !!farmId }\n  );\n\n  const { data: activeIncidents = [] } = trpc.incidentPlaybooks.getActiveIncidents.useQuery(\n    { farmId },\n    { enabled: !!farmId }\n  );\n\n  const escalateIncidentMutation = trpc.incidentPlaybooks.escalateIncident.useMutation();\n  const resolveIncidentMutation = trpc.incidentPlaybooks.resolveIncident.useMutation();\n\n  const handleEscalateIncident = async (incidentId: number) => {\n    try {\n      await escalateIncidentMutation.mutateAsync({\n        incidentId,\n        escalationReason: \"Manual escalation by admin\"\n      });\n    } catch (error) {\n      console.error(\"Error escalating incident:\", error);\n    }\n  };\n\n  const handleResolveIncident = async (incidentId: number) => {\n    try {\n      await resolveIncidentMutation.mutateAsync({\n        incidentId,\n        resolutionNotes: \"Incident resolved\"\n      });\n    } catch (error) {\n      console.error(\"Error resolving incident:\", error);\n    }\n  };\n\n  const getSeverityColor = (severity: string) => {\n    switch (severity) {\n      case \"critical\":\n        return \"bg-red-100 text-red-800\";\n      case \"high\":\n        return \"bg-orange-100 text-orange-800\";\n      case \"medium\":\n        return \"bg-yellow-100 text-yellow-800\";\n      default:\n        return \"bg-blue-100 text-blue-800\";\n    }\n  };\n\n  const getStatusIcon = (status: string) => {\n    switch (status) {\n      case \"triggered\":\n        return <AlertCircle className=\"h-4 w-4\" />;\n      case \"in_progress\":\n        return <Clock className=\"h-4 w-4\" />;\n      case \"escalated\":\n        return <AlertTriangle className=\"h-4 w-4\" />;\n      case \"resolved\":\n        return <CheckCircle className=\"h-4 w-4\" />;\n      default:\n        return <Zap className=\"h-4 w-4\" />;\n    }\n  };\n\n  return (\n    <div className=\"space-y-6\">\n      <Tabs defaultValue=\"active\" className=\"w-full\">\n        <TabsList className=\"grid w-full grid-cols-2\">\n          <TabsTrigger value=\"active\">\n            <AlertCircle className=\"h-4 w-4 mr-2\" />\n            Active Incidents ({activeIncidents.length})\n          </TabsTrigger>\n          <TabsTrigger value=\"playbooks\">\n            <Zap className=\"h-4 w-4 mr-2\" />\n            Playbooks ({playbooks.length})\n          </TabsTrigger>\n        </TabsList>\n\n        {/* Active Incidents Tab */}\n        <TabsContent value=\"active\" className=\"space-y-4\">\n          {activeIncidents.length === 0 ? (\n            <Card>\n              <CardContent className=\"pt-6\">\n                <div className=\"text-center py-8 text-gray-500\">\n                  <CheckCircle className=\"h-12 w-12 mx-auto mb-2 text-green-500\" />\n                  <p>No active incidents</p>\n                </div>\n              </CardContent>\n            </Card>\n          ) : (\n            <div className=\"space-y-3\">\n              {activeIncidents.map((incident: any) => (\n                <Card key={incident.id}>\n                  <CardContent className=\"pt-6\">\n                    <div className=\"flex items-start justify-between\">\n                      <div className=\"flex-1\">\n                        <div className=\"flex items-center gap-2 mb-2\">\n                          {getStatusIcon(incident.status)}\n                          <h3 className=\"font-semibold\">{incident.playbookName}</h3>\n                          <Badge className={getSeverityColor(incident.severity)}>\n                            {incident.severity.toUpperCase()}\n                          </Badge>\n                          <Badge variant=\"outline\">{incident.status}</Badge>\n                        </div>\n                        <p className=\"text-sm text-gray-600 mb-2\">{incident.triggerReason}</p>\n                        <div className=\"flex items-center gap-4 text-xs text-gray-500\">\n                          <span>Level {incident.currentEscalationLevel}</span>\n                          <span>Created: {new Date(incident.createdAt).toLocaleString()}</span>\n                        </div>\n                      </div>\n                      <div className=\"flex gap-2\">\n                        {incident.status !== \"resolved\" && (\n                          <>\n                            <Button\n                              size=\"sm\"\n                              variant=\"outline\"\n                              onClick={() => handleEscalateIncident(incident.id)}\n                              disabled={escalateIncidentMutation.isPending}\n                            >\n                              <AlertTriangle className=\"h-4 w-4 mr-1\" />\n                              Escalate\n                            </Button>\n                            <Button\n                              size=\"sm\"\n                              onClick={() => handleResolveIncident(incident.id)}\n                              disabled={resolveIncidentMutation.isPending}\n                            >\n                              <CheckCircle className=\"h-4 w-4 mr-1\" />\n                              Resolve\n                            </Button>\n                          </>\n                        )}\n                      </div>\n                    </div>\n                  </CardContent>\n                </Card>\n              ))}\n            </div>\n          )}\n        </TabsContent>\n\n        {/* Playbooks Tab */}\n        <TabsContent value=\"playbooks\" className=\"space-y-4\">\n          {playbooks.length === 0 ? (\n            <Card>\n              <CardContent className=\"pt-6\">\n                <div className=\"text-center py-8 text-gray-500\">\n                  <Zap className=\"h-12 w-12 mx-auto mb-2 text-gray-400\" />\n                  <p>No incident playbooks created yet</p>\n                </div>\n              </CardContent>\n            </Card>\n          ) : (\n            <div className=\"space-y-3\">\n              {playbooks.map((playbook: any) => (\n                <Card key={playbook.id}>\n                  <CardContent className=\"pt-6\">\n                    <div className=\"flex items-start justify-between\">\n                      <div className=\"flex-1\">\n                        <div className=\"flex items-center gap-2 mb-2\">\n                          <Zap className=\"h-4 w-4\" />\n                          <h3 className=\"font-semibold\">{playbook.playbookName}</h3>\n                          <Badge className={getSeverityColor(playbook.severity)}>\n                            {playbook.severity.toUpperCase()}\n                          </Badge>\n                          {playbook.isActive && (\n                            <Badge className=\"bg-green-100 text-green-800\">Active</Badge>\n                          )}\n                        </div>\n                        <p className=\"text-sm text-gray-600 mb-2\">{playbook.description}</p>\n                        <div className=\"flex items-center gap-4 text-xs text-gray-500\">\n                          <span>Type: {playbook.incidentType}</span>\n                          <span>Created: {new Date(playbook.createdAt).toLocaleDateString()}</span>\n                        </div>\n                      </div>\n                      <Button\n                        size=\"sm\"\n                        variant=\"outline\"\n                        onClick={() => setSelectedPlaybook(playbook.id)}\n                      >\n                        View Details\n                      </Button>\n                    </div>\n                  </CardContent>\n                </Card>\n              ))}\n            </div>\n          )}\n        </TabsContent>\n      </Tabs>\n    </div>\n  );\n};\n
+import React, { useState } from "react";
+import { trpc } from "@/lib/trpc";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AlertCircle, AlertTriangle, CheckCircle, Clock, Zap } from "lucide-react";
+
+interface IncidentResponseDashboardProps {
+  farmId: string;
+}
+
+export const IncidentResponseDashboard: React.FC<IncidentResponseDashboardProps> = ({ farmId }) => {
+  const [selectedPlaybook, setSelectedPlaybook] = useState<number | null>(null);
+
+  const { data: playbooks = [] } = trpc.incidentPlaybooks.getPlaybooks.useQuery(
+    { farmId },
+    { enabled: !!farmId }
+  );
+
+  const { data: activeIncidents = [] } = trpc.incidentPlaybooks.getActiveIncidents.useQuery(
+    { farmId },
+    { enabled: !!farmId }
+  );
+
+  const escalateIncidentMutation = trpc.incidentPlaybooks.escalateIncident.useMutation();
+  const resolveIncidentMutation = trpc.incidentPlaybooks.resolveIncident.useMutation();
+
+  const handleEscalateIncident = async (incidentId: number) => {
+    try {
+      await escalateIncidentMutation.mutateAsync({
+        incidentId,
+        escalationReason: "Manual escalation by admin"
+      });
+    } catch (error) {
+      console.error("Error escalating incident:", error);
+    }
+  };
+
+  const handleResolveIncident = async (incidentId: number) => {
+    try {
+      await resolveIncidentMutation.mutateAsync({
+        incidentId,
+        resolutionNotes: "Incident resolved"
+      });
+    } catch (error) {
+      console.error("Error resolving incident:", error);
+    }
+  };
+
+  const getSeverityColor = (severity: string) => {
+    switch (severity) {
+      case "critical":
+        return "bg-red-100 text-red-800";
+      case "high":
+        return "bg-orange-100 text-orange-800";
+      case "medium":
+        return "bg-yellow-100 text-yellow-800";
+      default:
+        return "bg-blue-100 text-blue-800";
+    }
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case "triggered":
+        return <AlertCircle className="h-4 w-4" />;
+      case "in_progress":
+        return <Clock className="h-4 w-4" />;
+      case "escalated":
+        return <AlertTriangle className="h-4 w-4" />;
+      case "resolved":
+        return <CheckCircle className="h-4 w-4" />;
+      default:
+        return <Zap className="h-4 w-4" />;
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <Tabs defaultValue="active" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="active">
+            <AlertCircle className="h-4 w-4 mr-2" />
+            Active Incidents ({activeIncidents.length})
+          </TabsTrigger>
+          <TabsTrigger value="playbooks">
+            <Zap className="h-4 w-4 mr-2" />
+            Playbooks ({playbooks.length})
+          </TabsTrigger>
+        </TabsList>
+
+        {/* Active Incidents Tab */}
+        <TabsContent value="active" className="space-y-4">
+          {activeIncidents.length === 0 ? (
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-center py-8 text-gray-500">
+                  <CheckCircle className="h-12 w-12 mx-auto mb-2 text-green-500" />
+                  <p>No active incidents</p>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-3">
+              {activeIncidents.map((incident: any) => (
+                <Card key={incident.id}>
+                  <CardContent className="pt-6">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          {getStatusIcon(incident.status)}
+                          <h3 className="font-semibold">{incident.playbookName}</h3>
+                          <Badge className={getSeverityColor(incident.severity)}>
+                            {incident.severity.toUpperCase()}
+                          </Badge>
+                          <Badge variant="outline">{incident.status}</Badge>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-2">{incident.triggerReason}</p>
+                        <div className="flex items-center gap-4 text-xs text-gray-500">
+                          <span>Level {incident.currentEscalationLevel}</span>
+                          <span>Created: {new Date(incident.createdAt).toLocaleString()}</span>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        {incident.status !== "resolved" && (
+                          <>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleEscalateIncident(incident.id)}
+                              disabled={escalateIncidentMutation.isPending}
+                            >
+                              <AlertTriangle className="h-4 w-4 mr-1" />
+                              Escalate
+                            </Button>
+                            <Button
+                              size="sm"
+                              onClick={() => handleResolveIncident(incident.id)}
+                              disabled={resolveIncidentMutation.isPending}
+                            >
+                              <CheckCircle className="h-4 w-4 mr-1" />
+                              Resolve
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+
+        {/* Playbooks Tab */}
+        <TabsContent value="playbooks" className="space-y-4">
+          {playbooks.length === 0 ? (
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-center py-8 text-gray-500">
+                  <Zap className="h-12 w-12 mx-auto mb-2 text-gray-400" />
+                  <p>No incident playbooks created yet</p>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-3">
+              {playbooks.map((playbook: any) => (
+                <Card key={playbook.id}>
+                  <CardContent className="pt-6">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Zap className="h-4 w-4" />
+                          <h3 className="font-semibold">{playbook.playbookName}</h3>
+                          <Badge className={getSeverityColor(playbook.severity)}>
+                            {playbook.severity.toUpperCase()}
+                          </Badge>
+                          {playbook.isActive && (
+                            <Badge className="bg-green-100 text-green-800">Active</Badge>
+                          )}
+                        </div>
+                        <p className="text-sm text-gray-600 mb-2">{playbook.description}</p>
+                        <div className="flex items-center gap-4 text-xs text-gray-500">
+                          <span>Type: {playbook.incidentType}</span>
+                          <span>Created: {new Date(playbook.createdAt).toLocaleDateString()}</span>
+                        </div>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setSelectedPlaybook(playbook.id)}
+                      >
+                        View Details
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+};
