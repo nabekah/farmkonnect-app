@@ -112,6 +112,9 @@ import { supplyChainVendorManagementCleanRouter } from "./routers/supplyChainVen
 import { customerPortalCleanRouter } from "./routers/customerPortalClean";
 import { iotSensorIntegrationCleanRouter } from "./routers/iotSensorIntegrationClean";
 import { financialManagementCleanRouter } from "./routers/financialManagementClean";
+import { mobileAppSyncCleanRouter } from "./routers/mobileAppSyncClean";
+import { advancedAnalyticsCleanRouter } from "./routers/advancedAnalyticsClean";
+import { cooperativeCommunitiesCleanRouter } from "./routers/cooperativeCommunitiesClean";
 import { z } from "zod";
 import { getDb } from "./db";
 import { TRPCError } from "@trpc/server";
@@ -230,6 +233,9 @@ export const appRouter = router({
   customerPortal: customerPortalCleanRouter,
   iotSensorIntegration: iotSensorIntegrationCleanRouter,
   financialManagement: financialManagementCleanRouter,
+  mobileAppSync: mobileAppSyncCleanRouter,
+  advancedAnalytics: advancedAnalyticsCleanRouter,
+  cooperativeCommunities: cooperativeCommunitiesCleanRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {
