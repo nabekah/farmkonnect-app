@@ -87,7 +87,7 @@ import {
 import { eq } from "drizzle-orm";
 
 export const appRouter = router({
-  security: securityRouter,
+  security: securityControlsRouter,
   system: systemRouter,
   rbac: rbacRouter,
   invitations: invitationsRouter,
@@ -798,7 +798,6 @@ export const appRouter = router({
   business: businessRouter,
   payment: paymentRouter,
   sms: smsRouter,
-  security: securityRouter,
   passwordReset: passwordResetRouter,
   activityApproval: activityApprovalRouter,
 });
