@@ -11,6 +11,11 @@ import { Textarea } from "../components/ui/textarea";
 import { Checkbox } from "../components/ui/checkbox";
 import { Shield, Users, Key, Activity, AlertTriangle, CheckCircle, XCircle, Lock, Settings as SettingsIcon } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
+import { ComplianceReportScheduler } from "../components/ComplianceReportScheduler";
+import { SecurityAuditDashboard } from "../components/SecurityAuditDashboard";
+import { RealtimeSecurityAlerts } from "../components/RealtimeSecurityAlerts";
+import { TrustedDevicesManager } from "../components/TrustedDevicesManager";
+import { IncidentResponseDashboard } from "../components/IncidentResponseDashboard";
 
 export default function SecurityDashboard() {
   const [selectedTab, setSelectedTab] = useState("overview");
@@ -220,7 +225,7 @@ export default function SecurityDashboard() {
       </div>
 
       <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-9 overflow-x-auto">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="approvals">
             Approvals
@@ -234,6 +239,9 @@ export default function SecurityDashboard() {
           <TabsTrigger value="rbac">RBAC</TabsTrigger>
           <TabsTrigger value="audit">Audit Logs</TabsTrigger>
           <TabsTrigger value="sessions">Sessions</TabsTrigger>
+          <TabsTrigger value="alerts">Real-time Alerts</TabsTrigger>
+          <TabsTrigger value="compliance">Compliance Reports</TabsTrigger>
+          <TabsTrigger value="security-metrics">Security Metrics</TabsTrigger>
         </TabsList>
 
         {/* OVERVIEW TAB */}
@@ -764,6 +772,21 @@ export default function SecurityDashboard() {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* REAL-TIME ALERTS TAB */}
+        <TabsContent value="alerts" className="space-y-4">
+          <RealtimeSecurityAlerts farmId="1" />
+        </TabsContent>
+
+        {/* COMPLIANCE REPORTS TAB */}
+        <TabsContent value="compliance" className="space-y-4">
+          <ComplianceReportScheduler farmId="1" />
+        </TabsContent>
+
+        {/* SECURITY METRICS TAB */}
+        <TabsContent value="security-metrics" className="space-y-4">
+          <SecurityAuditDashboard farmId="1" />
         </TabsContent>
       </Tabs>
     </div>

@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE IF NOT EXISTS security_audit_metrics (\n  id INT AUTO_INCREMENT PRIMARY KEY,\n  farmId INT NOT NULL,\n  metricDate DATE NOT NULL,\n  totalLoginAttempts INT DEFAULT 0,\n  failedLoginAttempts INT DEFAULT 0,\n  successfulLogins INT DEFAULT 0,\n  uniqueUsers INT DEFAULT 0,\n  uniqueDevices INT DEFAULT 0,\n  suspiciousActivities INT DEFAULT 0,\n  mfaUsageRate DECIMAL(5,2),\n  averageSessionDuration INT,\n  peakAccessTime VARCHAR(10),\n  geographicLocations INT DEFAULT 0,\n  dataAccessEvents INT DEFAULT 0,\n  dataModificationEvents INT DEFAULT 0,\n  complianceScore DECIMAL(5,2),\n  createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n  FOREIGN KEY (farmId) REFERENCES farms(id) ON DELETE CASCADE,\n  UNIQUE KEY unique_farm_date (farmId, metricDate),\n  INDEX idx_farmId_date (farmId, metricDate)\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2kNF22PapS9mysw.root --database WZQk4bD8DnsRHwYBkmh7FN --execute CREATE TABLE IF NOT EXISTS security_audit_metrics (\n  id INT AUTO_INCREMENT PRIMARY KEY,\n  farmId INT NOT NULL,\n  metricDate DATE NOT NULL,\n  totalLoginAttempts INT DEFAULT 0,\n  failedLoginAttempts INT DEFAULT 0,\n  successfulLogins INT DEFAULT 0,\n  uniqueUsers INT DEFAULT 0,\n  uniqueDevices INT DEFAULT 0,\n  suspiciousActivities INT DEFAULT 0,\n  mfaUsageRate DECIMAL(5,2),\n  averageSessionDuration INT,\n  peakAccessTime VARCHAR(10),\n  geographicLocations INT DEFAULT 0,\n  dataAccessEvents INT DEFAULT 0,\n  dataModificationEvents INT DEFAULT 0,\n  complianceScore DECIMAL(5,2),\n  createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n  FOREIGN KEY (farmId) REFERENCES farms(id) ON DELETE CASCADE,\n  UNIQUE KEY unique_farm_date (farmId, metricDate),\n  INDEX idx_farmId_date (farmId, metricDate)\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 176
+}
