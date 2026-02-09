@@ -92,7 +92,10 @@ import { budgetAlertsRouter } from "./routers/budgetAlerts";
 // import { telemedicineManagementRouter } from "./routers/telemedicineManagement";
 // import { insuranceClaimTrackingRouter } from "./routers/insuranceClaimTracking";
 // import { prescriptionNotificationsRouter } from "./routers/prescriptionNotifications";
-// import { vetRatingsRouter } from "./routers/vetRatings";
+// // import { vetRatingsRouter } from "./routers/vetRatings";
+import { veterinaryServicesCleanRouter } from "./routers/veterinaryServicesClean";
+import { financialManagementCleanRouter } from "./routers/financialManagementClean";
+import { laborManagementCleanRouter } from "./routers/laborManagementClean";
 import { z } from "zod";
 import { getDb } from "./db";
 import { TRPCError } from "@trpc/server";
@@ -192,6 +195,9 @@ export const appRouter = router({
   // insuranceClaims: insuranceClaimTrackingRouter,
   // prescriptionNotifications: prescriptionNotificationsRouter,
   // vetRatings: vetRatingsRouter,
+  veterinaryServices: veterinaryServicesCleanRouter,
+  financialManagement: financialManagementCleanRouter,
+  laborManagement: laborManagementCleanRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {
