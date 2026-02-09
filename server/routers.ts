@@ -103,6 +103,9 @@ import { maintenanceAlertsCleanRouter } from "./routers/maintenanceAlertsClean";
 import { maintenanceSchedulingCleanRouter } from "./routers/maintenanceSchedulingClean";
 import { workerPerformanceAnalyticsCleanRouter } from "./routers/workerPerformanceAnalyticsClean";
 import { farmProductsMarketplaceCleanRouter } from "./routers/farmProductsMarketplaceClean";
+import { realtimeNotificationsCleanRouter } from "./routers/realtimeNotificationsClean";
+import { advancedReportingAnalyticsCleanRouter } from "./routers/advancedReportingAnalyticsClean";
+import { multiFarmManagementCleanRouter } from "./routers/multiFarmManagementClean";
 import { z } from "zod";
 import { getDb } from "./db";
 import { TRPCError } from "@trpc/server";
@@ -212,6 +215,9 @@ export const appRouter = router({
   maintenanceScheduling: maintenanceSchedulingCleanRouter,
   workerPerformanceAnalytics: workerPerformanceAnalyticsCleanRouter,
   farmProductsMarketplace: farmProductsMarketplaceCleanRouter,
+  realtimeNotifications: realtimeNotificationsCleanRouter,
+  advancedReportingAnalytics: advancedReportingAnalyticsCleanRouter,
+  multiFarmManagement: multiFarmManagementCleanRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {
