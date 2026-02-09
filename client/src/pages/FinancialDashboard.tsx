@@ -13,6 +13,9 @@ import { toast } from "sonner";
 import { ExpenseRevenueHistory } from "@/components/ExpenseRevenueHistory";
 import { RecurringExpenseManager } from "@/components/RecurringExpenseManager";
 import { BudgetAlertsWidget } from "@/components/BudgetAlertsWidget";
+import { FarmComparisonCharts } from "@/components/FarmComparisonCharts";
+import { BudgetForecasting } from "@/components/BudgetForecasting";
+import { FinancialReportsExport } from "@/components/FinancialReportsExport";
 import { generateExpensePDF, generateRevenuePDF, downloadTextFile } from "@/lib/exportPdf";
 
 export const FinancialDashboard: React.FC = () => {
@@ -523,6 +526,45 @@ export const FinancialDashboard: React.FC = () => {
 
       {/* Revenue History */}
       {farmId && <ExpenseRevenueHistory farmId={farmId} type="revenue" startDate={startDate} endDate={endDate} />}
+
+      {/* Farm Comparison Charts - Only show when viewing all farms */}
+      {selectedFarmId === "all" && farms.length > 1 && (
+        <div className="space-y-6">
+          <div>
+            <h2 className="text-2xl font-bold mb-4">Farm Performance Comparison</h2>
+            <FarmComparisonCharts farms={farms} startDate={startDate} endDate={endDate} />
+          </div>
+        </div>
+      )}
+
+      {/* Budget Forecasting - Only show when viewing single farm */}
+      {selectedFarmId !== "all" && selectedFarmId && (
+        <div className="space-y-6">
+          <div>
+            <h2 className="text-2xl font-bold mb-4">Budget Forecasting</h2>
+            <BudgetForecasting
+              farmId={selectedFarmId}
+              budgetAmount={summary?.totalRevenue || 0}
+              currentSpent={summary?.totalExpenses || 0}
+              startDate={startDate}
+              endDate={endDate}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Financial Reports Export */}
+      {farmId && (
+        <div className="space-y-6">
+          <h2 className="text-2xl font-bold">Reports and Export</h2>
+          <FinancialReportsExport
+            farmId={selectedFarmId === "all" ? farms[0]?.id.toString() || "" : selectedFarmId}
+            farmName={selectedFarmId === "all" ? "All Farms" : farms.find(f => f.id.toString() === selectedFarmId)?.farmName || "Farm"}
+            startDate={startDate}
+            endDate={endDate}
+          />
+        </div>
+      )}
 
       {/* Cost Analysis */}
       <Card>
