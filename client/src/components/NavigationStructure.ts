@@ -184,12 +184,42 @@ export const navigationStructure: MenuGroup[] = [
   },
 
   {
-    title: "Ghana Extension Services",
-    description: "Agricultural support and resources",
+    title: "Veterinary Services",
+    description: "Veterinary care, prescriptions, and telemedicine",
     collapsible: true,
     defaultExpanded: false,
     items: [
-      { icon: BookOpen, label: "Extension Services", path: "/ghana-extension-services" },
+      { icon: Heart, label: "Veterinarian Directory", path: "/veterinary/directory" },
+      { icon: CheckCircle, label: "Appointments", path: "/veterinary/appointments" },
+      { icon: FileText, label: "Prescriptions", path: "/veterinary/prescriptions" },
+      { icon: Smartphone, label: "Telemedicine", path: "/veterinary/telemedicine" },
+      { icon: BarChart3, label: "Health Records", path: "/veterinary/health-records" },
+      { icon: Bell, label: "Prescription Alerts", path: "/veterinary/alerts" },
+    ],
+  },
+
+  {
+    title: "Extension Services",
+    description: "Agricultural extension, training, and market linkage",
+    collapsible: true,
+    defaultExpanded: false,
+    items: [
+      { icon: BookOpen, label: "Extension Agents", path: "/extension/agents" },
+      { icon: Target, label: "Training Programs", path: "/extension/training" },
+      { icon: Briefcase, label: "Business Development", path: "/extension/business" },
+      { icon: LineChart, label: "Market Linkage", path: "/extension/market-linkage" },
+      { icon: Users, label: "Farmer Groups", path: "/extension/farmer-groups" },
+      { icon: Leaf, label: "Technology Adoption", path: "/extension/technology" },
+    ],
+  },
+
+  {
+    title: "Ghana Services",
+    description: "Ghana-specific agricultural support and resources",
+    collapsible: true,
+    defaultExpanded: false,
+    items: [
+      { icon: BookOpen, label: "Ghana Extension Services", path: "/ghana-extension-services" },
     ],
   },
 

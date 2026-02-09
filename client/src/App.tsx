@@ -90,6 +90,8 @@ import { useWebSocket } from "./hooks/useWebSocket";
 import { FinancialDashboard } from "./pages/FinancialDashboard";
 import { GhanaExtensionServicesDashboard } from "./pages/GhanaExtensionServicesDashboard";
 import { InvoiceAndTaxReporting } from "./pages/InvoiceAndTaxReporting";
+import VeterinaryDirectory from "./pages/VeterinaryDirectory";
+import ExtensionAgents from "./pages/ExtensionAgents";
 
 function Router() {
   return (
@@ -249,6 +251,20 @@ function Router() {
         {() => (
           <DashboardLayout>
             <GhanaExtensionServicesDashboard />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/veterinary/directory">
+        {() => (
+          <DashboardLayout>
+            <VeterinaryDirectory />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/extension/agents">
+        {() => (
+          <DashboardLayout>
+            <ExtensionAgents />
           </DashboardLayout>
         )}
       </Route>
