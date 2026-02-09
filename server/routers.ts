@@ -73,6 +73,7 @@ import { stripePaymentRouter } from "./routers/stripePaymentRouter";
 import { sellerAnalyticsRouter } from "./routers/sellerAnalyticsRouter";
 import { inventoryManagementRouter } from "./routers/inventoryManagementRouter";
 import { marketplaceFinancialRouter } from "./routers/marketplaceFinancialRouter";
+import { settlementTaxPayoutRouter } from "./routers/settlementTaxPayoutRouter";
 import { z } from "zod";
 import { getDb } from "./db";
 import { TRPCError } from "@trpc/server";
@@ -823,6 +824,7 @@ export const appRouter = router({
   sellerAnalytics: sellerAnalyticsRouter,
   inventoryManagement: inventoryManagementRouter,
   marketplaceFinancial: marketplaceFinancialRouter,
+  settlementTaxPayout: settlementTaxPayoutRouter,
 });
 
 export type AppRouter = typeof appRouter;
