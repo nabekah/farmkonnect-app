@@ -2,51 +2,83 @@ import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Heart, MapPin, Phone, Mail, Star, Video, AlertCircle } from 'lucide-react';
-import { trpc } from '@/lib/trpc';
-import { useAuth } from '@/hooks/useAuth';
+import { Heart, MapPin, Phone, Mail, Star, Video } from 'lucide-react';
 
 export default function VeterinaryDirectory() {
-  const { user } = useAuth();
-  const [selectedSpecialization, setSelectedSpecialization] = useState<string>('');
-  const [selectedRegion, setSelectedRegion] = useState<string>('');
+  const [selectedSpecialization, setSelectedSpecialization] = useState<string>('all');
+  const [selectedRegion, setSelectedRegion] = useState<string>('all');
 
-  // Fetch veterinarians from tRPC
-  const { data: searchResults, isLoading } = trpc.veterinaryDirectory.search.useQuery(
+  const veterinarians = [
     {
-      region: selectedRegion || undefined,
-      specialty: selectedSpecialization || undefined,
-      verified: true,
-      limit: 20,
-      offset: 0,
+      id: 1,
+      name: 'Dr. Kwame Osei',
+      license: 'GVC-2019-0456',
+      specialization: 'Livestock, Poultry',
+      clinic: 'Accra Veterinary Clinic',
+      region: 'Greater Accra',
+      experience: 12,
+      rating: 4.8,
+      reviews: 45,
+      telemedicine: true,
+      consultationFee: 150,
+      phone: '+233-24-XXXX-XXXX',
+      email: 'kwame@accravet.gh',
     },
-    { enabled: true }
-  );
+    {
+      id: 2,
+      name: 'Dr. Ama Mensah',
+      license: 'GVC-2020-0789',
+      specialization: 'Fish Farming, Aquaculture',
+      clinic: 'Tema Aquaculture Veterinary Center',
+      region: 'Greater Accra',
+      experience: 8,
+      rating: 4.6,
+      reviews: 32,
+      telemedicine: true,
+      consultationFee: 120,
+      phone: '+233-27-XXXX-XXXX',
+      email: 'ama@temaaquavet.gh',
+    },
+    {
+      id: 3,
+      name: 'Dr. Kofi Amponsah',
+      license: 'GVC-2018-0234',
+      specialization: 'Mixed Farming',
+      clinic: 'Kumasi Agricultural Veterinary Services',
+      region: 'Ashanti',
+      experience: 15,
+      rating: 4.9,
+      reviews: 58,
+      telemedicine: true,
+      consultationFee: 140,
+      phone: '+233-26-XXXX-XXXX',
+      email: 'kofi@kumasivet.gh',
+    },
+    {
+      id: 4,
+      name: 'Dr. Abubakari Hassan',
+      license: 'GVC-2019-0567',
+      specialization: 'Livestock, Pastoralism',
+      clinic: 'Northern Livestock Veterinary Center',
+      region: 'Northern',
+      experience: 10,
+      rating: 4.5,
+      reviews: 28,
+      telemedicine: false,
+      consultationFee: 100,
+      phone: '+233-24-XXXX-XXXX',
+      email: 'abubakari@northernvet.gh',
+    },
+  ];
 
-  // Fetch featured veterinarians
-  const { data: featured } = trpc.veterinaryDirectory.getFeatured.useQuery(
-    { limit: 5 },
-    { enabled: true }
-  );
+  const specializations = ['all', 'Livestock', 'Fish Farming', 'Crops', 'Poultry', 'Mixed Farming'];
+  const regions = ['all', 'Greater Accra', 'Ashanti', 'Northern', 'Western', 'Central'];
 
-  // Fetch statistics
-  const { data: stats } = trpc.veterinaryDirectory.getStatistics.useQuery(
-    { region: selectedRegion || undefined },
-    { enabled: true }
-  );
-
-  if (!user) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-          <p className="text-lg font-semibold">Please log in to view the veterinary directory</p>
-        </div>
-      </div>
-    );
-  }
-
-  const veterinarians = searchResults?.data || [];
+  const filteredVets = veterinarians.filter(vet => {
+    const specMatch = selectedSpecialization === 'all' || vet.specialization.includes(selectedSpecialization);
+    const regionMatch = selectedRegion === 'all' || vet.region === selectedRegion;
+    return specMatch && regionMatch;
+  });
 
   return (
     <div className="space-y-6 p-6">
@@ -54,47 +86,6 @@ export default function VeterinaryDirectory() {
         <h1 className="text-3xl font-bold tracking-tight">Veterinary Directory</h1>
         <p className="text-muted-foreground mt-2">Find qualified veterinarians in Ghana</p>
       </div>
-
-      {/* Statistics */}
-      {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Total Veterinarians</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.totalVeterinarians}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Average Rating</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center">
-                <div className="text-2xl font-bold mr-2">{stats.averageRating}</div>
-                <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Emergency Available</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.emergencyAvailable}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Avg. Consultation Fee</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">GHS {stats.averageConsultationFee}</div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
 
       {/* Filters */}
       <Card>
@@ -110,11 +101,11 @@ export default function VeterinaryDirectory() {
                 onChange={(e) => setSelectedSpecialization(e.target.value)}
                 className="w-full mt-2 px-3 py-2 border rounded-md"
               >
-                <option value="">All Specializations</option>
-                <option value="Cattle">Cattle</option>
-                <option value="Small Ruminants">Small Ruminants</option>
-                <option value="Poultry">Poultry</option>
-                <option value="Mixed Animals">Mixed Animals</option>
+                {specializations.map(spec => (
+                  <option key={spec} value={spec}>
+                    {spec === 'all' ? 'All Specializations' : spec}
+                  </option>
+                ))}
               </select>
             </div>
             <div>
@@ -124,11 +115,11 @@ export default function VeterinaryDirectory() {
                 onChange={(e) => setSelectedRegion(e.target.value)}
                 className="w-full mt-2 px-3 py-2 border rounded-md"
               >
-                <option value="">All Regions</option>
-                <option value="Ashanti">Ashanti</option>
-                <option value="Greater Accra">Greater Accra</option>
-                <option value="Eastern">Eastern</option>
-                <option value="Western">Western</option>
+                {regions.map(region => (
+                  <option key={region} value={region}>
+                    {region === 'all' ? 'All Regions' : region}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
@@ -137,85 +128,85 @@ export default function VeterinaryDirectory() {
 
       {/* Veterinarian Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {isLoading ? (
-          <div className="col-span-2 text-center py-8">
-            <p className="text-gray-500">Loading veterinarians...</p>
-          </div>
-        ) : veterinarians && veterinarians.length > 0 ? (
-          veterinarians.map((vet: any) => (
-            <Card key={vet.id} className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="flex justify-between items-start">
-                  <div>
-                    <CardTitle className="flex items-center gap-2">
-                      <Heart className="w-5 h-5 text-red-500" />
-                      {vet.name}
-                    </CardTitle>
-                    <CardDescription>{vet.clinicName}</CardDescription>
-                  </div>
-                  <div className="text-right">
-                    <div className="flex items-center gap-1">
-                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                      <span className="font-semibold">{vet.averageRating}</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground">{vet.totalReviews} reviews</p>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
+        {filteredVets.map(vet => (
+          <Card key={vet.id} className="hover:shadow-lg transition-shadow">
+            <CardHeader>
+              <div className="flex justify-between items-start">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">License</p>
-                  <p className="text-sm">{vet.licenseNumber}</p>
+                  <CardTitle className="flex items-center gap-2">
+                    <Heart className="w-5 h-5 text-red-500" />
+                    {vet.name}
+                  </CardTitle>
+                  <CardDescription>{vet.clinic}</CardDescription>
                 </div>
+                <div className="text-right">
+                  <div className="flex items-center gap-1">
+                    <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                    <span className="font-semibold">{vet.rating}</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">{vet.reviews} reviews</p>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">License</p>
+                <p className="text-sm">{vet.license}</p>
+              </div>
 
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Specialization</p>
+                <div className="flex flex-wrap gap-2 mt-1">
+                  {vet.specialization.split(',').map(spec => (
+                    <Badge key={spec.trim()} variant="secondary">{spec.trim()}</Badge>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Specialization</p>
-                  <Badge variant="secondary">{vet.specialty}</Badge>
+                  <p className="text-muted-foreground">Experience</p>
+                  <p className="font-semibold">{vet.experience} years</p>
                 </div>
-
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <p className="text-muted-foreground">Experience</p>
-                    <p className="font-semibold">{vet.yearsOfExperience} years</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Consultation Fee</p>
-                    <p className="font-semibold">GHS {vet.consultationFee}</p>
-                  </div>
+                <div>
+                  <p className="text-muted-foreground">Consultation Fee</p>
+                  <p className="font-semibold">GHS {vet.consultationFee}/hr</p>
                 </div>
+              </div>
 
-                <div className="flex items-center gap-2 text-sm">
-                  <MapPin className="w-4 h-4" />
-                  <span>{vet.region}</span>
-                </div>
+              <div className="flex items-center gap-2 text-sm">
+                <MapPin className="w-4 h-4" />
+                <span>{vet.region}</span>
+              </div>
 
-                <div className="flex gap-2 pt-4">
-                  <Button className="flex-1" variant="default">
-                    Schedule Appointment
+              <div className="flex gap-2 pt-4">
+                <Button className="flex-1" variant="default">
+                  Schedule Appointment
+                </Button>
+                {vet.telemedicine && (
+                  <Button className="flex-1" variant="outline">
+                    <Video className="w-4 h-4 mr-2" />
+                    Telemedicine
                   </Button>
-                  {vet.emergencyAvailable && (
-                    <Button className="flex-1" variant="outline">
-                      <Heart className="w-4 h-4 mr-2" />
-                      Emergency
-                    </Button>
-                  )}
-                </div>
+                )}
+              </div>
 
-                <div className="flex gap-2 text-sm text-muted-foreground">
-                  <Phone className="w-4 h-4" />
-                  <span>{vet.phone}</span>
-                </div>
-              </CardContent>
-            </Card>
-          ))
-        ) : (
-          <Card className="col-span-2">
-            <CardContent className="pt-6 text-center">
-              <p className="text-muted-foreground">No veterinarians found matching your criteria</p>
+              <div className="flex gap-2 text-sm text-muted-foreground">
+                <Phone className="w-4 h-4" />
+                <span>{vet.phone}</span>
+              </div>
             </CardContent>
           </Card>
-        )}
+        ))}
       </div>
+
+      {filteredVets.length === 0 && (
+        <Card>
+          <CardContent className="pt-6 text-center">
+            <p className="text-muted-foreground">No veterinarians found matching your criteria</p>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

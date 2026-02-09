@@ -29,7 +29,6 @@ export const workforceRouter = router({
 
         const values = {
           ...input,
-          hireDate: input.hireDate instanceof Date ? input.hireDate.toISOString().split('T')[0] : input.hireDate,
           salary: input.salary ? input.salary.toString() : null,
           status: input.status || "active",
         };

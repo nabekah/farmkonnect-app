@@ -4,8 +4,7 @@ import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertCircle, Calendar, FileText, MessageSquare, Plus, AlertTriangle, Clock, DollarSign, TrendingUp, Pill } from "lucide-react";
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { AlertCircle, Calendar, FileText, MessageSquare, Plus } from "lucide-react";
 
 export default function VeterinaryDashboard() {
   const { user } = useAuth();
