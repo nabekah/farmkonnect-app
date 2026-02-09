@@ -1,0 +1,50 @@
+{
+  "query": "\n-- Verify veterinary data\nSELECT 'Veterinarians' as table_name, COUNT(*) as record_count FROM veterinarians\nUNION ALL\nSELECT 'Extension Agents', COUNT(*) FROM extension_agents\nUNION ALL\nSELECT 'Prescriptions', COUNT(*) FROM prescriptions\nUNION ALL\nSELECT 'Appointments', COUNT(*) FROM appointments\nUNION ALL\nSELECT 'Telemedicine Sessions', COUNT(*) FROM telemedicine_sessions\nUNION ALL\nSELECT 'Calendar Syncs', COUNT(*) FROM calendar_syncs\nUNION ALL\nSELECT 'Notification Preferences', COUNT(*) FROM notification_preferences\nUNION ALL\nSELECT 'Notification Logs', COUNT(*) FROM notification_logs\nUNION ALL\nSELECT 'Expenses', COUNT(*) FROM expenses WHERE farmId = 1\nUNION ALL\nSELECT 'Revenue', COUNT(*) FROM revenue WHERE farmId = 1;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2kNF22PapS9mysw.root --database WZQk4bD8DnsRHwYBkmh7FN --execute \n-- Verify veterinary data\nSELECT 'Veterinarians' as table_name, COUNT(*) as record_count FROM veterinarians\nUNION ALL\nSELECT 'Extension Agents', COUNT(*) FROM extension_agents\nUNION ALL\nSELECT 'Prescriptions', COUNT(*) FROM prescriptions\nUNION ALL\nSELECT 'Appointments', COUNT(*) FROM appointments\nUNION ALL\nSELECT 'Telemedicine Sessions', COUNT(*) FROM telemedicine_sessions\nUNION ALL\nSELECT 'Calendar Syncs', COUNT(*) FROM calendar_syncs\nUNION ALL\nSELECT 'Notification Preferences', COUNT(*) FROM notification_preferences\nUNION ALL\nSELECT 'Notification Logs', COUNT(*) FROM notification_logs\nUNION ALL\nSELECT 'Expenses', COUNT(*) FROM expenses WHERE farmId = 1\nUNION ALL\nSELECT 'Revenue', COUNT(*) FROM revenue WHERE farmId = 1;\n",
+  "rows": [
+    {
+      "table_name": "Telemedicine Sessions",
+      "record_count": "1"
+    },
+    {
+      "table_name": "Prescriptions",
+      "record_count": "3"
+    },
+    {
+      "table_name": "Appointments",
+      "record_count": "3"
+    },
+    {
+      "table_name": "Calendar Syncs",
+      "record_count": "2"
+    },
+    {
+      "table_name": "Notification Logs",
+      "record_count": "2"
+    },
+    {
+      "table_name": "Notification Preferences",
+      "record_count": "2"
+    },
+    {
+      "table_name": "Veterinarians",
+      "record_count": "6"
+    },
+    {
+      "table_name": "Extension Agents",
+      "record_count": "5"
+    },
+    {
+      "table_name": "Expenses",
+      "record_count": "13"
+    },
+    {
+      "table_name": "Revenue",
+      "record_count": "10"
+    }
+  ],
+  "messages": [],
+  "stdout": "table_name\trecord_count\nTelemedicine Sessions\t1\nPrescriptions\t3\nAppointments\t3\nCalendar Syncs\t2\nNotification Logs\t2\nNotification Preferences\t2\nVeterinarians\t6\nExtension Agents\t5\nExpenses\t13\nRevenue\t10\n",
+  "stderr": "",
+  "execution_time_ms": 362
+}
