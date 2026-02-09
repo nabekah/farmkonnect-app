@@ -28,6 +28,7 @@ import { assetRouter } from "./assetRouter";
 import { reportingRouter } from "./reportingRouter";
 import { analyticsRouter } from "./analyticsRouter";
 import { notificationSettingsRouter } from "./notificationSettingsRouter";
+import { rbacRouter } from "./routers/rbac";
 import { exportRouter } from "./exportRouter";
 import { alertHistoryRouter } from "./alertHistoryRouter";
 import { fertilizerRouter } from "./fertilizerRouter";
@@ -107,6 +108,7 @@ import { eq } from "drizzle-orm";
 
 export const appRouter = router({
   system: systemRouter,
+  rbac: rbacRouter,
   upload: uploadRouter,
   financial: financialRouter,
   livestock: livestockRouter,

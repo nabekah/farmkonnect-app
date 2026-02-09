@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE IF NOT EXISTS farm_workers (\n  id INT AUTO_INCREMENT PRIMARY KEY,\n  userId VARCHAR(255) NOT NULL,\n  farmId INT NOT NULL,\n  role ENUM('owner', 'manager', 'worker', 'viewer') DEFAULT 'worker',\n  permissions JSON DEFAULT NULL,\n  status ENUM('active', 'inactive', 'suspended') DEFAULT 'active',\n  assignedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n  createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n  updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  UNIQUE KEY unique_user_farm (userId, farmId),\n  FOREIGN KEY (farmId) REFERENCES farms(id) ON DELETE CASCADE,\n  INDEX idx_userId (userId),\n  INDEX idx_farmId (farmId),\n  INDEX idx_status (status)\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2kNF22PapS9mysw.root --database WZQk4bD8DnsRHwYBkmh7FN --execute CREATE TABLE IF NOT EXISTS farm_workers (\n  id INT AUTO_INCREMENT PRIMARY KEY,\n  userId VARCHAR(255) NOT NULL,\n  farmId INT NOT NULL,\n  role ENUM('owner', 'manager', 'worker', 'viewer') DEFAULT 'worker',\n  permissions JSON DEFAULT NULL,\n  status ENUM('active', 'inactive', 'suspended') DEFAULT 'active',\n  assignedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n  createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n  updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  UNIQUE KEY unique_user_farm (userId, farmId),\n  FOREIGN KEY (farmId) REFERENCES farms(id) ON DELETE CASCADE,\n  INDEX idx_userId (userId),\n  INDEX idx_farmId (farmId),\n  INDEX idx_status (status)\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 307
+}
