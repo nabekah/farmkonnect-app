@@ -16,6 +16,8 @@ import { BudgetAlertsWidget } from "@/components/BudgetAlertsWidget";
 import { FarmComparisonCharts } from "@/components/FarmComparisonCharts";
 import { BudgetForecasting } from "@/components/BudgetForecasting";
 import { FinancialReportsExport } from "@/components/FinancialReportsExport";
+import { BudgetVarianceAnalysis } from "@/components/BudgetVarianceAnalysis";
+import { MobileOptimizedDashboard } from "@/components/MobileOptimizedDashboard";
 import { generateExpensePDF, generateRevenuePDF, downloadTextFile } from "@/lib/exportPdf";
 
 export const FinancialDashboard: React.FC = () => {
@@ -60,16 +62,20 @@ export const FinancialDashboard: React.FC = () => {
     animalId: ""
   });
 
-  // Calculate date range
-  const endDate = new Date();
-  let startDate = new Date();
-  if (dateRange === "month") {
-    startDate.setMonth(endDate.getMonth() - 1);
-  } else if (dateRange === "quarter") {
-    startDate.setMonth(endDate.getMonth() - 3);
-  } else {
-    startDate.setFullYear(endDate.getFullYear() - 1);
-  }
+  // Calculate date range with useMemo to prevent flickering
+  const { startDate, endDate } = React.useMemo(() => {
+    const end = new Date();
+    const start = new Date();
+    if (dateRange === "month") {
+      start.setMonth(end.getMonth() - 1);
+    } else if (dateRange === "quarter") {
+      start.setMonth(end.getMonth() - 3);
+    } else {
+      start.setFullYear(end.getFullYear() - 1);
+    }
+    return { startDate: start, endDate: end };
+  }, [dateRange]);
+
 
   // Fetch financial data
   const { data: summary } = trpc.financialManagement.getFinancialSummary.useQuery(
@@ -206,7 +212,22 @@ export const FinancialDashboard: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <>
+      {/* Mobile Optimized View - Hidden on desktop */}
+      <div className="md:hidden">
+        <MobileOptimizedDashboard
+          summary={summary}
+          expenseBreakdown={expenseChartData}
+          revenueBreakdown={revenueChartData}
+          costPerAnimal={costPerAnimal}
+          onAddExpense={() => setIsAddExpenseOpen(true)}
+          onAddRevenue={() => setIsAddRevenueOpen(true)}
+        />
+      </div>
+
+      {/* Desktop View - Hidden on mobile */}
+      <div className="hidden md:block space-y-6">
+
       {/* Header with date range selector and farm selection */}
       <div className="flex justify-between items-center gap-4">
         <div>
@@ -562,6 +583,18 @@ export const FinancialDashboard: React.FC = () => {
         </div>
       )}
 
+      {/* Budget Variance Analysis */}
+      {selectedFarmId !== "all" && selectedFarmId && (
+        <div className="space-y-6">
+          <h2 className="text-2xl font-bold">Budget Variance Analysis</h2>
+          <BudgetVarianceAnalysis
+            farmId={selectedFarmId}
+            startDate={startDate}
+            endDate={endDate}
+          />
+        </div>
+      )}
+
       {/* Cost Analysis */}
       <Card>
         <CardHeader>
@@ -576,7 +609,8 @@ export const FinancialDashboard: React.FC = () => {
           </div>
         </CardContent>
       </Card>
-    </div>
+      </div>
+      </>
   );
 };
 
