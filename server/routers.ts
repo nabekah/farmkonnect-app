@@ -35,6 +35,9 @@ import { workerPerformanceRouter } from "./routers/workerPerformance";
 import { mfaRouter } from "./routers/mfa";
 import { userApprovalRouter } from "./routers/userApproval";
 import { performanceAlertsRouter } from "./routers/performanceAlerts";
+import { securityControlsRouter } from "./routers/securityControls";
+import { smsNotificationsRouter } from "./routers/smsNotifications";
+import { complianceReportsRouter } from "./routers/complianceReports";
 import { exportRouter } from "./exportRouter";
 import { alertHistoryRouter } from "./alertHistoryRouter";
 import { fertilizerRouter } from "./fertilizerRouter";
@@ -121,6 +124,9 @@ export const appRouter = router({
   mfa: mfaRouter,
   userApproval: userApprovalRouter,
   performanceAlerts: performanceAlertsRouter,
+  securityControls: securityControlsRouter,
+  smsNotifications: smsNotificationsRouter,
+  complianceReports: complianceReportsRouter,
   upload: uploadRouter,
   financial: financialRouter,
   livestock: livestockRouter,
