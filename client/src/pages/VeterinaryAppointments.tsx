@@ -1,4 +1,3 @@
-import { useState, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,12 +8,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar, Clock, User, MapPin, Plus, Edit, Trash2, CheckCircle, AlertCircle, X } from "lucide-react";
 import { trpc } from "@/lib/trpc";
+import { AppointmentCalendar } from "@/components/AppointmentCalendar";
+import { useState, useMemo } from "react";
 
 const toast = (options: any) => {
   console.log(options);
 };
 
 export default function VeterinaryAppointments() {
+  const [useCalendarBooking, setUseCalendarBooking] = useState(false);
+  const [selectedVeterinarianId, setSelectedVeterinarianId] = useState<number | null>(null);
   const [selectedFarmId, setSelectedFarmId] = useState<number>(1);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingAppointmentId, setEditingAppointmentId] = useState<number | null>(null);
@@ -216,6 +219,21 @@ export default function VeterinaryAppointments() {
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
+              {useCalendarBooking && selectedVeterinarianId && (
+                <div className="border rounded-lg p-4 bg-blue-50">
+                  <AppointmentCalendar
+                    veterinarianId={selectedVeterinarianId}
+                    appointmentDuration={30}
+                    onSlotSelect={(date, time) => {
+                      setFormData({
+                        ...formData,
+                        appointmentDate: date,
+                        appointmentTime: time,
+                      });
+                    }}
+                  />
+                </div>
+              )}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="animalId">Animal (Optional)</Label>
@@ -249,37 +267,54 @@ export default function VeterinaryAppointments() {
                   </Select>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="appointmentDate">Date *</Label>
-                  <Input
-                    id="appointmentDate"
-                    type="date"
-                    value={formData.appointmentDate}
-                    onChange={(e) => setFormData({ ...formData, appointmentDate: e.target.value })}
-                    required
-                  />
-                </div>
+                {!useCalendarBooking && (
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="appointmentDate">Date *</Label>
+                      <Input
+                        id="appointmentDate"
+                        type="date"
+                        value={formData.appointmentDate}
+                        onChange={(e) => setFormData({ ...formData, appointmentDate: e.target.value })}
+                        required
+                      />
+                    </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="appointmentTime">Time *</Label>
-                  <Input
-                    id="appointmentTime"
-                    type="time"
-                    value={formData.appointmentTime}
-                    onChange={(e) => setFormData({ ...formData, appointmentTime: e.target.value })}
-                    required
-                  />
-                </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="appointmentTime">Time *</Label>
+                      <Input
+                        id="appointmentTime"
+                        type="time"
+                        value={formData.appointmentTime}
+                        onChange={(e) => setFormData({ ...formData, appointmentTime: e.target.value })}
+                        required
+                      />
+                    </div>
+                  </>
+                )}
 
                 <div className="space-y-2">
                   <Label htmlFor="veterinarian">Veterinarian *</Label>
-                  <Input
-                    id="veterinarian"
-                    placeholder="Dr. Name"
-                    value={formData.veterinarian}
-                    onChange={(e) => setFormData({ ...formData, veterinarian: e.target.value })}
-                    required
-                  />
+                  {useCalendarBooking ? (
+                    <Select value={selectedVeterinarianId?.toString() || ""} onValueChange={(value) => setSelectedVeterinarianId(parseInt(value))}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select veterinarian to view availability" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1">Dr. Smith - Main Clinic</SelectItem>
+                        <SelectItem value="2">Dr. Johnson - City Veterinary</SelectItem>
+                        <SelectItem value="3">Dr. Williams - Rural Clinic</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <Input
+                      id="veterinarian"
+                      placeholder="Dr. Name"
+                      value={formData.veterinarian}
+                      onChange={(e) => setFormData({ ...formData, veterinarian: e.target.value })}
+                      required
+                    />
+                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -327,13 +362,22 @@ export default function VeterinaryAppointments() {
                 />
               </div>
 
-              <div className="flex gap-2 justify-end">
-                <Button type="button" variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
-                  Cancel
+              <div className="flex gap-2 justify-between">
+                <Button
+                  type="button"
+                  variant={useCalendarBooking ? "default" : "outline"}
+                  onClick={() => setUseCalendarBooking(!useCalendarBooking)}
+                >
+                  {useCalendarBooking ? "Use Manual Entry" : "Use Calendar"}
                 </Button>
-                <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
-                  {editingAppointmentId ? "Update" : "Schedule"} Appointment
-                </Button>
+                <div className="flex gap-2">
+                  <Button type="button" variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
+                    {editingAppointmentId ? "Update" : "Schedule"} Appointment
+                  </Button>
+                </div>
               </div>
             </form>
           </DialogContent>

@@ -4277,3 +4277,18 @@
 - [x] Get farmId from user context instead of hardcoding
 - [x] Add farm selector dropdown for multi-farm support
 - [x] Implement full appointment CRUD operations
+
+
+## Appointment Availability Calendar (COMPLETED)
+- [x] Create veterinarianAvailability database table with schedule slots
+- [x] Create veterinarianSchedule table for working hours and days
+- [x] Build getVeterinarianAvailability procedure to fetch available slots
+- [x] Build getVeterinarianSchedule procedure to fetch vet working hours
+- [x] Build updateVeterinarianAvailability procedure for admins to set availability
+- [x] Create AppointmentCalendar component with month/week view
+- [x] Implement slot selection with visual indicators (available/booked/unavailable)
+- [x] Add real-time availability updates when slots are booked
+- [x] Integrate calendar into appointment booking dialog
+- [x] Add veterinarian filter to show specific vet availability
+- [x] Implement time zone handling for scheduling
+- [x] Add appointment reminders based on calendar bookings

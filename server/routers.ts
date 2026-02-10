@@ -76,6 +76,7 @@ import { animalSearchFiltersRouter } from "./routers/animalSearchFilters";
 import { bulkHealthOperationsRouter } from "./routers/bulkHealthOperations";
 import { healthAlertsRouter } from "./routers/healthAlerts";
 import { vetAppointmentsRouter } from "./routers/vetAppointments";
+import { veterinarianAvailabilityRouter } from "./routers/veterinarianAvailability";
 import { healthReportsRouter } from "./routers/healthReports";
 import { medicationTrackingRouter } from "./routers/medicationTracking";
 import { healthTrendsAnalyticsRouter } from "./routers/healthTrendsAnalytics";
@@ -242,6 +243,7 @@ export const appRouter = router({
   bulkHealthOperations: bulkHealthOperationsRouter,
   healthAlerts: healthAlertsRouter,
   vetAppointments: vetAppointmentsRouter,
+  veterinarianAvailability: veterinarianAvailabilityRouter,
   healthReports: healthReportsRouter,
   medicationTracking: medicationTrackingRouter,
   healthTrendsAnalytics: healthTrendsAnalyticsRouter,
