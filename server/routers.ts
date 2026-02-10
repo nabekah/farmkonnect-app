@@ -163,6 +163,8 @@ import { paymentRouter } from "./routers/paymentRouter";
 import { reviewsRouter } from "./routers/reviewsRouter";
 import { notificationCenterRouter } from "./routers/notificationCenterRouter";
 import { adminRouter } from "./routers/adminRouter";
+import { chatbotRouter } from "./routers/chatbotRouter";
+import { weatherAlertsRouter } from "./routers/weatherAlertsRouter";
 import { z } from "zod";
 import { getDb } from "./db";
 import { TRPCError } from "@trpc/server";
@@ -272,6 +274,8 @@ export const appRouter = router({
   reviews: reviewsRouter,
   notificationCenter: notificationCenterRouter,
   admin: adminRouter,
+  chatbot: chatbotRouter,
+  weatherAlerts: weatherAlertsRouter,
   // accountingExport: accountingExportRouter,
   // expenseNotifications: expenseNotifications,
   // farmAnalytics: farmAnalytics,
