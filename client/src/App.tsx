@@ -45,6 +45,9 @@ import FishFarming from "./pages/FishFarming";
 import AssetManagement from "./pages/AssetManagement";
 import AnalyticsDashboard from "./pages/AnalyticsDashboard";
 import PredictiveAnalytics from "./pages/PredictiveAnalytics";
+import PredictionDashboard from "./pages/PredictionDashboard";
+import PredictionHistoryComparison from "./pages/PredictionHistoryComparison";
+import OutcomeRecordingForm from "./pages/OutcomeRecordingForm";
 import NotificationSettings from "./pages/NotificationSettings";
 import AlertHistory from "./pages/AlertHistory";
 import FertilizerTracking from "./pages/FertilizerTracking";
@@ -190,6 +193,27 @@ function Router() {
         {() => (
           <DashboardLayout>
             <NotificationAnalyticsDashboard />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/prediction-dashboard">
+        {() => (
+          <DashboardLayout>
+            <PredictionDashboard />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/prediction-history">
+        {() => (
+          <DashboardLayout>
+            <PredictionHistoryComparison />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/outcome-recording">
+        {() => (
+          <DashboardLayout>
+            <OutcomeRecordingForm />
           </DashboardLayout>
         )}
       </Route>
