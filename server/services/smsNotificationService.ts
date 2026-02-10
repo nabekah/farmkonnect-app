@@ -5,10 +5,17 @@ const twilioAccountSid = process.env.TWILIO_ACCOUNT_SID;
 const twilioAuthToken = process.env.TWILIO_AUTH_TOKEN;
 const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER;
 
-let twilioClient: ReturnType<typeof twilio> | null = null;
+let twilioClient: any = null;
 
 if (twilioAccountSid && twilioAuthToken) {
-  twilioClient = twilio(twilioAccountSid, twilioAuthToken);
+  // Check if using API Key (starts with SK) or Account SID (starts with AC)
+  if (twilioAccountSid.startsWith('SK')) {
+    // Using API Key - disable for now
+    console.warn('[SMS] API Key detected (SK*). Please provide the actual Account SID (AC*) as TWILIO_ACCOUNT_SID');
+    twilioClient = null;
+  } else {
+    twilioClient = twilio(twilioAccountSid, twilioAuthToken);
+  }
 }
 
 interface SMSNotificationPayload {
