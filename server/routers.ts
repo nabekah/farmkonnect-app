@@ -155,6 +155,7 @@ import { mobileAppRouter } from "./routers/mobileAppRouter";
 import { advancedAnalyticsRouter } from "./routers/advancedAnalyticsRouter";
 import { supplyChainRouter } from "./routers/supplyChainRouter";
 import { cooperativeRouter } from "./routers/cooperativeRouter";
+import { advancedSearchRouter } from "./routers/advancedSearchRouter";
 import { z } from "zod";
 import { getDb } from "./db";
 import { TRPCError } from "@trpc/server";
@@ -256,6 +257,7 @@ export const appRouter = router({
   advancedAnalytics: advancedAnalyticsRouter,
   supplyChain: supplyChainRouter,
   cooperative: cooperativeRouter,
+  advancedSearch: advancedSearchRouter,
   // accountingExport: accountingExportRouter,
   // expenseNotifications: expenseNotifications,
   // farmAnalytics: farmAnalytics,
@@ -284,7 +286,6 @@ export const appRouter = router({
   customerPortal: customerPortalCleanRouter,
   iotSensorIntegration: iotSensorIntegrationCleanRouter,
   mobileAppSync: mobileAppSyncCleanRouter,
-  advancedAnalytics: advancedAnalyticsCleanRouter,
   cooperativeCommunities: cooperativeCommunitiesCleanRouter,
   cropDiseaseDetection: cropDiseaseDetectionCleanRouter,
   weatherIrrigationAutomation: weatherIrrigationAutomationCleanRouter,

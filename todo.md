@@ -4190,3 +4190,42 @@
 - [ ] Connect mobile screens to tRPC backend
 - [ ] Implement offline data sync with AsyncStorage
 - [ ] Test on iOS and Android simulators
+
+
+## Phase 7: Mobile Backend Integration, Push Notifications & Advanced Search (In Progress)
+
+### Step 1: Connect Mobile Screens to Backend with tRPC
+- [x] Create tRPC client for React Native (lib/trpc.ts)
+- [x] Implement offline sync hook with AsyncStorage (hooks/useOfflineSync.ts)
+- [x] Create push notifications service for React Native (services/pushNotifications.ts)
+- [x] Implement auth token management (saveAuthToken, getAuthToken, clearAuthToken)
+- [x] Configure tRPC HTTP batch link for mobile
+- [ ] Connect mobile screens to tRPC queries/mutations
+- [ ] Test offline data sync functionality
+- [ ] Test on iOS and Android simulators
+
+### Step 2: Implement Push Notifications System
+- [x] Push notifications router already exists with web-push integration
+- [x] Implemented registerPushToken procedure for device registration
+- [x] Implemented sendNotification procedure for targeted notifications
+- [x] Implemented broadcastNotification procedure for admin-only broadcasts
+- [x] Implemented sendFarmEventNotification for farm-specific alerts
+- [x] Implemented notification preferences management
+- [x] Implemented notification history and read status tracking
+- [ ] Integrate with React Native Expo Push Notifications
+- [ ] Test notification delivery on mobile devices
+- [ ] Add notification sound and badge management
+
+### Step 3: Add Advanced Search & Filtering
+- [x] Create advancedSearchRouter with 7 procedures
+- [x] Implement searchMarketplaceProducts with filters (crop type, price, rating, location)
+- [x] Implement searchForumPosts with category and tag filtering
+- [x] Implement getSearchSuggestions for autocomplete
+- [x] Implement saveSearchQuery and getSavedSearches
+- [x] Implement deleteSavedSearch for managing saved searches
+- [x] Implement getTrendingSearches for popular queries
+- [x] Create AdvancedSearchBar component with filter dialog
+- [x] Add advanced search router to main appRouter
+- [ ] Integrate AdvancedSearchBar into Marketplace page
+- [ ] Integrate AdvancedSearchBar into Community Forum page
+- [ ] Test search functionality with various filters
