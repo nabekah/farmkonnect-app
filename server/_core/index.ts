@@ -13,6 +13,7 @@ import { initializeNotificationCron } from "../notificationCron";
 import { initializeWebSocketServer } from "./websocket";
 import { initializeAlertScheduler } from "./alertScheduler";
 import { scheduledReportExecutor } from "./scheduledReportExecutor";
+import { initializeNotificationScheduler } from "../services/notificationScheduler";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -154,6 +155,9 @@ async function startServer() {
     // Initialize cron jobs after server starts
     initializeWeatherCron();
     initializeNotificationCron();
+    
+    // Initialize notification scheduler for automated reminders
+    initializeNotificationScheduler();
   });
 }
 

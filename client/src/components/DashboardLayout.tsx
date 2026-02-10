@@ -27,7 +27,7 @@ import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
 import { Button } from "./ui/button";
 
-import { Moon, Sun, Settings } from 'lucide-react';
+import { Moon, Sun, Settings, Bell } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
 import { Badge } from './ui/badge';
 import { useDarkMode } from '@/contexts/DarkModeContext';
@@ -254,6 +254,13 @@ function DashboardLayoutContent({
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem
+                  onClick={() => window.location.href = '/notification-preferences'}
+                  className="cursor-pointer"
+                >
+                  <Bell className="mr-2 h-4 w-4" />
+                  <span>Notification Settings</span>
+                </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={logout}
                   className="cursor-pointer text-destructive focus:text-destructive"

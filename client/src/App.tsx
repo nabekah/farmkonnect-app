@@ -49,6 +49,7 @@ import NotificationSettings from "./pages/NotificationSettings";
 import AlertHistory from "./pages/AlertHistory";
 import FertilizerTracking from "./pages/FertilizerTracking";
 import NotificationPreferencesPage from "./pages/NotificationPreferencesPage";
+import NotificationHistoryPage from "./pages/NotificationHistoryPage";
 import ReportManagement from "./pages/ReportManagement";
 import ReportTemplates from "./pages/ReportTemplates";
 import ReportAnalyticsDashboard from "./pages/ReportAnalyticsDashboard";
@@ -691,6 +692,13 @@ function Router() {
         {() => (
           <DashboardLayout>
             <NotificationPreferencesPage />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/notification-history">
+        {() => (
+          <DashboardLayout>
+            <NotificationHistoryPage />
           </DashboardLayout>
         )}
       </Route>
