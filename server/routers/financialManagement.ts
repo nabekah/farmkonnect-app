@@ -16,10 +16,10 @@ export const financialManagementRouter = router({
   createExpense: protectedProcedure
     .input(z.object({
       farmId: z.string(),
-      expenseType: z.enum(["feed", "medication", "labor", "equipment", "utilities", "transport", "veterinary", "fertilizer", "seeds", "pesticides", "water", "rent", "insurance", "maintenance", "other"]),
+      expenseType: z.enum(["feed", "medication", "labor", "equipment", "utilities", "transport", "veterinary", "fertilizer", "seeds", "pesticides", "water", "rent", "insurance", "maintenance", "other"]).or(z.string()),
       description: z.string(),
       amount: z.number().positive(),
-      expenseDate: z.date(),
+      expenseDate: z.date().or(z.string()),
       animalId: z.string().optional(),
       quantity: z.number().optional(),
       unitCost: z.number().optional(),

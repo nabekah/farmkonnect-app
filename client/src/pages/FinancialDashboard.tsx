@@ -160,23 +160,29 @@ export const FinancialDashboard: React.FC = () => {
       toast.error("Please select an expense type");
       return;
     }
+
+    if (!expenseForm.expenseDate || !expenseForm.expenseDate.trim()) {
+      toast.error("Please select a date");
+      return;
+    }
     
     if (!farmId) {
       toast.error("No farm selected. Please select a farm first.");
       return;
     }
 
-    // DEBUG: Log the form data before sending
-    console.log("DEBUG: expenseForm before mutation:", expenseForm);
-    console.log("DEBUG: expenseType value:", expenseForm.expenseType);
-    console.log("DEBUG: expenseType type:", typeof expenseForm.expenseType);
+    const dateObj = new Date(expenseForm.expenseDate);
+    if (isNaN(dateObj.getTime())) {
+      toast.error("Invalid date format");
+      return;
+    }
 
     await createExpenseMutation.mutateAsync({
       farmId,
-      expenseType: expenseForm.expenseType as any,
+      expenseType: expenseForm.expenseType,
       description: expenseForm.description,
       amount: parseFloat(expenseForm.amount),
-      expenseDate: new Date(expenseForm.expenseDate),
+      expenseDate: dateObj,
       vendor: expenseForm.vendor || undefined,
       animalId: expenseForm.animalId || undefined
     });
