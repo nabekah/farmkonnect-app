@@ -106,6 +106,9 @@ import VeterinaryTelemedicine from "./pages/VeterinaryTelemedicine";
 import VeterinaryHealthRecords from "./pages/VeterinaryHealthRecords";
 import VeterinaryAlerts from "./pages/VeterinaryAlerts";
 import ExtensionAgents from "./pages/ExtensionAgents";
+import TemplateManagementPage from "./pages/TemplateManagementPage";
+import NotificationDeliveryTrackingDashboard from "./pages/NotificationDeliveryTrackingDashboard";
+import AdminSchedulerControlPanel from "./pages/AdminSchedulerControlPanel";
 
 function Router() {
   return (
@@ -699,6 +702,27 @@ function Router() {
         {() => (
           <DashboardLayout>
             <NotificationHistoryPage />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/notification-templates">
+        {() => (
+          <DashboardLayout>
+            <TemplateManagementPage />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/notification-delivery-tracking">
+        {() => (
+          <DashboardLayout>
+            <NotificationDeliveryTrackingDashboard />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/admin/scheduler">
+        {() => (
+          <DashboardLayout>
+            <AdminSchedulerControlPanel />
           </DashboardLayout>
         )}
       </Route>

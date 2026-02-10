@@ -90,6 +90,7 @@ import { ghanaExtensionServicesRouter } from "./routers/ghanaExtensionServices";
 // import { financialManagementRouter } from "./routers/financialManagement";
 import { recurringExpensesRouter } from "./routers/recurringExpenses";
 import { budgetAlertsRouter } from "./routers/budgetAlerts";
+// import { notificationDataRouter } from "./routers/notificationDataRouter"; // TODO: Add notificationLogs table to schema first
 // import { accountingExportRouter } from "./routers/accountingExport";
 // import { expenseNotifications } from "./routers/expenseNotifications";
 // import { farmAnalytics } from "./routers/farmAnalytics";
@@ -236,6 +237,7 @@ export const appRouter = router({
   // financialManagement: financialManagementRouter,
   recurringExpenses: recurringExpensesRouter,
   budgetAlerts: budgetAlertsRouter,
+  // notificationData: notificationDataRouter, // TODO: Enable after schema update
   // accountingExport: accountingExportRouter,
   // expenseNotifications: expenseNotifications,
   // farmAnalytics: farmAnalytics,
@@ -263,7 +265,6 @@ export const appRouter = router({
   supplyChainVendorManagement: supplyChainVendorManagementCleanRouter,
   customerPortal: customerPortalCleanRouter,
   iotSensorIntegration: iotSensorIntegrationCleanRouter,
-  financialManagement: financialManagementCleanRouter,
   mobileAppSync: mobileAppSyncCleanRouter,
   advancedAnalytics: advancedAnalyticsCleanRouter,
   cooperativeCommunities: cooperativeCommunitiesCleanRouter,
@@ -964,7 +965,6 @@ export const appRouter = router({
   weatherNotifications: weatherNotificationRouter,
   cropPlanning: cropPlanningRouter,
   inventory: inventoryRouter,
-  training: trainingRouter,
   roleManagement: roleManagementRouter,
   merl: merlRouter,
   transport: transportRouter,
