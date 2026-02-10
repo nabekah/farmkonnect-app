@@ -267,7 +267,7 @@ class WebSocketService {
 }
 
 // Create singleton instance
-const wsUrl = process.env.VITE_WS_URL || `ws://${window.location.host}/ws`;
+const wsUrl = process.env.VITE_WS_URL || `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws`;
 export const wsService = new WebSocketService(wsUrl);
 
 // Auto-connect on module load

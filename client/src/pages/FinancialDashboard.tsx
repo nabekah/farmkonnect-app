@@ -146,8 +146,23 @@ export const FinancialDashboard: React.FC = () => {
   });
 
   const handleAddExpense = async () => {
-    if (!expenseForm.description || !expenseForm.amount) {
-      toast.error("Please fill in all required fields");
+    if (!expenseForm.description || !expenseForm.description.trim()) {
+      toast.error("Please enter a description");
+      return;
+    }
+    
+    if (!expenseForm.amount || parseFloat(expenseForm.amount) <= 0) {
+      toast.error("Please enter a valid amount");
+      return;
+    }
+    
+    if (!expenseForm.expenseType) {
+      toast.error("Please select an expense type");
+      return;
+    }
+    
+    if (!farmId) {
+      toast.error("No farm selected. Please select a farm first.");
       return;
     }
 

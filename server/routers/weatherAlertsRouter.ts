@@ -6,13 +6,32 @@ export const weatherAlertsRouter = router({
   getCurrentWeather: protectedProcedure
     .input(
       z.object({
-        latitude: z.number(),
-        longitude: z.number(),
+        latitude: z.number().nullable().optional(),
+        longitude: z.number().nullable().optional(),
         location: z.string().optional(),
       })
     )
     .query(async ({ input }) => {
       try {
+        // Return default if coordinates are missing
+        if (!input.latitude || !input.longitude) {
+          return {
+            success: true,
+            location: input.location || "Unknown",
+            temperature: 0,
+            feelsLike: 0,
+            humidity: 0,
+            windSpeed: 0,
+            cloudCover: 0,
+            description: "No location data",
+            icon: "01d",
+            pressure: 0,
+            visibility: 0,
+            uvIndex: 0,
+            timestamp: Date.now(),
+          };
+        }
+
         // Call OpenWeather API (configured via env)
         const response = await fetch(
           `https://api.openweathermap.org/data/2.5/weather?lat=${input.latitude}&lon=${input.longitude}&appid=${process.env.OPENWEATHER_API_KEY}&units=metric`
