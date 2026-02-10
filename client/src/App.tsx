@@ -78,6 +78,8 @@ import { ActivityAnalyticsDashboard } from "./pages/ActivityAnalyticsDashboard";
 import { GPSTracking } from "./pages/GPSTracking";
 import { ActivityPhotoGallery } from "./pages/ActivityPhotoGallery";
 import { TaskPerformanceAnalytics } from "./pages/TaskPerformanceAnalytics";
+import { BlockchainSupplyChain } from "./pages/BlockchainSupplyChain";
+import { FarmerDashboard } from "./pages/FarmerDashboard";
 import { ActivityHistory } from "./pages/ActivityHistory";
 import { ActivityApprovalManager } from "./pages/ActivityApprovalManager";
 import { TimeTrackerReporting } from "./pages/TimeTrackerReporting";
@@ -723,6 +725,20 @@ function Router() {
         {() => (
           <DashboardLayout>
             <AdminSchedulerControlPanel />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/blockchain-supply-chain">
+        {() => (
+          <DashboardLayout>
+            <BlockchainSupplyChain />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/farmer-dashboard">
+        {() => (
+          <DashboardLayout>
+            <FarmerDashboard />
           </DashboardLayout>
         )}
       </Route>

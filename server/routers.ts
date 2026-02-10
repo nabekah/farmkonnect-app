@@ -91,6 +91,7 @@ import { ghanaExtensionServicesRouter } from "./routers/ghanaExtensionServices";
 import { recurringExpensesRouter } from "./routers/recurringExpenses";
 import { budgetAlertsRouter } from "./routers/budgetAlerts";
 import { notificationDataRouter } from "./routers/notificationDataRouter";
+import { blockchainSupplyChainRouter } from "./routers/blockchainSupplyChain";
 // import { accountingExportRouter } from "./routers/accountingExport";
 // import { expenseNotifications } from "./routers/expenseNotifications";
 // import { farmAnalytics } from "./routers/farmAnalytics";
@@ -238,6 +239,7 @@ export const appRouter = router({
   recurringExpenses: recurringExpensesRouter,
   budgetAlerts: budgetAlertsRouter,
   notificationData: notificationDataRouter,
+  blockchainSupplyChain: blockchainSupplyChainRouter,
   // accountingExport: accountingExportRouter,
   // expenseNotifications: expenseNotifications,
   // farmAnalytics: farmAnalytics,
