@@ -114,6 +114,8 @@ import ExtensionAgents from "./pages/ExtensionAgents";
 import TemplateManagementPage from "./pages/TemplateManagementPage";
 import NotificationDeliveryTrackingDashboard from "./pages/NotificationDeliveryTrackingDashboard";
 import AdminSchedulerControlPanel from "./pages/AdminSchedulerControlPanel";
+import CropRecommendationPage from "./pages/CropRecommendationPage";
+import FarmerCommunityForum from "./pages/FarmerCommunityForum";
 
 function Router() {
   return (
@@ -763,6 +765,20 @@ function Router() {
         {() => (
           <DashboardLayout>
             <FarmerDashboard />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/crop-recommendations">
+        {() => (
+          <DashboardLayout>
+            <CropRecommendationPage />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/community-forum">
+        {() => (
+          <DashboardLayout>
+            <FarmerCommunityForum />
           </DashboardLayout>
         )}
       </Route>
