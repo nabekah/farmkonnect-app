@@ -162,6 +162,7 @@ import { equipmentRentalRouter } from "./routers/equipmentRentalRouter";
 import { paymentRouter } from "./routers/paymentRouter";
 import { reviewsRouter } from "./routers/reviewsRouter";
 import { notificationCenterRouter } from "./routers/notificationCenterRouter";
+import { adminRouter } from "./routers/adminRouter";
 import { z } from "zod";
 import { getDb } from "./db";
 import { TRPCError } from "@trpc/server";
@@ -270,6 +271,7 @@ export const appRouter = router({
   payment: paymentRouter,
   reviews: reviewsRouter,
   notificationCenter: notificationCenterRouter,
+  admin: adminRouter,
   // accountingExport: accountingExportRouter,
   // expenseNotifications: expenseNotifications,
   // farmAnalytics: farmAnalytics,
