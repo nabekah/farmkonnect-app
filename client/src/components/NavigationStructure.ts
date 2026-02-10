@@ -304,6 +304,9 @@ export const navigationStructure: MenuGroup[] = [
     items: [
       { icon: BarChart3, label: "Farmer Dashboard", path: "/farmer-dashboard" },
       { icon: TrendingUp, label: "Blockchain Supply Chain", path: "/blockchain-supply-chain" },
+      { icon: Brain, label: "Prediction Dashboard", path: "/prediction-dashboard" },
+      { icon: History, label: "Prediction History", path: "/prediction-history" },
+      { icon: CheckCircle, label: "Record Outcomes", path: "/outcome-recording" },
     ],
   },
 ];
