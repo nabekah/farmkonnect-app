@@ -159,6 +159,9 @@ import { advancedSearchRouter } from "./routers/advancedSearchRouter";
 import { sellerDashboardRouter } from "./routers/sellerDashboardRouter";
 import { mentorshipRouter } from "./routers/mentorshipRouter";
 import { equipmentRentalRouter } from "./routers/equipmentRentalRouter";
+import { paymentRouter } from "./routers/paymentRouter";
+import { reviewsRouter } from "./routers/reviewsRouter";
+import { notificationCenterRouter } from "./routers/notificationCenterRouter";
 import { z } from "zod";
 import { getDb } from "./db";
 import { TRPCError } from "@trpc/server";
@@ -264,6 +267,9 @@ export const appRouter = router({
   sellerDashboard: sellerDashboardRouter,
   mentorship: mentorshipRouter,
   equipmentRental: equipmentRentalRouter,
+  payment: paymentRouter,
+  reviews: reviewsRouter,
+  notificationCenter: notificationCenterRouter,
   // accountingExport: accountingExportRouter,
   // expenseNotifications: expenseNotifications,
   // farmAnalytics: farmAnalytics,
