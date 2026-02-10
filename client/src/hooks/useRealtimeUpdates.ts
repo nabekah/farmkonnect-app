@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { trpc } from '@/lib/trpc';
+import wsService from '@/lib/websocket';
 
 interface UseRealtimeUpdatesOptions {
   enabled?: boolean;
@@ -92,4 +93,101 @@ export function useRealtimeUpdates(options: UseRealtimeUpdatesOptions = {}) {
     refetchTasks,
     refetchActivities,
   };
+}
+
+
+/**
+ * Hook for subscribing to real-time supply chain updates
+ */
+export function useSupplyChainUpdates(onUpdate: (data: any) => void) {
+  const unsubscribeRef = useRef<(() => void) | null>(null);
+
+  useEffect(() => {
+    if (!wsService.isConnected()) {
+      wsService.connect().catch(console.error);
+    }
+
+    unsubscribeRef.current = wsService.on('supply_chain_update', onUpdate);
+
+    return () => {
+      if (unsubscribeRef.current) {
+        unsubscribeRef.current();
+      }
+    };
+  }, [onUpdate]);
+}
+
+/**
+ * Hook for subscribing to real-time marketplace updates
+ */
+export function useMarketplaceUpdates(onUpdate: (data: any) => void) {
+  const unsubscribeRef = useRef<(() => void) | null>(null);
+
+  useEffect(() => {
+    if (!wsService.isConnected()) {
+      wsService.connect().catch(console.error);
+    }
+
+    unsubscribeRef.current = wsService.on('marketplace_update', onUpdate);
+
+    return () => {
+      if (unsubscribeRef.current) {
+        unsubscribeRef.current();
+      }
+    };
+  }, [onUpdate]);
+}
+
+/**
+ * Hook for subscribing to real-time forum updates
+ */
+export function useForumUpdates(onUpdate: (data: any) => void) {
+  const unsubscribeRef = useRef<(() => void) | null>(null);
+
+  useEffect(() => {
+    if (!wsService.isConnected()) {
+      wsService.connect().catch(console.error);
+    }
+
+    unsubscribeRef.current = wsService.on('forum_update', onUpdate);
+
+    return () => {
+      if (unsubscribeRef.current) {
+        unsubscribeRef.current();
+      }
+    };
+  }, [onUpdate]);
+}
+
+/**
+ * Hook for WebSocket connection status
+ */
+export function useWebSocketStatus(onStatusChange?: (connected: boolean) => void) {
+  const connectedRef = useRef(wsService.isConnected());
+
+  useEffect(() => {
+    const handleConnect = () => {
+      connectedRef.current = true;
+      onStatusChange?.(true);
+    };
+
+    const handleDisconnect = () => {
+      connectedRef.current = false;
+      onStatusChange?.(false);
+    };
+
+    const unsubscribeConnect = wsService.onConnect(handleConnect);
+    const unsubscribeDisconnect = wsService.onDisconnect(handleDisconnect);
+
+    if (!wsService.isConnected()) {
+      wsService.connect().catch(console.error);
+    }
+
+    return () => {
+      unsubscribeConnect();
+      unsubscribeDisconnect();
+    };
+  }, [onStatusChange]);
+
+  return connectedRef.current;
 }

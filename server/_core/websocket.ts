@@ -256,3 +256,65 @@ export function broadcastToFarm(farmId: number, message: any) {
     console.warn('[WebSocket] Server not initialized, cannot broadcast to farm');
   }
 }
+
+// Real-time update functions
+export function broadcastSupplyChainUpdate(productId: string, status: string, location: string, metadata?: any) {
+  const message = {
+    type: 'supply_chain_update',
+    data: {
+      productId,
+      status,
+      location,
+      metadata,
+      timestamp: new Date().toISOString(),
+    },
+  };
+  if (wsServer) {
+    wsServer.broadcastToAll(message);
+  }
+}
+
+export function broadcastMarketplaceUpdate(productId: string, action: string, price?: number) {
+  const message = {
+    type: 'marketplace_update',
+    data: {
+      productId,
+      action,
+      price,
+      timestamp: new Date().toISOString(),
+    },
+  };
+  if (wsServer) {
+    wsServer.broadcastToAll(message);
+  }
+}
+
+export function broadcastForumUpdate(postId: string, action: string, data?: any) {
+  const message = {
+    type: 'forum_update',
+    data: {
+      postId,
+      action,
+      data,
+      timestamp: new Date().toISOString(),
+    },
+  };
+  if (wsServer) {
+    wsServer.broadcastToAll(message);
+  }
+}
+
+export function broadcastCooperativeUpdate(cooperativeId: number, action: string, data?: any) {
+  const message = {
+    type: 'cooperative_update',
+    data: {
+      cooperativeId,
+      action,
+      data,
+      timestamp: new Date().toISOString(),
+    },
+  };
+  if (wsServer) {
+    wsServer.broadcastToAll(message);
+  }
+}
