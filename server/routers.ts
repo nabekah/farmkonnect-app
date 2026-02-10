@@ -48,6 +48,7 @@ import { reportTemplatesRouter } from "./routers/reportTemplates";
 import { reportAnalyticsRouter } from "./routers/reportAnalytics";
 import { recipientManagementRouter } from "./routers/recipientManagement";
 import { reportExportRouter } from "./routers/reportExport";
+import { predictiveAnalyticsRouter } from "./routers/predictiveAnalyticsRouter";
 import { veterinaryClinicDirectoryRouter } from "./routers/veterinaryClinicDirectoryClean";
 import { prescriptionRefillAutomationRouter } from "./routers/prescriptionRefillAutomationClean";
 import { notificationServicesRouter } from "./routers/notificationServicesClean";
@@ -240,6 +241,7 @@ export const appRouter = router({
   budgetAlerts: budgetAlertsRouter,
   notificationData: notificationDataRouter,
   blockchainSupplyChain: blockchainSupplyChainRouter,
+  predictiveAnalytics: predictiveAnalyticsRouter,
   // accountingExport: accountingExportRouter,
   // expenseNotifications: expenseNotifications,
   // farmAnalytics: farmAnalytics,
