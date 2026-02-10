@@ -48,6 +48,8 @@ import { reportTemplatesRouter } from "./routers/reportTemplates";
 import { reportAnalyticsRouter } from "./routers/reportAnalytics";
 import { recipientManagementRouter } from "./routers/recipientManagement";
 import { reportExportRouter } from "./routers/reportExport";
+import { veterinaryClinicDirectoryRouter } from "./routers/veterinaryClinicDirectoryClean";
+import { prescriptionRefillAutomationRouter } from "./routers/prescriptionRefillAutomationClean";
 import { notificationServicesRouter } from "./routers/notificationServicesClean";
 import { veterinarianCalendarRouter } from "./routers/veterinarianCalendarClean";
 import { telemedicineRouter } from "./routers/telemedicineClean";
@@ -290,6 +292,8 @@ export const appRouter = router({
   notificationServices: notificationServicesRouter,
   veterinarianCalendar: veterinarianCalendarRouter,
   telemedicine: telemedicineRouter,
+  veterinaryClinicDirectory: veterinaryClinicDirectoryRouter,
+  prescriptionRefillAutomation: prescriptionRefillAutomationRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {
