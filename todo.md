@@ -3768,3 +3768,103 @@
 6. **Test End-to-End** - Verify all notification channels work correctly
 7. **Add Rate Limiting** - Implement rate limiting for notification endpoints
 8. **Monitor Delivery** - Set up monitoring for notification delivery rates
+
+
+## Phase 9: WebSocket Notification Triggers & Scheduling
+
+### WebSocket Notification Trigger Integration (Completed)
+- [x] Created websocketNotificationTriggers.ts service
+- [x] Implemented checkBreedingReminders function
+- [x] Implemented checkVaccinationReminders function
+- [x] Implemented checkHarvestReminders function
+- [x] Implemented checkStockAlerts function
+- [x] Implemented checkOrderStatusUpdates function
+- [x] Implemented broadcastWeatherAlert function
+- [x] Integrated WebSocket broadcasting with multi-channel notifications
+
+### Notification Scheduling with Cron (Completed)
+- [x] Created notificationScheduler.ts service
+- [x] Implemented initializeNotificationScheduler function
+- [x] Implemented stopNotificationScheduler function
+- [x] Implemented getSchedulerStatus function
+- [x] Implemented enableJob function
+- [x] Implemented disableJob function
+- [x] Implemented runJobNow function
+- [x] Created cron jobs for:
+  - Breeding reminders (daily at 9:00 AM)
+  - Vaccination reminders (daily at 10:00 AM)
+  - Harvest reminders (daily at 11:00 AM)
+  - Stock alerts (every 30 minutes)
+  - Order status updates (every 15 minutes)
+
+### Notification Scheduler Router (Completed)
+- [x] Created notificationSchedulerRouter.ts
+- [x] Implemented getStatus endpoint
+- [x] Implemented enableJob endpoint (admin only)
+- [x] Implemented disableJob endpoint (admin only)
+- [x] Implemented runJobNow endpoint (admin only)
+- [x] Implemented initialize endpoint (admin only)
+- [x] Implemented stop endpoint (admin only)
+
+### Notification Preferences UI (Completed)
+- [x] Created NotificationPreferencesPage.tsx component
+- [x] Implemented notification type toggles:
+  - Breeding reminders
+  - Stock alerts
+  - Weather alerts
+  - Vaccination reminders
+  - Harvest reminders
+  - Marketplace updates
+  - IoT sensor alerts
+  - Training reminders
+- [x] Implemented delivery channel toggles:
+  - Push notifications
+  - Email notifications
+  - SMS notifications
+- [x] Implemented schedule settings:
+  - Timezone selector (13 timezones)
+  - Quiet hours configuration
+  - Start/end time selectors
+- [x] Implemented save functionality with success feedback
+- [x] Added route to App.tsx at /notification-preferences
+- [x] Integrated with DashboardLayout
+
+### Features Implemented
+- **Real-time WebSocket Broadcasting**: Notifications broadcast to users/farms in real-time
+- **Cron Job Scheduling**: Automated notification triggers on configurable schedules
+- **Multi-channel Delivery**: Respects user preferences for push, email, and SMS
+- **Granular Preferences**: Users can toggle each notification type and channel
+- **Timezone Support**: 13 different timezones for scheduling
+- **Quiet Hours**: Users can set quiet hours to avoid notifications
+- **Admin Controls**: Admins can enable/disable/run jobs manually
+- **Delivery Logging**: All notifications logged for tracking and analytics
+
+### Files Created
+1. server/services/websocketNotificationTriggers.ts (220 lines)
+2. server/services/notificationScheduler.ts (180 lines)
+3. server/routers/notificationSchedulerRouter.ts (120 lines)
+4. client/src/pages/NotificationPreferencesPage.tsx (380 lines)
+
+### Cron Job Schedule
+- **Breeding Reminders**: 0 9 * * * (Daily at 9:00 AM)
+- **Vaccination Reminders**: 0 10 * * * (Daily at 10:00 AM)
+- **Harvest Reminders**: 0 11 * * * (Daily at 11:00 AM)
+- **Stock Alerts**: */30 * * * * (Every 30 minutes)
+- **Order Status Updates**: */15 * * * * (Every 15 minutes)
+
+### Integration Points
+- WebSocket service: Broadcasts notifications to connected clients
+- Multi-channel service: Routes notifications to push, email, SMS
+- Database: Logs all notification delivery attempts
+- tRPC routers: Exposes scheduler management endpoints
+- Frontend: NotificationPreferencesPage for user settings
+
+### Next Steps
+1. **Test WebSocket Notifications** - Verify real-time delivery to connected clients
+2. **Test Cron Jobs** - Run jobs manually and verify notifications are sent
+3. **Test User Preferences** - Verify preferences are saved and respected
+4. **Monitor Notification Delivery** - Check logs for delivery status
+5. **Performance Testing** - Test with large number of notifications
+6. **Email Template Testing** - Verify email formatting and delivery
+7. **SMS Testing** - Verify SMS delivery via Twilio
+8. **User Acceptance Testing** - Get feedback from farmers on notification experience
