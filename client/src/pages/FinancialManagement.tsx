@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,7 +20,10 @@ import {
   Stethoscope,
   Shield,
   TrendingUpIcon,
+  Bell,
+  Settings,
 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 /**
  * Financial Management & Accounting Component
@@ -28,11 +31,13 @@ import {
  */
 export const FinancialManagement: React.FC = () => {
   const [viewMode, setViewMode] = useState<
-    "dashboard" | "expenses" | "revenue" | "budget" | "forecast" | "reports" | "tax" | "veterinary" | "insurance"
+    "dashboard" | "expenses" | "revenue" | "budget" | "forecast" | "reports" | "tax" | "veterinary" | "insurance" | "alerts" | "export"
   >("dashboard");
   const [timeRange, setTimeRange] = useState<"month" | "quarter" | "year">("month");
   const [selectedFarmId, setSelectedFarmId] = useState<number>(1);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [showBudgetAlerts, setShowBudgetAlerts] = useState(false);
+  const [exportFormat, setExportFormat] = useState<"pdf" | "csv" | "excel">("pdf");
 
   // Mock farms data
   const farms = [
@@ -49,190 +54,91 @@ export const FinancialManagement: React.FC = () => {
     { value: "labor", label: "Labor" },
     { value: "utilities", label: "Utilities" },
     { value: "veterinary", label: "Veterinary" },
-  ];}
+  ];
 
-  // Mock financial data
+  // Budget Alerts
+  const budgetAlerts = [
+    { id: 1, category: "Equipment", threshold: 5000, current: 4800, status: "warning", message: "Approaching budget limit" },
+    { id: 2, category: "Labor", threshold: 8000, current: 7200, status: "ok", message: "Within budget" },
+    { id: 3, category: "Inputs", threshold: 6000, current: 6500, status: "exceeded", message: "Budget exceeded by ₵500" },
+    { id: 4, category: "Utilities", threshold: 2000, current: 1800, status: "ok", message: "Well within budget" },
+  ];
+
+  // Export function
+  const handleExport = (format: "pdf" | "csv" | "excel") => {
+    setExportFormat(format);
+    const timestamp = new Date().toLocaleDateString();
+    const filename = `Financial_Report_${selectedFarmId}_${timestamp}.${format === "csv" ? "csv" : format === "excel" ? "xlsx" : "pdf"}`;
+    
+    // Mock export - in real app, would call backend API
+    console.log(`Exporting ${filename} in ${format.toUpperCase()} format`);
+    alert(`Exporting financial report as ${format.toUpperCase()}...`);
+  };
+
+  // Mock dashboard data
   const dashboard = {
-    totalRevenue: 45000,
-    totalExpenses: 28000,
-    netProfit: 17000,
-    profitMargin: 37.8,
-    cashFlow: 12000,
-    outstandingPayments: 3500,
-    pendingInvoices: 5200,
-    veterinaryExpenses: 3200,
-    insuranceCosts: 1500,
+    totalIncome: 125000,
+    totalExpenses: 78000,
+    netProfit: 47000,
+    profitMargin: 37.6,
+    cashFlow: 45000,
+    outstandingPayments: 12000,
+    pendingInvoices: 8500,
+    cropExpenses: 35000,
+    livestockExpenses: 28000,
+    veterinaryExpenses: 15000,
     metrics: {
-      revenueGrowth: 12.5,
-      expenseGrowth: 8.3,
-      profitGrowth: 18.7,
-      veterinaryROI: 4.2, // Return on investment for veterinary care
+      cropROI: "2.5x",
+      livestockROI: "1.8x",
+      veterinaryROI: "3.2x",
     },
   };
 
-  // Mock expenses
+  // Mock expenses data
   const expenses = [
-    {
-      id: 1,
-      date: "2026-02-08",
-      category: "Equipment Maintenance",
-      description: "Tractor oil change and filter replacement",
-      amount: 500,
-      vendor: "Ghana Equipment Services",
-      status: "paid",
-    },
-    {
-      id: 2,
-      date: "2026-02-07",
-      category: "Inputs",
-      description: "NPK Fertilizer - 100 bags",
-      amount: 4500,
-      vendor: "Ghana Agricultural Supplies",
-      status: "paid",
-    },
-    {
-      id: 3,
-      date: "2026-02-06",
-      category: "Labor",
-      description: "Worker wages - February",
-      amount: 8000,
-      vendor: "Internal",
-      status: "pending",
-    },
-    {
-      id: 4,
-      date: "2026-02-05",
-      category: "Utilities",
-      description: "Water and electricity",
-      amount: 1200,
-      vendor: "Utility Provider",
-      status: "paid",
-    },
-    {
-      id: 5,
-      date: "2026-02-04",
-      category: "Veterinary",
-      description: "Vaccination and health check for cattle",
-      amount: 800,
-      vendor: "Accra Veterinary Clinic",
-      status: "paid",
-    },
-    {
-      id: 6,
-      date: "2026-02-03",
-      category: "Insurance",
-      description: "Monthly crop insurance premium",
-      amount: 500,
-      vendor: "Ghana Insurance Co",
-      status: "paid",
-    },
+    { id: 1, description: "Fertilizer Purchase", category: "inputs", vendor: "AgroSupply Co", amount: 2500, date: "2026-02-05", status: "paid" },
+    { id: 2, description: "Equipment Repair", category: "equipment", vendor: "Farm Tech", amount: 1200, date: "2026-02-04", status: "pending" },
+    { id: 3, description: "Labor Payment", category: "labor", vendor: "Workers", amount: 3000, date: "2026-02-03", status: "paid" },
+    { id: 4, description: "Water Pump Maintenance", category: "utilities", vendor: "Maintenance Co", amount: 800, date: "2026-02-02", status: "paid" },
+    { id: 5, description: "Veterinary Consultation", category: "veterinary", vendor: "Vet Clinic", amount: 500, date: "2026-02-01", status: "paid" },
   ];
 
-  // Mock revenue
+  // Mock revenue data
   const revenue = [
-    {
-      id: 1,
-      date: "2026-02-08",
-      source: "Tomato Sales",
-      product: "Organic Tomatoes (5kg)",
-      quantity: 50,
-      unitPrice: 45,
-      total: 2250,
-      buyer: "Accra Market",
-      status: "paid",
-    },
-    {
-      id: 2,
-      date: "2026-02-07",
-      source: "Milk Sales",
-      product: "Fresh Cow Milk (1L)",
-      quantity: 200,
-      unitPrice: 15,
-      total: 3000,
-      buyer: "Local Dairy Cooperative",
-      status: "paid",
-    },
-    {
-      id: 3,
-      date: "2026-02-06",
-      source: "Egg Sales",
-      product: "Chicken Eggs (Crate)",
-      quantity: 30,
-      unitPrice: 60,
-      total: 1800,
-      buyer: "Kumasi Supermarket",
-      status: "pending",
-    },
+    { id: 1, product: "Maize", quantity: 500, unit: "bags", unitPrice: 150, totalAmount: 75000, date: "2026-01-30" },
+    { id: 2, product: "Tomatoes", quantity: 200, unit: "crates", unitPrice: 120, totalAmount: 24000, date: "2026-01-28" },
+    { id: 3, product: "Chicken Eggs", quantity: 1000, unit: "crates", unitPrice: 8, totalAmount: 8000, date: "2026-01-25" },
+    { id: 4, product: "Cattle", quantity: 2, unit: "heads", unitPrice: 9000, totalAmount: 18000, date: "2026-01-20" },
   ];
 
   // Mock veterinary expenses
   const veterinaryExpenses = [
-    {
-      id: 1,
-      date: "2026-02-08",
-      animal: "Bessie (Cow)",
-      service: "Vaccination",
-      clinic: "Accra Veterinary Clinic",
-      cost: 800,
-      status: "completed",
-      impact: "Prevented disease outbreak - Estimated savings: $5000",
-    },
-    {
-      id: 2,
-      date: "2026-02-05",
-      animal: "Daisy (Cow)",
-      service: "Consultation",
-      clinic: "Accra Veterinary Clinic",
-      cost: 400,
-      status: "completed",
-      impact: "Early detection of mastitis - Treatment cost: $300",
-    },
-    {
-      id: 3,
-      date: "2026-02-01",
-      animal: "Herd (20 chickens)",
-      service: "Deworming",
-      clinic: "Kumasi Animal Hospital",
-      cost: 200,
-      status: "completed",
-      impact: "Improved egg production by 15%",
-    },
+    { id: 1, animal: "Cattle", treatment: "Vaccination", cost: 5000, date: "2026-02-05", status: "completed" },
+    { id: 2, animal: "Poultry", treatment: "Disease Treatment", cost: 3500, date: "2026-02-03", status: "completed" },
+    { id: 3, animal: "Goats", treatment: "Deworming", cost: 2000, date: "2026-02-01", status: "pending" },
   ];
 
   // Mock insurance data
   const insuranceData = {
-    totalPremium: 1500,
+    totalPremium: 8500,
     coverage: {
-      cropInsurance: 500,
-      livestockInsurance: 600,
-      equipmentInsurance: 400,
+      "Crop Insurance": 4000,
+      "Livestock Insurance": 3000,
+      "Equipment Insurance": 1500,
     },
     claims: [
-      {
-        id: 1,
-        type: "Crop Loss",
-        date: "2026-01-15",
-        amount: 5000,
-        status: "approved",
-        payoutDate: "2026-02-01",
-      },
-      {
-        id: 2,
-        type: "Animal Death",
-        date: "2026-01-10",
-        amount: 8000,
-        status: "pending",
-        payoutDate: null,
-      },
+      { id: 1, type: "Drought Damage", amount: 15000, date: "2026-01-15", status: "approved", payoutDate: "2026-02-05" },
+      { id: 2, type: "Pest Infestation", amount: 8000, date: "2026-01-20", status: "pending" },
     ],
   };
 
   // Mock budget data
   const budgetData = {
     categories: [
-      { name: "Labor", budgeted: 10000, actual: 8000, variance: 2000 },
-      { name: "Inputs", budgeted: 8000, actual: 7500, variance: 500 },
-      { name: "Equipment", budgeted: 5000, actual: 4200, variance: 800 },
+      { name: "Equipment", budgeted: 10000, actual: 8500, variance: 1500 },
+      { name: "Inputs", budgeted: 15000, actual: 14200, variance: 800 },
+      { name: "Labor", budgeted: 20000, actual: 19500, variance: 500 },
+      { name: "Utilities", budgeted: 5000, actual: 4200, variance: 800 },
       { name: "Veterinary", budgeted: 2000, actual: 1600, variance: 400 },
       { name: "Insurance", budgeted: 1500, actual: 1500, variance: 0 },
     ],
@@ -244,67 +150,155 @@ export const FinancialManagement: React.FC = () => {
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Financial Management</h1>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={() => setShowBudgetAlerts(!showBudgetAlerts)}>
+            <Bell className="w-4 h-4 mr-2" />
+            Budget Alerts
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setViewMode("export")}>
             <Download className="w-4 h-4 mr-2" />
             Export Report
           </Button>
-          <Button size="sm">
-            <Plus className="w-4 h-4 mr-2" />
-            New Transaction
-          </Button>
         </div>
       </div>
 
-      {/* Farm and Category Selectors */}
-      <div className="flex gap-4 items-center bg-gray-50 p-4 rounded-lg">
-        <div className="flex items-center gap-2">
-          <label className="text-sm font-medium">Farm:</label>
-          <select
-            value={selectedFarmId}
-            onChange={(e) => setSelectedFarmId(Number(e.target.value))}
-            className="px-3 py-2 border rounded-md text-sm bg-white"
-          >
-            {farms.map((farm) => (
-              <option key={farm.id} value={farm.id}>
-                {farm.name}
-              </option>
-            ))}
-          </select>
-        </div>
-        {(viewMode === "expenses" || viewMode === "dashboard") && (
-          <div className="flex items-center gap-2">
-            <label className="text-sm font-medium">Category:</label>
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-3 py-2 border rounded-md text-sm bg-white"
-            >
-              {expenseCategories.map((cat) => (
-                <option key={cat.value} value={cat.value}>
-                  {cat.label}
-                </option>
+      {/* Farm & Category Selectors */}
+      <div className="flex gap-4">
+        <div className="flex-1">
+          <label className="text-sm font-medium mb-2 block">Select Farm</label>
+          <Select value={selectedFarmId.toString()} onValueChange={(val) => setSelectedFarmId(parseInt(val))}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {farms.map((farm) => (
+                <SelectItem key={farm.id} value={farm.id.toString()}>
+                  {farm.name}
+                </SelectItem>
               ))}
-            </select>
-          </div>
-        )}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex-1">
+          <label className="text-sm font-medium mb-2 block">Expense Category</label>
+          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {expenseCategories.map((cat) => (
+                <SelectItem key={cat.value} value={cat.value}>
+                  {cat.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
-      {/* View Mode Tabs */}
-      <div className="flex gap-2 border-b">
-        {["dashboard", "expenses", "revenue", "budget", "forecast", "reports", "tax", "veterinary", "insurance"].map(
-          (mode) => (
-            <button
-              key={mode}
-              onClick={() => setViewMode(mode as typeof viewMode)}
-              className={`px-4 py-2 font-medium ${
-                viewMode === mode ? "border-b-2 border-blue-600 text-blue-600" : "text-gray-600"
-              }`}
-            >
-              {mode.charAt(0).toUpperCase() + mode.slice(1)}
-            </button>
-          )
-        )}
-      </div>
+      {/* Budget Alerts Panel */}
+      {showBudgetAlerts && (
+        <Card className="p-6 border-orange-200 bg-orange-50">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold flex items-center gap-2">
+              <AlertCircle className="w-5 h-5 text-orange-600" />
+              Budget Alerts
+            </h2>
+            <Button size="sm" variant="ghost" onClick={() => setShowBudgetAlerts(false)}>×</Button>
+          </div>
+          <div className="space-y-3">
+            {budgetAlerts.map((alert) => (
+              <div key={alert.id} className={`p-3 rounded-lg border ${
+                alert.status === "exceeded" ? "bg-red-50 border-red-200" :
+                alert.status === "warning" ? "bg-yellow-50 border-yellow-200" :
+                "bg-green-50 border-green-200"
+              }`}>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium">{alert.category}</p>
+                    <p className="text-sm text-gray-600">{alert.message}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-bold">₵{alert.current.toLocaleString()} / ₵{alert.threshold.toLocaleString()}</p>
+                    <p className={`text-xs ${
+                      alert.status === "exceeded" ? "text-red-600" :
+                      alert.status === "warning" ? "text-yellow-600" :
+                      "text-green-600"
+                    }`}>
+                      {Math.round((alert.current / alert.threshold) * 100)}% used
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
+
+      {/* Export Report View */}
+      {viewMode === "export" && (
+        <Card className="p-6">
+          <h2 className="text-xl font-bold mb-4">Export Financial Report</h2>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium mb-2 block">Select Export Format</label>
+              <div className="flex gap-3">
+                <Button
+                  variant={exportFormat === "pdf" ? "default" : "outline"}
+                  onClick={() => handleExport("pdf")}
+                  className="flex-1"
+                >
+                  <FileText className="w-4 h-4 mr-2" />
+                  PDF Report
+                </Button>
+                <Button
+                  variant={exportFormat === "csv" ? "default" : "outline"}
+                  onClick={() => handleExport("csv")}
+                  className="flex-1"
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  CSV Export
+                </Button>
+                <Button
+                  variant={exportFormat === "excel" ? "default" : "outline"}
+                  onClick={() => handleExport("excel")}
+                  className="flex-1"
+                >
+                  <BarChart3 className="w-4 h-4 mr-2" />
+                  Excel Sheet
+                </Button>
+              </div>
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">Include in Report</label>
+              <div className="space-y-2">
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" defaultChecked className="rounded" />
+                  <span className="text-sm">Income & Expenses</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" defaultChecked className="rounded" />
+                  <span className="text-sm">Budget Analysis</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" defaultChecked className="rounded" />
+                  <span className="text-sm">Veterinary Costs</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" defaultChecked className="rounded" />
+                  <span className="text-sm">Insurance Claims</span>
+                </label>
+              </div>
+            </div>
+            <Button className="w-full" onClick={() => {
+              alert(`Report exported as ${exportFormat.toUpperCase()}`);
+              setViewMode("dashboard");
+            }}>
+              <Download className="w-4 h-4 mr-2" />
+              Download Report
+            </Button>
+          </div>
+        </Card>
+      )}
 
       {/* Dashboard View */}
       {viewMode === "dashboard" && (
@@ -314,14 +308,14 @@ export const FinancialManagement: React.FC = () => {
             <Card className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-600 text-sm">Total Revenue</p>
-                  <p className="text-2xl font-bold">₵{dashboard.totalRevenue.toLocaleString()}</p>
+                  <p className="text-gray-600 text-sm">Total Income</p>
+                  <p className="text-2xl font-bold">₵{dashboard.totalIncome.toLocaleString()}</p>
                   <p className="text-green-600 text-sm flex items-center mt-2">
-                    <TrendingUp className="w-4 h-4 mr-1" />
-                    {dashboard.metrics.revenueGrowth}% growth
+                    <ArrowUpRight className="w-4 h-4 mr-1" />
+                    +12% from last month
                   </p>
                 </div>
-                <DollarSign className="w-8 h-8 text-green-600" />
+                <TrendingUp className="w-8 h-8 text-green-600" />
               </div>
             </Card>
 
@@ -331,11 +325,11 @@ export const FinancialManagement: React.FC = () => {
                   <p className="text-gray-600 text-sm">Total Expenses</p>
                   <p className="text-2xl font-bold">₵{dashboard.totalExpenses.toLocaleString()}</p>
                   <p className="text-red-600 text-sm flex items-center mt-2">
-                    <TrendingDown className="w-4 h-4 mr-1" />
-                    {dashboard.metrics.expenseGrowth}% increase
+                    <ArrowDownLeft className="w-4 h-4 mr-1" />
+                    +8% from last month
                   </p>
                 </div>
-                <ArrowDownLeft className="w-8 h-8 text-red-600" />
+                <TrendingDown className="w-8 h-8 text-red-600" />
               </div>
             </Card>
 
@@ -345,11 +339,42 @@ export const FinancialManagement: React.FC = () => {
                   <p className="text-gray-600 text-sm">Net Profit</p>
                   <p className="text-2xl font-bold">₵{dashboard.netProfit.toLocaleString()}</p>
                   <p className="text-blue-600 text-sm flex items-center mt-2">
-                    <TrendingUpIcon className="w-4 h-4 mr-1" />
+                    <CheckCircle className="w-4 h-4 mr-1" />
                     {dashboard.profitMargin}% margin
                   </p>
                 </div>
-                <TrendingUp className="w-8 h-8 text-blue-600" />
+                <DollarSign className="w-8 h-8 text-blue-600" />
+              </div>
+            </Card>
+
+            <Card className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-600 text-sm">Crop Expenses</p>
+                  <p className="text-2xl font-bold">₵{dashboard.cropExpenses.toLocaleString()}</p>
+                  <p className="text-purple-600 text-sm flex items-center mt-2">
+                    <TrendingUp className="w-4 h-4 mr-1" />
+                    ROI: {dashboard.metrics.cropROI}
+                  </p>
+                </div>
+                <Pill className="w-8 h-8 text-purple-600" />
+              </div>
+            </Card>
+          </div>
+
+          {/* Expense & Revenue Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Card className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-600 text-sm">Livestock Expenses</p>
+                  <p className="text-2xl font-bold">₵{dashboard.livestockExpenses.toLocaleString()}</p>
+                  <p className="text-orange-600 text-sm flex items-center mt-2">
+                    <Activity className="w-4 h-4 mr-1" />
+                    ROI: {dashboard.metrics.livestockROI}x
+                  </p>
+                </div>
+                <Activity className="w-8 h-8 text-orange-600" />
               </div>
             </Card>
 
@@ -366,26 +391,16 @@ export const FinancialManagement: React.FC = () => {
                 <Stethoscope className="w-8 h-8 text-purple-600" />
               </div>
             </Card>
-          </div>
-
-          {/* Cash Flow & Outstanding Payments */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card className="p-6">
-              <p className="text-gray-600 text-sm mb-2">Cash Flow</p>
-              <p className="text-2xl font-bold text-green-600">₵{dashboard.cashFlow.toLocaleString()}</p>
-              <p className="text-gray-600 text-xs mt-2">Available for operations</p>
-            </Card>
 
             <Card className="p-6">
-              <p className="text-gray-600 text-sm mb-2">Outstanding Payments</p>
-              <p className="text-2xl font-bold text-orange-600">₵{dashboard.outstandingPayments.toLocaleString()}</p>
-              <p className="text-gray-600 text-xs mt-2">Due within 30 days</p>
-            </Card>
-
-            <Card className="p-6">
-              <p className="text-gray-600 text-sm mb-2">Pending Invoices</p>
-              <p className="text-2xl font-bold text-blue-600">₵{dashboard.pendingInvoices.toLocaleString()}</p>
-              <p className="text-gray-600 text-xs mt-2">Awaiting payment</p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-600 text-sm">Cash Flow</p>
+                  <p className="text-2xl font-bold text-green-600">₵{dashboard.cashFlow.toLocaleString()}</p>
+                  <p className="text-gray-600 text-xs mt-2">Available for operations</p>
+                </div>
+                <PieChart className="w-8 h-8 text-green-600" />
+              </div>
             </Card>
           </div>
         </div>
@@ -418,105 +433,32 @@ export const FinancialManagement: React.FC = () => {
                   >
                     {expense.status}
                   </span>
-                 </div>
+                </div>
               </div>
             ))}
           </div>
         </Card>
       )}
-      {/* Veterinary Expenses View */}
-      {viewMode === "veterinary" && (
+
+      {/* Revenue View */}
+      {viewMode === "revenue" && (
         <Card className="p-6">
-          <h2 className="text-xl font-bold mb-4">Veterinary Expenses & ROI</h2>
+          <h2 className="text-xl font-bold mb-4">Revenue Tracking</h2>
           <div className="space-y-3">
-            {veterinaryExpenses.map((expense) => (
-              <div key={expense.id} className="p-4 border rounded-lg bg-purple-50">
-                <div className="flex items-center justify-between mb-2">
-                  <div>
-                    <p className="font-medium">{expense.animal}</p>
-                    <p className="text-sm text-gray-600">{expense.service} • {expense.clinic}</p>
-                  </div>
-                  <p className="font-bold text-purple-600">₵{expense.cost}</p>
+            {revenue.map((item) => (
+              <div key={item.id} className="flex items-center justify-between p-3 border rounded-lg">
+                <div className="flex-1">
+                  <p className="font-medium">{item.product}</p>
+                  <p className="text-sm text-gray-600">{item.quantity} {item.unit} @ ₵{item.unitPrice}/unit</p>
+                  <p className="text-xs text-gray-500">{item.date}</p>
                 </div>
-                <div className="bg-white p-2 rounded mt-2 border-l-4 border-green-500">
-                  <p className="text-sm text-green-700">
-                    <CheckCircle className="w-4 h-4 inline mr-1" />
-                    {expense.impact}
-                  </p>
+                <div className="text-right">
+                  <p className="font-bold text-green-600">₵{item.totalAmount.toLocaleString()}</p>
                 </div>
               </div>
             ))}
-            <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <p className="text-sm font-medium text-blue-900">
-                Total Veterinary Investment: ₵{veterinaryExpenses.reduce((sum, e) => sum + e.cost, 0)}
-              </p>
-              <p className="text-sm text-blue-700 mt-1">
-                Estimated ROI: {dashboard.metrics.veterinaryROI}x (Disease prevention & productivity gains)
-              </p>
-            </div>
           </div>
         </Card>
-      )}
-
-      {/* Insurance View */}
-      {viewMode === "insurance" && (
-        <div className="space-y-6">
-          <Card className="p-6">
-            <h2 className="text-xl font-bold mb-4 flex items-center">
-              <Shield className="w-5 h-5 mr-2" />
-              Insurance Coverage & Claims
-            </h2>
-
-            {/* Coverage Breakdown */}
-            <div className="mb-6">
-              <h3 className="font-medium mb-3">Monthly Premiums</h3>
-              <div className="space-y-2">
-                {Object.entries(insuranceData.coverage).map(([type, amount]) => (
-                  <div key={type} className="flex justify-between items-center p-2 bg-gray-50 rounded">
-                    <p className="text-sm">{type}</p>
-                    <p className="font-medium">₵{amount}</p>
-                  </div>
-                ))}
-              </div>
-              <div className="flex justify-between items-center p-2 bg-blue-50 rounded mt-3 border border-blue-200">
-                <p className="font-medium">Total Premium</p>
-                <p className="font-bold text-blue-600">₵{insuranceData.totalPremium}</p>
-              </div>
-            </div>
-
-            {/* Claims */}
-            <div>
-              <h3 className="font-medium mb-3">Claims Status</h3>
-              <div className="space-y-3">
-                {insuranceData.claims.map((claim) => (
-                  <div key={claim.id} className="p-3 border rounded-lg">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium">{claim.type}</p>
-                        <p className="text-sm text-gray-600">Filed: {claim.date}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-bold text-green-600">₵{claim.amount.toLocaleString()}</p>
-                        <span
-                          className={`text-xs px-2 py-1 rounded ${
-                            claim.status === "approved"
-                              ? "bg-green-100 text-green-800"
-                              : "bg-yellow-100 text-yellow-800"
-                          }`}
-                        >
-                          {claim.status}
-                        </span>
-                      </div>
-                    </div>
-                    {claim.payoutDate && (
-                      <p className="text-xs text-gray-600 mt-2">Payout: {claim.payoutDate}</p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </Card>
-        </div>
       )}
 
       {/* Budget View */}
@@ -574,30 +516,31 @@ export const FinancialManagement: React.FC = () => {
                 )}
               </div>
             ))}
-          </div>
-        </Card>
+            </div>
+          </Card>
+        </div>
       )}
 
-      {/* Revenue View */}
-      {viewMode === "revenue" && (
+      {/* Veterinary View */}
+      {viewMode === "veterinary" && (
         <Card className="p-6">
-          <h2 className="text-xl font-bold mb-4">Revenue Tracking</h2>
+          <h2 className="text-xl font-bold mb-4">Veterinary Expenses & ROI</h2>
           <div className="space-y-3">
-            {revenue.map((item) => (
-              <div key={item.id} className="flex items-center justify-between p-3 border rounded-lg">
-                <div className="flex-1">
-                  <p className="font-medium">{item.product}</p>
-                  <p className="text-sm text-gray-600">{item.source} • {item.buyer}</p>
-                  <p className="text-xs text-gray-500">{item.quantity} units @ ₵{item.unitPrice}</p>
+            {veterinaryExpenses.map((expense) => (
+              <div key={expense.id} className="p-4 border rounded-lg bg-purple-50">
+                <div className="flex items-center justify-between mb-2">
+                  <div>
+                    <p className="font-medium">{expense.animal}</p>
+                    <p className="text-sm text-gray-600">{expense.treatment}</p>
+                  </div>
+                  <p className="font-bold text-purple-600">₵{expense.cost.toLocaleString()}</p>
                 </div>
-                <div className="text-right">
-                  <p className="font-bold text-green-600">₵{item.total.toLocaleString()}</p>
-                  <span
-                    className={`text-xs px-2 py-1 rounded ${
-                      item.status === "paid" ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
-                    }`}
-                  >
-                    {item.status}
+                <div className="flex items-center justify-between">
+                  <p className="text-xs text-gray-500">{expense.date}</p>
+                  <span className={`text-xs px-2 py-1 rounded ${
+                    expense.status === "completed" ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
+                  }`}>
+                    {expense.status}
                   </span>
                 </div>
               </div>
@@ -606,15 +549,103 @@ export const FinancialManagement: React.FC = () => {
         </Card>
       )}
 
-      {/* Forecast & Reports Views */}
-      {(viewMode === "forecast" || viewMode === "reports" || viewMode === "tax") && (
-        <Card className="p-6">
-          <div className="text-center py-12">
-            <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600">{viewMode.charAt(0).toUpperCase() + viewMode.slice(1)} feature coming soon</p>
-          </div>
-        </Card>
+      {/* Insurance View */}
+      {viewMode === "insurance" && (
+        <div className="space-y-4">
+          <Card className="p-6">
+            <h2 className="text-xl font-bold mb-4">Insurance Management</h2>
+
+            {/* Coverage Breakdown */}
+            <div className="mb-6">
+              <h3 className="font-medium mb-3">Monthly Premiums</h3>
+              <div className="space-y-2">
+                {Object.entries(insuranceData.coverage).map(([type, amount]) => (
+                  <div key={type} className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                    <p className="text-sm">{type}</p>
+                    <p className="font-medium">₵{amount}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="flex justify-between items-center p-2 bg-blue-50 rounded mt-3 border border-blue-200">
+                <p className="font-medium">Total Premium</p>
+                <p className="font-bold text-blue-600">₵{insuranceData.totalPremium}</p>
+              </div>
+            </div>
+
+            {/* Claims */}
+            <div>
+              <h3 className="font-medium mb-3">Claims Status</h3>
+              <div className="space-y-3">
+                {insuranceData.claims.map((claim) => (
+                  <div key={claim.id} className="p-3 border rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium">{claim.type}</p>
+                        <p className="text-sm text-gray-600">Filed: {claim.date}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-bold text-green-600">₵{claim.amount.toLocaleString()}</p>
+                        <span
+                          className={`text-xs px-2 py-1 rounded ${
+                            claim.status === "approved"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-yellow-100 text-yellow-800"
+                          }`}
+                        >
+                          {claim.status}
+                        </span>
+                      </div>
+                    </div>
+                    {claim.payoutDate && (
+                      <p className="text-xs text-gray-600 mt-2">Payout: {claim.payoutDate}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Card>
+        </div>
       )}
+
+      {/* View Selector Buttons */}
+      <div className="flex flex-wrap gap-2">
+        <Button
+          variant={viewMode === "dashboard" ? "default" : "outline"}
+          onClick={() => setViewMode("dashboard")}
+        >
+          Dashboard
+        </Button>
+        <Button
+          variant={viewMode === "expenses" ? "default" : "outline"}
+          onClick={() => setViewMode("expenses")}
+        >
+          Expenses
+        </Button>
+        <Button
+          variant={viewMode === "revenue" ? "default" : "outline"}
+          onClick={() => setViewMode("revenue")}
+        >
+          Revenue
+        </Button>
+        <Button
+          variant={viewMode === "budget" ? "default" : "outline"}
+          onClick={() => setViewMode("budget")}
+        >
+          Budget
+        </Button>
+        <Button
+          variant={viewMode === "veterinary" ? "default" : "outline"}
+          onClick={() => setViewMode("veterinary")}
+        >
+          Veterinary
+        </Button>
+        <Button
+          variant={viewMode === "insurance" ? "default" : "outline"}
+          onClick={() => setViewMode("insurance")}
+        >
+          Insurance
+        </Button>
+      </div>
     </div>
   );
 };
