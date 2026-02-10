@@ -4160,3 +4160,33 @@
 - [ ] Test real-time updates with multiple clients
 - [ ] Add connection status indicator to UI
 - [ ] Implement automatic reconnection with exponential backoff
+
+
+## Phase 6: Integration & Deployment (In Progress)
+
+### Step 1: Integrate Dashboards into App Navigation
+- [x] Add routes for SupplyChainDashboard and CooperativeDashboard in App.tsx
+- [x] Add menu items to NavigationStructure.ts under "Community & Recommendations" group
+- [x] Test navigation flow to both dashboards
+- [x] Verify all routes accessible from sidebar
+
+### Step 2: Connect WebSocket Hooks to Dashboard Components
+- [x] Import useSupplyChainUpdates hook in SupplyChainDashboard
+- [x] Import useMarketplaceUpdates hook in CooperativeDashboard
+- [x] Replace mock data with real tRPC queries
+- [x] Add real-time update indicators (Wifi/WifiOff icons)
+- [x] Add toast notifications for updates
+- [x] Display recent updates in real-time cards
+
+### Step 3: Build React Native Mobile App with Expo
+- [x] Initialize Expo project (farmkonnect-mobile)
+- [x] Install dependencies (@react-navigation, @trpc/client, react-native-safe-area-context)
+- [x] Create bottom tab navigation with 5 tabs
+- [x] Build FarmOverviewScreen (farm stats, recent activities)
+- [x] Build CropTrackingScreen (crop list, health status, yield tracking)
+- [x] Build LivestockScreen (animal types, health records, vaccinations)
+- [x] Build MarketplaceScreen (product browsing, search, cart, categories)
+- [x] Build NotificationsScreen (alerts, filters, preferences)
+- [ ] Connect mobile screens to tRPC backend
+- [ ] Implement offline data sync with AsyncStorage
+- [ ] Test on iOS and Android simulators

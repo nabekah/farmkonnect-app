@@ -1,17 +1,25 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import { QrCode, MapPin, CheckCircle, AlertCircle, Package, Truck } from "lucide-react";
+import { QrCode, MapPin, CheckCircle, AlertCircle, Package, Truck, Wifi, WifiOff } from "lucide-react";
 import { trpc } from "@/lib/trpc";
+import { useSupplyChainUpdates, useWebSocketStatus } from "@/hooks/useRealtimeUpdates";
 
 export default function SupplyChainDashboard() {
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
   const [showQRModal, setShowQRModal] = useState(false);
+  const [recentUpdates, setRecentUpdates] = useState<any[]>([]);
+  const wsConnected = useWebSocketStatus();
+
+  // Subscribe to supply chain updates via WebSocket
+  useSupplyChainUpdates((data) => {
+    setRecentUpdates(prev => [data, ...prev.slice(0, 9)]);
+  });
 
   // Fetch supply chain dashboard
-  const { data: dashboard } = trpc.supplyChain.getSupplyChainDashboard.useQuery();
+  const { data: dashboard, isLoading: dashboardLoading } = trpc.supplyChain.getSupplyChainDashboard.useQuery();
 
   // Fetch product tracking
   const { data: productTracking } = trpc.supplyChain.trackProduct.useQuery(
@@ -51,6 +59,17 @@ export default function SupplyChainDashboard() {
 
   const topCrops = stats?.topCrops || [];
 
+  if (dashboardLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto" />
+          <p className="text-gray-600">Loading supply chain data...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 p-6">
       {/* Header */}
@@ -59,7 +78,39 @@ export default function SupplyChainDashboard() {
           <h1 className="text-3xl font-bold">Supply Chain Dashboard</h1>
           <p className="text-gray-600">Track products from farm to buyer with blockchain verification</p>
         </div>
+        <div className="flex items-center gap-2">
+          {wsConnected ? (
+            <div className="flex items-center gap-2 px-3 py-2 bg-green-100 text-green-800 rounded-lg text-sm font-medium">
+              <Wifi className="h-4 w-4" />
+              Live Updates
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 px-3 py-2 bg-yellow-100 text-yellow-800 rounded-lg text-sm font-medium">
+              <WifiOff className="h-4 w-4" />
+              Offline
+            </div>
+          )}
+        </div>
       </div>
+
+      {/* Recent Real-time Updates */}
+      {recentUpdates.length > 0 && (
+        <Card className="border-blue-200 bg-blue-50">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">Real-time Updates</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2 max-h-24 overflow-y-auto">
+              {recentUpdates.map((update, idx) => (
+                <div key={idx} className="text-xs text-gray-700 flex items-center gap-2">
+                  <CheckCircle className="h-3 w-3 text-green-600" />
+                  <span>Product {update.productId}: {update.status} at {update.location}</span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -104,7 +155,7 @@ export default function SupplyChainDashboard() {
         </Card>
       </div>
 
-      {/* Product Tracking */}
+      {/* Tabs */}
       <Tabs defaultValue="status" className="space-y-4">
         <TabsList>
           <TabsTrigger value="status">Product Status</TabsTrigger>
@@ -338,15 +389,6 @@ export default function SupplyChainDashboard() {
                           </span>
                         </div>
                       </div>
-                    </div>
-                  </div>
-
-                  {/* Verification */}
-                  <div className="p-4 bg-purple-50 rounded border border-purple-200">
-                    <h3 className="font-semibold mb-2">Buyer Verification</h3>
-                    <p className="text-sm text-gray-600 mb-3">Share this QR code with buyers for instant verification:</p>
-                    <div className="p-3 bg-white rounded border border-purple-200">
-                      <p className="text-xs font-mono text-center break-all">{transparencyReport.buyerVerification.verificationUrl}</p>
                     </div>
                   </div>
                 </div>

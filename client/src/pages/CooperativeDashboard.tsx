@@ -3,16 +3,24 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import { Users, Package, TrendingUp, DollarSign, Plus, UserPlus, Share2 } from "lucide-react";
+import { Users, Package, TrendingUp, DollarSign, Plus, UserPlus, Share2, Wifi, WifiOff } from "lucide-react";
 import { trpc } from "@/lib/trpc";
+import { useMarketplaceUpdates, useWebSocketStatus } from "@/hooks/useRealtimeUpdates";
 
 export default function CooperativeDashboard() {
   const [selectedCooperativeId, setSelectedCooperativeId] = useState<number>(1);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showAddMemberModal, setShowAddMemberModal] = useState(false);
+  const [marketplaceUpdates, setMarketplaceUpdates] = useState<any[]>([]);
+  const wsConnected = useWebSocketStatus();
+
+  // Subscribe to marketplace updates via WebSocket
+  useMarketplaceUpdates((data) => {
+    setMarketplaceUpdates(prev => [data, ...prev.slice(0, 4)]);
+  });
 
   // Fetch cooperative dashboard
-  const { data: cooperative } = trpc.cooperative.getCooperativeDashboard.useQuery(
+  const { data: cooperative, isLoading: coopLoading } = trpc.cooperative.getCooperativeDashboard.useQuery(
     { cooperativeId: selectedCooperativeId },
     { enabled: !!selectedCooperativeId }
   );
@@ -86,6 +94,17 @@ export default function CooperativeDashboard() {
     { name: "Available", value: 35, color: "#e5e7eb" },
   ];
 
+  if (coopLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto" />
+          <p className="text-gray-600">Loading cooperative data...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 p-6">
       {/* Header */}
@@ -94,11 +113,39 @@ export default function CooperativeDashboard() {
           <h1 className="text-3xl font-bold">Cooperative Management</h1>
           <p className="text-gray-600">Manage shared resources, members, and revenue distribution</p>
         </div>
-        <Button onClick={() => setShowCreateModal(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Create Cooperative
-        </Button>
+        <div className="flex items-center gap-2">
+          {wsConnected ? (
+            <div className="flex items-center gap-2 px-3 py-2 bg-green-100 text-green-800 rounded-lg text-sm font-medium">
+              <Wifi className="h-4 w-4" />
+              Live Updates
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 px-3 py-2 bg-yellow-100 text-yellow-800 rounded-lg text-sm font-medium">
+              <WifiOff className="h-4 w-4" />
+              Offline
+            </div>
+          )}
+        </div>
       </div>
+
+      {/* Marketplace Updates */}
+      {marketplaceUpdates.length > 0 && (
+        <Card className="border-purple-200 bg-purple-50">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">Marketplace Activity</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2 max-h-20 overflow-y-auto">
+              {marketplaceUpdates.map((update, idx) => (
+                <div key={idx} className="text-xs text-gray-700 flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-purple-600" />
+                  <span>Product {update.productId}: {update.action} - ₦{update.price}</span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

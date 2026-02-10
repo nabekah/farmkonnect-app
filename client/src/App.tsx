@@ -116,6 +116,8 @@ import NotificationDeliveryTrackingDashboard from "./pages/NotificationDeliveryT
 import AdminSchedulerControlPanel from "./pages/AdminSchedulerControlPanel";
 import CropRecommendationPage from "./pages/CropRecommendationPage";
 import FarmerCommunityForum from "./pages/FarmerCommunityForum";
+import SupplyChainDashboard from "./pages/SupplyChainDashboard";
+import CooperativeDashboard from "./pages/CooperativeDashboard";
 
 function Router() {
   return (
@@ -779,6 +781,20 @@ function Router() {
         {() => (
           <DashboardLayout>
             <FarmerCommunityForum />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/supply-chain">
+        {() => (
+          <DashboardLayout>
+            <SupplyChainDashboard />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/cooperative">
+        {() => (
+          <DashboardLayout>
+            <CooperativeDashboard />
           </DashboardLayout>
         )}
       </Route>

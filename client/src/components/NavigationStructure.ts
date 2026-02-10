@@ -148,53 +148,19 @@ export const navigationStructure: MenuGroup[] = [
       { icon: FileText, label: "Report Templates", path: "/report-templates" },
       { icon: BarChart3, label: "Report Analytics", path: "/report-analytics" },
       { icon: Calendar, label: "Schedule Reports", path: "/advanced-report-scheduling" },
-      { icon: Users, label: "Recipient Groups", path: "/recipient-groups" },
-      { icon: Download, label: "Export History", path: "/report-history-export" },
-      { icon: Palette, label: "Report Customization", path: "/report-template-customization" },
-      { icon: LineChart, label: "Health Trends", path: "/health-trends" },
-      { icon: Brain, label: "Breeding Recommendations", path: "/breeding-recommendations" },
-      { icon: Brain, label: "Species Selection Wizard", path: "/species-wizard" },
     ],
   },
 
   {
     title: "Marketplace",
-    description: "Buy, sell, and trade",
+    description: "Buy and sell farm products",
     collapsible: true,
-    defaultExpanded: false,
+    defaultExpanded: true,
     items: [
-      { icon: ShoppingCart, label: "Browse Products", path: "/marketplace" },
-      { icon: Heart, label: "Wishlist", path: "/wishlist" },
-      { icon: DollarSign, label: "Seller Payouts", path: "/seller-payouts" },
-      { icon: ShoppingCart, label: "Orders", path: "/orders" },
-      { icon: BarChart3, label: "Seller Analytics", path: "/seller-analytics" },
-    ],
-  },
-
-  {
-    title: "Financial Management",
-    description: "Finance and budgeting",
-    collapsible: true,
-    defaultExpanded: false,
-    items: [
-      { icon: Wallet, label: "Farm Finance", path: "/farm-finance" },
-      { icon: DollarSign, label: "Financial Dashboard", path: "/financial-dashboard" },
-      { icon: FileText, label: "Invoicing & Tax", path: "/invoicing-tax-reporting" },
-    ],
-  },
-
-  {
-    title: "Veterinary Services",
-    description: "Veterinary care, prescriptions, and telemedicine",
-    collapsible: true,
-    defaultExpanded: false,
-    items: [
-      { icon: Heart, label: "Veterinarian Directory", path: "/veterinary/directory" },
-      { icon: CheckCircle, label: "Appointments", path: "/veterinary/appointments" },
-      { icon: FileText, label: "Prescriptions", path: "/veterinary/prescriptions" },
-      { icon: Smartphone, label: "Telemedicine", path: "/veterinary/telemedicine" },
-      { icon: BarChart3, label: "Health Records", path: "/veterinary/health-records" },
-      { icon: Bell, label: "Prescription Alerts", path: "/veterinary/alerts" },
+      { icon: ShoppingCart, label: "Marketplace", path: "/marketplace" },
+      { icon: Wallet, label: "My Orders", path: "/my-orders" },
+      { icon: ShoppingCart, label: "My Products", path: "/my-products" },
+      { icon: TrendingUp, label: "Sales Analytics", path: "/sales-analytics" },
     ],
   },
 
@@ -307,6 +273,19 @@ export const navigationStructure: MenuGroup[] = [
       { icon: Brain, label: "Prediction Dashboard", path: "/prediction-dashboard" },
       { icon: History, label: "Prediction History", path: "/prediction-history" },
       { icon: CheckCircle, label: "Record Outcomes", path: "/outcome-recording" },
+    ],
+  },
+
+  {
+    title: "Community & Recommendations",
+    description: "Farmer community and AI recommendations",
+    collapsible: true,
+    defaultExpanded: false,
+    items: [
+      { icon: Brain, label: "Crop Recommendations", path: "/crop-recommendations" },
+      { icon: Users, label: "Community Forum", path: "/community-forum" },
+      { icon: TrendingUp, label: "Supply Chain", path: "/supply-chain" },
+      { icon: Users, label: "Cooperative", path: "/cooperative" },
     ],
   },
 ];
