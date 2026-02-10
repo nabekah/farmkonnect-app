@@ -156,6 +156,9 @@ import { advancedAnalyticsRouter } from "./routers/advancedAnalyticsRouter";
 import { supplyChainRouter } from "./routers/supplyChainRouter";
 import { cooperativeRouter } from "./routers/cooperativeRouter";
 import { advancedSearchRouter } from "./routers/advancedSearchRouter";
+import { sellerDashboardRouter } from "./routers/sellerDashboardRouter";
+import { mentorshipRouter } from "./routers/mentorshipRouter";
+import { equipmentRentalRouter } from "./routers/equipmentRentalRouter";
 import { z } from "zod";
 import { getDb } from "./db";
 import { TRPCError } from "@trpc/server";
@@ -258,6 +261,9 @@ export const appRouter = router({
   supplyChain: supplyChainRouter,
   cooperative: cooperativeRouter,
   advancedSearch: advancedSearchRouter,
+  sellerDashboard: sellerDashboardRouter,
+  mentorship: mentorshipRouter,
+  equipmentRental: equipmentRentalRouter,
   // accountingExport: accountingExportRouter,
   // expenseNotifications: expenseNotifications,
   // farmAnalytics: farmAnalytics,
