@@ -295,6 +295,17 @@ export const navigationStructure: MenuGroup[] = [
       { icon: History, label: "Operation History", path: "/operation-history" },
     ],
   },
+
+  {
+    title: "Analytics & Insights",
+    description: "Dashboards and analytics",
+    collapsible: true,
+    defaultExpanded: false,
+    items: [
+      { icon: BarChart3, label: "Farmer Dashboard", path: "/farmer-dashboard" },
+      { icon: TrendingUp, label: "Blockchain Supply Chain", path: "/blockchain-supply-chain" },
+    ],
+  },
 ];
 
 export function getAllMenuItems(): MenuItem[] {

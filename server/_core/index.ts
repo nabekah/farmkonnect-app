@@ -14,6 +14,7 @@ import { initializeWebSocketServer } from "./websocket";
 import { initializeAlertScheduler } from "./alertScheduler";
 import { scheduledReportExecutor } from "./scheduledReportExecutor";
 import { initializeNotificationScheduler } from "../services/notificationScheduler";
+import { RealTimeProductTracking } from "../services/realtimeProductTracking";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -145,6 +146,10 @@ async function startServer() {
     
   // Initialize WebSocket server
   initializeWebSocketServer(server);
+  
+  // Initialize real-time product tracking
+  const productTracking = new RealTimeProductTracking(server);
+  console.log('[ProductTracking] Real-time product tracking initialized');
   
   // Initialize alert scheduler
   initializeAlertScheduler();
