@@ -120,6 +120,7 @@ import { weatherIrrigationAutomationCleanRouter } from "./routers/weatherIrrigat
 import { farmerTrainingCertificationCleanRouter } from "./routers/farmerTrainingCertificationClean";
 import { cropInsuranceRiskManagementCleanRouter } from "./routers/cropInsuranceRiskManagementClean";
 import { communityForumKnowledgeSharingCleanRouter } from "./routers/communityForumKnowledgeSharingClean";
+import { mobileFirstDashboardCleanRouter } from "./routers/mobileFirstDashboardClean";
 import { z } from "zod";
 import { getDb } from "./db";
 import { TRPCError } from "@trpc/server";
@@ -246,6 +247,7 @@ export const appRouter = router({
   farmerTrainingCertification: farmerTrainingCertificationCleanRouter,
   cropInsuranceRiskManagement: cropInsuranceRiskManagementCleanRouter,
   communityForumKnowledgeSharing: communityForumKnowledgeSharingCleanRouter,
+  mobileFirstDashboard: mobileFirstDashboardCleanRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {
