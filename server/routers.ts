@@ -91,6 +91,7 @@ import { ghanaExtensionServicesRouter } from "./routers/ghanaExtensionServices";
 // import { financialManagementRouter } from "./routers/financialManagement";
 import { recurringExpensesRouter } from "./routers/recurringExpenses";
 import { budgetAlertsRouter } from "./routers/budgetAlerts";
+import { financialExportRouter } from "./routers/financialExport";
 import { notificationDataRouter } from "./routers/notificationDataRouter";
 import { blockchainSupplyChainRouter } from "./routers/blockchainSupplyChain";
 // import { accountingExportRouter } from "./routers/accountingExport";
@@ -256,6 +257,7 @@ export const appRouter = router({
   // financialManagement: financialManagementRouter,
   recurringExpenses: recurringExpensesRouter,
   budgetAlerts: budgetAlertsRouter,
+  financialExport: financialExportRouter,
   notificationData: notificationDataRouter,
   blockchainSupplyChain: blockchainSupplyChainRouter,
   predictiveAnalytics: predictiveAnalyticsRouter,
@@ -273,7 +275,6 @@ export const appRouter = router({
   payment: paymentRouter,
   reviews: reviewsRouter,
   notificationCenter: notificationCenterRouter,
-  admin: adminRouter,
   chatbot: chatbotRouter,
   weatherAlerts: weatherAlertsRouter,
   // accountingExport: accountingExportRouter,
@@ -1006,7 +1007,6 @@ export const appRouter = router({
   merl: merlRouter,
   transport: transportRouter,
   business: businessRouter,
-  payment: paymentRouter,
   sms: smsRouter,
   security: securityRouter,
   passwordReset: passwordResetRouter,
