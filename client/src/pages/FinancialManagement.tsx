@@ -121,12 +121,30 @@ export const FinancialManagement: React.FC = () => {
 
   // Prepare farmId for queries
   const farmId = selectedFarmId || (farms.length > 0 ? farms[0].id.toString() : "");
+  const isConsolidated = selectedFarmId === "consolidated";
 
   // Fetch financial summary
   const { data: summary, isLoading: summaryLoading } = trpc.financialManagement.getFinancialSummary.useQuery(
-    farmId ? { farmId, startDate, endDate } : undefined,
-    { enabled: !!farmId }
+    farmId && !isConsolidated ? { farmId, startDate, endDate } : undefined,
+    { enabled: !!farmId && !isConsolidated }
   );
+
+  // Calculate consolidated summary when "all farms" is selected
+  const consolidatedSummary = React.useMemo(() => {
+    if (!isConsolidated || !farms.length) return null;
+    
+    let totalIncome = 0;
+    let totalExpenses = 0;
+    
+    // This will be populated when we fetch all farm data
+    // For now, return placeholder
+    return {
+      totalIncome,
+      totalExpenses,
+      netProfit: totalIncome - totalExpenses,
+      profitMargin: totalIncome > 0 ? ((totalIncome - totalExpenses) / totalIncome * 100).toFixed(2) : "0",
+    };
+  }, [isConsolidated, farms]);
 
   // Fetch expenses
   const { data: expenseData, isLoading: expensesLoading } = trpc.financialManagement.getExpenses.useQuery(
@@ -335,6 +353,11 @@ export const FinancialManagement: React.FC = () => {
               <SelectValue placeholder={farmsLoading ? "Loading farms..." : "Choose a farm"} />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="consolidated">
+                <div className="flex items-center gap-2">
+                  📊 Consolidated All Farms
+                </div>
+              </SelectItem>
               {farms.length === 0 && !farmsLoading && (
                 <div className="p-2 text-gray-500 text-sm">No farms available</div>
               )}
@@ -422,7 +445,7 @@ export const FinancialManagement: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Total Income</p>
-                  <p className="text-2xl font-bold">₵{(Number(summary?.totalIncome) || 0).toLocaleString()}</p>
+                  <p className="text-2xl font-bold">₵{(Number(isConsolidated ? consolidatedSummary?.totalIncome : summary?.totalIncome) || 0).toLocaleString()}</p>
                 </div>
                 <TrendingUp className="w-8 h-8 text-green-500" />
               </div>
@@ -431,7 +454,7 @@ export const FinancialManagement: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Total Expenses</p>
-                  <p className="text-2xl font-bold">₵{(Number(summary?.totalExpenses) || 0).toLocaleString()}</p>
+                  <p className="text-2xl font-bold">₵{(Number(isConsolidated ? consolidatedSummary?.totalExpenses : summary?.totalExpenses) || 0).toLocaleString()}</p>
                 </div>
                 <TrendingDown className="w-8 h-8 text-red-500" />
               </div>
@@ -440,7 +463,7 @@ export const FinancialManagement: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Net Profit</p>
-                  <p className="text-2xl font-bold">₵{(Number(summary?.netProfit) || 0).toLocaleString()}</p>
+                  <p className="text-2xl font-bold">₵{(Number(isConsolidated ? consolidatedSummary?.netProfit : summary?.netProfit) || 0).toLocaleString()}</p>
                 </div>
                 <DollarSign className="w-8 h-8 text-blue-500" />
               </div>
@@ -449,7 +472,7 @@ export const FinancialManagement: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Profit Margin</p>
-                  <p className="text-2xl font-bold">{(Number(summary?.profitMargin) || 0).toFixed(1)}%</p>
+                  <p className="text-2xl font-bold">{(Number(isConsolidated ? consolidatedSummary?.profitMargin : summary?.profitMargin) || 0).toFixed(1)}%</p>
                 </div>
                 <BarChart3 className="w-8 h-8 text-purple-500" />
               </div>
