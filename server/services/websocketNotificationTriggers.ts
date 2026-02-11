@@ -182,39 +182,37 @@ export async function checkOrderStatusUpdates(): Promise<void> {
   try {
     const db = await getDb();
     
-    // Get orders with pending status updates
+    // Get orders with pending status
     const pendingOrders = await db
       .select()
       .from(orders)
       .where(
-        and(
-          eq(orders.statusUpdated, false)
-        )
+        eq(orders.status, 'pending')
       );
 
     for (const order of pendingOrders) {
       // Send multi-channel notification
       await sendMarketplaceOrderNotification(
-        order.userId,
-        order.userEmail || '',
-        order.userPhone || null,
-        order.orderNumber,
+        order.buyerUserId,
+        '',
+        null,
+        order.id.toString(),
         order.status,
         `/marketplace/orders/${order.id}`
       );
 
       // Broadcast to WebSocket
-      broadcastToUser(order.userId, {
+      broadcastToUser(order.buyerUserId, {
         type: 'order_status_update',
         data: {
           orderId: order.id,
-          orderNumber: order.orderNumber,
+          orderNumber: `ORD-${order.id}`,
           status: order.status,
           timestamp: new Date().toISOString(),
         },
       });
 
-      console.log(`[OrderUpdate] Order ${order.orderNumber} status: ${order.status}`);
+      console.log(`[OrderUpdate] Order ORD-${order.id} status: ${order.status}`);
     }
   } catch (error) {
     console.error('[OrderUpdate] Error checking order updates:', error);

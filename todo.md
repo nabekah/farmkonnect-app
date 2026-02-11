@@ -4530,3 +4530,12 @@
 - [x] Implement automatic sync when online
 - [x] Add sync status indicator and messages
 - [x] Integrate OfflineIndicator into App.tsx
+
+
+## Financial Dashboard Error Fix (COMPLETED)
+- [x] Diagnose financial dashboard error
+- [x] Found SQL error in checkOrderStatusUpdates function
+- [x] Fixed orders query to use correct schema fields
+- [x] Replaced non-existent statusUpdated field with status='pending'
+- [x] Updated field references to match orders table schema
+- [x] Verified dev server running without SQL errors
