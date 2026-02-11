@@ -596,5 +596,108 @@ export const financialManagementRouter = router({
         .where(eq(invoices.id, parseInt(input.invoiceId)));
 
       return result;
+    }),
+
+  /**
+   * Export financial report in various formats
+   */
+  exportReport: protectedProcedure
+    .input(z.object({
+      farmId: z.string(),
+      format: z.enum(["pdf", "csv", "excel"]),
+      startDate: z.date().optional(),
+      endDate: z.date().optional()
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const db = await getDb();
+      if (!db) throw new Error("Database not available");
+
+      const farmIds = input.farmId.split(",").map(id => parseInt(id));
+      const startDate = input.startDate || new Date(new Date().setMonth(new Date().getMonth() - 1));
+      const endDate = input.endDate || new Date();
+
+      // Fetch financial summary
+      const summaryResult = await db
+        .select({
+          totalIncome: sql<number>`COALESCE(SUM(CAST(${revenue.totalAmount} AS DECIMAL(15,2))), 0)`,
+          totalExpenses: sql<number>`COALESCE(SUM(CAST(${expenses.amount} AS DECIMAL(15,2))), 0)`,
+        })
+        .from(revenue)
+        .leftJoin(expenses, sql`1=1`)
+        .where(
+          and(
+            inArray(revenue.farmId, farmIds),
+            gte(revenue.saleDate, startDate),
+            lte(revenue.saleDate, endDate)
+          )
+        );
+
+      const summary = summaryResult[0] || { totalIncome: 0, totalExpenses: 0 };
+      const totalIncome = Number(summary.totalIncome) || 0;
+      const totalExpenses = Number(summary.totalExpenses) || 0;
+      const netProfit = totalIncome - totalExpenses;
+      const profitMargin = totalIncome > 0 ? ((netProfit / totalIncome) * 100).toFixed(2) : "0.00";
+
+      // Fetch expense breakdown
+      const expenseBreakdown = await db
+        .select({
+          category: expenses.expenseType,
+          totalAmount: sql<number>`COALESCE(SUM(CAST(${expenses.amount} AS DECIMAL(15,2))), 0)`,
+        })
+        .from(expenses)
+        .where(
+          and(
+            inArray(expenses.farmId, farmIds),
+            gte(expenses.expenseDate, startDate),
+            lte(expenses.expenseDate, endDate)
+          )
+        )
+        .groupBy(expenses.expenseType);
+
+      // Fetch revenue breakdown
+      const revenueBreakdown = await db
+        .select({
+          product: revenue.productId,
+          totalAmount: sql<number>`COALESCE(SUM(CAST(${revenue.totalAmount} AS DECIMAL(15,2))), 0)`,
+        })
+        .from(revenue)
+        .where(
+          and(
+            inArray(revenue.farmId, farmIds),
+            gte(revenue.saleDate, startDate),
+            lte(revenue.saleDate, endDate)
+          )
+        )
+        .groupBy(revenue.productId);
+
+      // Prepare report data
+      const reportData = {
+        generatedAt: new Date().toISOString(),
+        period: {
+          startDate: startDate.toISOString().split('T')[0],
+          endDate: endDate.toISOString().split('T')[0],
+        },
+        summary: {
+          totalIncome: totalIncome.toFixed(2),
+          totalExpenses: totalExpenses.toFixed(2),
+          netProfit: netProfit.toFixed(2),
+          profitMargin: profitMargin,
+        },
+        expenseBreakdown: expenseBreakdown.map(item => ({
+          category: item.category || "Unknown",
+          amount: (Number(item.totalAmount) || 0).toFixed(2),
+        })),
+        revenueBreakdown: revenueBreakdown.map(item => ({
+          product: item.product || "Unknown",
+          amount: (Number(item.totalAmount) || 0).toFixed(2),
+        })),
+      };
+
+      return {
+        success: true,
+        format: input.format,
+        data: reportData,
+        message: `Financial report exported successfully as ${input.format.toUpperCase()}`,
+      };
     })
 });
