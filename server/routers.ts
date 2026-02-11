@@ -48,6 +48,7 @@ import { reportTemplatesRouter } from "./routers/reportTemplates";
 import { reportAnalyticsRouter } from "./routers/reportAnalytics";
 import { recipientManagementRouter } from "./routers/recipientManagement";
 import { reportExportRouter } from "./routers/reportExport";
+import { adminAnalyticsRouter } from "./routers/adminAnalytics";
 import { predictiveAnalyticsRouter } from "./routers/predictiveAnalyticsRouter";
 import { veterinaryClinicDirectoryRouter } from "./routers/veterinaryClinicDirectoryClean";
 import { prescriptionRefillAutomationRouter } from "./routers/prescriptionRefillAutomationClean";
@@ -226,6 +227,7 @@ export const appRouter = router({
   reportAnalytics: reportAnalyticsRouter,
   recipientManagement: recipientManagementRouter,
   reportExport: reportExportRouter,
+  adminAnalytics: adminAnalyticsRouter,
   reportTemplateCustomization: reportTemplateCustomizationRouter,
     reportExecution: reportExecutionRouter,
     fertilizerManagement: fertilizerManagementRouter,
