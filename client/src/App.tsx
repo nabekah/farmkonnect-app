@@ -101,6 +101,7 @@ import { ActivityNotificationContainer } from "./components/ActivityNotification
 import { WebSocketStatus } from "./components/WebSocketStatus";
 import { useNotification } from "./contexts/NotificationContext";
 import { useWebSocket } from "./hooks/useWebSocket";
+import { LoadingProvider } from "./contexts/LoadingContext";
 import { FinancialDashboard } from "./pages/FinancialDashboard";
 import { FinancialManagement } from "./pages/FinancialManagement";
 import { FinancialForecastingDashboard } from "./pages/FinancialForecastingDashboard";
@@ -894,11 +895,13 @@ function AppContent() {
 
 function App() {
   return (
-    <NotificationProvider>
-      <TimeTrackerProvider>
-        <AppContent />
-      </TimeTrackerProvider>
-    </NotificationProvider>
+    <LoadingProvider>
+      <NotificationProvider>
+        <TimeTrackerProvider>
+          <AppContent />
+        </TimeTrackerProvider>
+      </NotificationProvider>
+    </LoadingProvider>
   );
 }
 
