@@ -1851,10 +1851,7 @@ export const financialManagementRouter = router({
       const budgetList = await db
         .select()
         .from(budgets)
-        .where(and(
-          eq(budgets.farmId, farmId),
-          eq(budgets.status, "active")
-        ));
+        .where(eq(budgets.farmId, farmId));
 
       if (!budgetList.length) return [];
 

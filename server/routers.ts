@@ -93,7 +93,7 @@ import { animalMigrationRouter } from "./routers/animalMigration";
 import { veterinaryIntegrationRouter } from "./routers/veterinaryIntegration";
 import { csvImportRouter } from "./routers/csvImport";
 import { ghanaExtensionServicesRouter } from "./routers/ghanaExtensionServices";
-// import { financialManagementRouter } from "./routers/financialManagement";
+import { financialManagementRouter } from "./routers/financialManagement";
 import { recurringExpensesRouter } from "./routers/recurringExpenses";
 import { budgetAlertsRouter } from "./routers/budgetAlerts";
 import { financialExportRouter } from "./routers/financialExport";
@@ -297,7 +297,7 @@ export const appRouter = router({
   // prescriptionNotifications: prescriptionNotificationsRouter,
   // vetRatings: vetRatingsRouter,
   veterinaryServices: veterinaryServicesCleanRouter,
-  financialManagement: financialManagementCleanRouter,
+  financialManagement: financialManagementRouter,
   laborManagement: laborManagementCleanRouter,
   training: trainingCertificationCleanRouter,
   equipment: equipmentManagementCleanRouter,
