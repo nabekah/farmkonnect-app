@@ -6,6 +6,7 @@ import {
   expenses,
   revenue,
   budgets,
+  budgetLineItems,
   invoices,
   animals,
   vetAppointments,
@@ -1596,5 +1597,302 @@ export const financialManagementRouter = router({
       await db.delete(revenue).where(inArray(revenue.id, input.revenueIds));
 
       return { success: true, deleted: input.revenueIds.length };
+    }),
+
+  /**
+   * Get detailed budget vs actual analysis by expense type
+   */
+  getBudgetVsActualDetailed: protectedProcedure
+    .input(z.object({
+      farmId: z.string(),
+      budgetId: z.string().optional(),
+      startDate: z.date().optional(),
+      endDate: z.date().optional()
+    }))
+    .query(async ({ input, ctx }) => {
+      const db = await getDb();
+      if (!db) throw new Error("Database not available");
+
+      const farmId = parseInt(input.farmId);
+      const budgetList = await db
+        .select()
+        .from(budgets)
+        .where(eq(budgets.farmId, farmId));
+
+      if (!budgetList.length) return [];
+
+      const budgetId = input.budgetId ? parseInt(input.budgetId) : budgetList[0].id;
+      const lineItems = await db
+        .select()
+        .from(budgetLineItems)
+        .where(eq(budgetLineItems.budgetId, budgetId));
+
+      const expenseConditions = [eq(expenses.farmId, farmId)];
+      if (input.startDate) {
+        const startDateStr = input.startDate instanceof Date 
+          ? input.startDate.toISOString().split('T')[0]
+          : input.startDate.toString();
+        expenseConditions.push(gte(expenses.expenseDate, startDateStr));
+      }
+      if (input.endDate) {
+        const endDateStr = input.endDate instanceof Date 
+          ? input.endDate.toISOString().split('T')[0]
+          : input.endDate.toString();
+        expenseConditions.push(lte(expenses.expenseDate, endDateStr));
+      }
+
+      const expenseList = await db
+        .select()
+        .from(expenses)
+        .where(and(...expenseConditions));
+
+      const comparison = lineItems.map(item => {
+        const budgeted = parseFloat(item.budgetedAmount.toString());
+        const actual = expenseList
+          .filter(exp => exp.expenseType === item.expenseType)
+          .reduce((sum, exp) => sum + parseFloat(exp.amount.toString()), 0);
+
+        const variance = budgeted - actual;
+        const variancePercent = budgeted > 0 ? (variance / budgeted) * 100 : 0;
+        const percentageUsed = budgeted > 0 ? (actual / budgeted) * 100 : 0;
+        const isOverBudget = actual > budgeted;
+
+        return {
+          id: item.id,
+          expenseType: item.expenseType,
+          description: item.description,
+          budgeted,
+          actual,
+          variance,
+          variancePercent,
+          percentageUsed,
+          isOverBudget,
+          remaining: variance
+        };
+      });
+
+      return comparison;
+    }),
+
+  /**
+   * Get budget trend analysis over time
+   */
+  getBudgetTrendAnalysis: protectedProcedure
+    .input(z.object({
+      farmId: z.string(),
+      startDate: z.date(),
+      endDate: z.date(),
+      groupBy: z.enum(["week", "month", "quarter"]).default("month")
+    }))
+    .query(async ({ input, ctx }) => {
+      const db = await getDb();
+      if (!db) throw new Error("Database not available");
+
+      const farmId = parseInt(input.farmId);
+      const startDateStr = input.startDate instanceof Date 
+        ? input.startDate.toISOString().split('T')[0]
+        : input.startDate.toString();
+      const endDateStr = input.endDate instanceof Date 
+        ? input.endDate.toISOString().split('T')[0]
+        : input.endDate.toString();
+
+      const expenseList = await db
+        .select()
+        .from(expenses)
+        .where(and(
+          eq(expenses.farmId, farmId),
+          gte(expenses.expenseDate, startDateStr),
+          lte(expenses.expenseDate, endDateStr)
+        ));
+
+      const budgetList = await db
+        .select()
+        .from(budgets)
+        .where(eq(budgets.farmId, farmId));
+
+      const groupedData: Record<string, number> = {};
+      expenseList.forEach(exp => {
+        const date = new Date(exp.expenseDate);
+        let period = "";
+        
+        if (input.groupBy === "week") {
+          const weekStart = new Date(date);
+          weekStart.setDate(date.getDate() - date.getDay());
+          period = weekStart.toISOString().split('T')[0];
+        } else if (input.groupBy === "month") {
+          period = date.toISOString().slice(0, 7);
+        } else if (input.groupBy === "quarter") {
+          const quarter = Math.ceil((date.getMonth() + 1) / 3);
+          period = `${date.getFullYear()}-Q${quarter}`;
+        }
+
+        groupedData[period] = (groupedData[period] || 0) + parseFloat(exp.amount.toString());
+      });
+
+      const totalBudget = budgetList.reduce((sum, b) => sum + parseFloat(b.totalBudget.toString()), 0);
+      const periodCount = Object.keys(groupedData).length || 1;
+      const budgetPerPeriod = totalBudget / periodCount;
+
+      const trendData = Object.entries(groupedData).map(([period, actual]) => ({
+        period,
+        actual,
+        budgeted: budgetPerPeriod,
+        variance: budgetPerPeriod - actual,
+        variancePercent: budgetPerPeriod > 0 ? ((budgetPerPeriod - actual) / budgetPerPeriod) * 100 : 0
+      }));
+
+      return trendData.sort((a, b) => a.period.localeCompare(b.period));
+    }),
+
+  /**
+   * Get budget performance metrics and summary
+   */
+  getBudgetPerformanceMetrics: protectedProcedure
+    .input(z.object({
+      farmId: z.string(),
+      startDate: z.date().optional(),
+      endDate: z.date().optional()
+    }))
+    .query(async ({ input, ctx }) => {
+      const db = await getDb();
+      if (!db) throw new Error("Database not available");
+
+      const farmId = parseInt(input.farmId);
+      const budgetList = await db
+        .select()
+        .from(budgets)
+        .where(eq(budgets.farmId, farmId));
+
+      if (!budgetList.length) {
+        return {
+          totalBudget: 0,
+          totalSpent: 0,
+          totalRemaining: 0,
+          budgetUtilization: 0,
+          overBudgetCategories: 0,
+          underBudgetCategories: 0,
+          budgetHealth: "no_budget"
+        };
+      }
+
+      const expenseConditions = [eq(expenses.farmId, farmId)];
+      if (input.startDate) {
+        const startDateStr = input.startDate instanceof Date 
+          ? input.startDate.toISOString().split('T')[0]
+          : input.startDate.toString();
+        expenseConditions.push(gte(expenses.expenseDate, startDateStr));
+      }
+      if (input.endDate) {
+        const endDateStr = input.endDate instanceof Date 
+          ? input.endDate.toISOString().split('T')[0]
+          : input.endDate.toString();
+        expenseConditions.push(lte(expenses.expenseDate, endDateStr));
+      }
+
+      const expenseList = await db
+        .select()
+        .from(expenses)
+        .where(and(...expenseConditions));
+
+      const totalBudget = budgetList.reduce((sum, b) => sum + parseFloat(b.totalBudget.toString()), 0);
+      const totalSpent = expenseList.reduce((sum, e) => sum + parseFloat(e.amount.toString()), 0);
+      const totalRemaining = totalBudget - totalSpent;
+      const budgetUtilization = totalBudget > 0 ? (totalSpent / totalBudget) * 100 : 0;
+
+      const allLineItems = await db
+        .select()
+        .from(budgetLineItems)
+        .where(inArray(budgetLineItems.budgetId, budgetList.map(b => b.id)));
+
+      let overBudgetCount = 0;
+      let underBudgetCount = 0;
+
+      allLineItems.forEach(item => {
+        const budgeted = parseFloat(item.budgetedAmount.toString());
+        const actual = expenseList
+          .filter(exp => exp.expenseType === item.expenseType)
+          .reduce((sum, exp) => sum + parseFloat(exp.amount.toString()), 0);
+        
+        if (actual > budgeted) overBudgetCount++;
+        else underBudgetCount++;
+      });
+
+      let budgetHealth = "healthy";
+      if (budgetUtilization > 100) budgetHealth = "over_budget";
+      else if (budgetUtilization > 90) budgetHealth = "caution";
+      else if (budgetUtilization < 20) budgetHealth = "under_utilized";
+
+      return {
+        totalBudget,
+        totalSpent,
+        totalRemaining,
+        budgetUtilization: Math.round(budgetUtilization * 100) / 100,
+        overBudgetCategories: overBudgetCount,
+        underBudgetCategories: underBudgetCount,
+        budgetHealth
+      };
+    }),
+
+  /**
+   * Get budget alerts for overspending categories
+   */
+  getBudgetAlerts: protectedProcedure
+    .input(z.object({
+      farmId: z.string(),
+      thresholdPercent: z.number().default(80)
+    }))
+    .query(async ({ input, ctx }) => {
+      const db = await getDb();
+      if (!db) throw new Error("Database not available");
+
+      const farmId = parseInt(input.farmId);
+      const threshold = input.thresholdPercent / 100;
+
+      const budgetList = await db
+        .select()
+        .from(budgets)
+        .where(and(
+          eq(budgets.farmId, farmId),
+          eq(budgets.status, "active")
+        ));
+
+      if (!budgetList.length) return [];
+
+      const lineItems = await db
+        .select()
+        .from(budgetLineItems)
+        .where(inArray(budgetLineItems.budgetId, budgetList.map(b => b.id)));
+
+      const expenseList = await db
+        .select()
+        .from(expenses)
+        .where(eq(expenses.farmId, farmId));
+
+      const alerts = lineItems
+        .map(item => {
+          const budgeted = parseFloat(item.budgetedAmount.toString());
+          const actual = expenseList
+            .filter(exp => exp.expenseType === item.expenseType)
+            .reduce((sum, exp) => sum + parseFloat(exp.amount.toString()), 0);
+          
+          const percentageUsed = budgeted > 0 ? actual / budgeted : 0;
+          const isAlert = percentageUsed >= threshold;
+
+          return {
+            id: item.id,
+            expenseType: item.expenseType,
+            description: item.description,
+            budgeted,
+            actual,
+            percentageUsed: Math.round(percentageUsed * 100),
+            severity: actual > budgeted ? "critical" : percentageUsed >= threshold ? "warning" : "normal",
+            message: actual > budgeted 
+              ? `Over budget by ₵${(actual - budgeted).toFixed(2)}`
+              : `${Math.round(percentageUsed * 100)}% of budget used`
+          };
+        })
+        .filter(alert => alert.severity !== "normal");
+
+      return alerts;
     }),
 });

@@ -10,6 +10,7 @@ import { DollarSign, TrendingUp, TrendingDown, Plus, Download, Calendar, AlertCi
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { BarChart, Bar, PieChart as PieChartComponent, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts";
+import { BudgetVisualization } from "@/components/BudgetVisualization";
 
 /**
  * Financial Management & Cost Analysis Component
@@ -93,6 +94,27 @@ export const FinancialManagement: React.FC = () => {
 
   const { data: revenueBreakdown = [] } = trpc.financialManagement.getRevenueBreakdown.useQuery(
     { farmId: selectedFarmId, startDate: currentMonthStart, endDate: currentMonthEnd },
+    { enabled: isValidFarmId }
+  );
+
+  // Budget visualization queries
+  const { data: budgetVsActualData = [], isLoading: budgetLoading } = trpc.financialManagement.getBudgetVsActualDetailed.useQuery(
+    { farmId: selectedFarmId, startDate: currentMonthStart, endDate: currentMonthEnd },
+    { enabled: isValidFarmId }
+  );
+
+  const { data: budgetTrendData = [] } = trpc.financialManagement.getBudgetTrendAnalysis.useQuery(
+    { farmId: selectedFarmId, startDate: currentMonthStart, endDate: currentMonthEnd, groupBy: "month" },
+    { enabled: isValidFarmId }
+  );
+
+  const { data: budgetMetrics } = trpc.financialManagement.getBudgetPerformanceMetrics.useQuery(
+    { farmId: selectedFarmId, startDate: currentMonthStart, endDate: currentMonthEnd },
+    { enabled: isValidFarmId }
+  );
+
+  const { data: budgetAlerts = [] } = trpc.financialManagement.getBudgetAlerts.useQuery(
+    { farmId: selectedFarmId, thresholdPercent: 80 },
     { enabled: isValidFarmId }
   );
 
@@ -487,10 +509,15 @@ export const FinancialManagement: React.FC = () => {
 
       {/* Budget View */}
       {viewMode === "budget" && (
-        <Card className="p-6">
-          <h2 className="text-xl font-bold mb-4">Budget Planning</h2>
-          <p className="text-gray-600">Coming soon: Budget templates, forecasting, and alerts</p>
-        </Card>
+        <div className="space-y-6">
+          <BudgetVisualization
+            data={budgetVsActualData}
+            trendData={budgetTrendData}
+            alerts={budgetAlerts}
+            metrics={budgetMetrics}
+            isLoading={budgetLoading}
+          />
+        </div>
       )}
 
       {/* Reports View */}
