@@ -4780,3 +4780,17 @@
 - [x] Add drill-down navigation (click to view individual farm)
 - [x] Create consolidation export functionality (table export)
 - [x] Add unit tests for consolidation features (18 tests)
+
+
+## Feature 5: Farm Drill-Down Analytics (IN PROGRESS)
+- [ ] Create detailed farm analytics component (FarmDetailedAnalytics.tsx)
+- [ ] Add farm detail route to App.tsx (/farm/:farmId/analytics)
+- [ ] Make farm cards clickable in consolidation dashboard
+- [ ] Implement back navigation and breadcrumbs
+- [ ] Display detailed farm financial metrics
+- [ ] Show farm-specific expense breakdown
+- [ ] Show farm-specific revenue breakdown
+- [ ] Display farm budget status
+- [ ] Add farm comparison with portfolio average
+- [ ] Create unit tests for drill-down feature
+- [ ] Test end-to-end navigation

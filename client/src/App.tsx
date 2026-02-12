@@ -125,6 +125,7 @@ import SupplyChainDashboard from "./pages/SupplyChainDashboard";
 import CooperativeDashboard from "./pages/CooperativeDashboard";
 import { FarmComparison } from "./components/FarmComparison";
 import { FarmConsolidationDashboard } from "./components/FarmConsolidationDashboard";
+import { FarmDetailedAnalytics } from "./components/FarmDetailedAnalytics";
 
 function Router() {
   return (
@@ -190,6 +191,13 @@ function Router() {
         {() => (
           <DashboardLayout>
             <FarmConsolidationDashboard />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/farm/:farmId/analytics">
+        {() => (
+          <DashboardLayout>
+            <FarmDetailedAnalytics />
           </DashboardLayout>
         )}
       </Route>
