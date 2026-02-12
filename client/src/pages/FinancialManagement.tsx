@@ -117,6 +117,10 @@ export const FinancialManagement: React.FC = () => {
   // Fetch user's farms
   const { data: farms = [], isLoading: farmsLoading } = trpc.farms.list.useQuery();
 
+  // Prepare farmId for queries
+  const farmId = selectedFarmId || (farms.length > 0 ? farms[0].id.toString() : "");
+  const isConsolidated = selectedFarmId === "consolidated";
+
   // Fetch consolidated expenses when in consolidated view
   const { data: consolidatedExpenses = [], isLoading: consolidatedExpensesLoading } = trpc.financialManagement.getConsolidatedExpenses.useQuery(
     isConsolidated ? { 
@@ -143,9 +147,6 @@ export const FinancialManagement: React.FC = () => {
     }
   }, [farms]);
 
-  // Prepare farmId for queries
-  const farmId = selectedFarmId || (farms.length > 0 ? farms[0].id.toString() : "");
-  const isConsolidated = selectedFarmId === "consolidated";
 
   // Fetch financial summary
   const { data: summary, isLoading: summaryLoading } = trpc.financialManagement.getFinancialSummary.useQuery(
