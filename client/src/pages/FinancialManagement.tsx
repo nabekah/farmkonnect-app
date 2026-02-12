@@ -11,6 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { BarChart, Bar, PieChart as PieChartComponent, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts";
 import { BudgetVisualization } from "@/components/BudgetVisualization";
+import { BudgetCreationForm } from "@/components/BudgetCreationForm";
+import { BudgetComparisonReports } from "@/components/BudgetComparisonReports";
 
 /**
  * Financial Management & Cost Analysis Component
@@ -510,6 +512,10 @@ export const FinancialManagement: React.FC = () => {
       {/* Budget View */}
       {viewMode === "budget" && (
         <div className="space-y-6">
+          <div className="flex justify-between items-center">
+            <h2 className="text-2xl font-bold">Budget Management</h2>
+            <BudgetCreationForm farmId={selectedFarmId} />
+          </div>
           <BudgetVisualization
             data={budgetVsActualData}
             trendData={budgetTrendData}
@@ -517,6 +523,7 @@ export const FinancialManagement: React.FC = () => {
             metrics={budgetMetrics}
             isLoading={budgetLoading}
           />
+          <BudgetComparisonReports farmId={selectedFarmId} />
         </div>
       )}
 
