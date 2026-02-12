@@ -1,0 +1,19 @@
+{
+  "query": "SELECT COUNT(*) as expense_count FROM expenses; SELECT COUNT(*) as revenue_count FROM revenue;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2kNF22PapS9mysw.root --database WZQk4bD8DnsRHwYBkmh7FN --execute SELECT COUNT(*) as expense_count FROM expenses; SELECT COUNT(*) as revenue_count FROM revenue;",
+  "rows": [
+    {
+      "expense_count": "17"
+    },
+    {
+      "expense_count": "revenue_count"
+    },
+    {
+      "expense_count": "12"
+    }
+  ],
+  "messages": [],
+  "stdout": "expense_count\n17\nrevenue_count\n12\n",
+  "stderr": "",
+  "execution_time_ms": 433
+}

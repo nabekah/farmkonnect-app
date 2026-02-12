@@ -150,8 +150,8 @@ export const FinancialManagement: React.FC = () => {
 
   // Fetch financial summary
   const { data: summary, isLoading: summaryLoading } = trpc.financialManagement.getFinancialSummary.useQuery(
-    farmId && !isConsolidated ? { farmId, startDate, endDate } : undefined,
-    { enabled: !!farmId && !isConsolidated }
+    selectedFarmId && !isConsolidated ? { farmId: selectedFarmId, startDate, endDate } : undefined,
+    { enabled: !!selectedFarmId && !isConsolidated }
   );
 
   // Calculate consolidated summary when "all farms" is selected
@@ -173,56 +173,56 @@ export const FinancialManagement: React.FC = () => {
 
   // Fetch expenses (only for individual farm view)
   const { data: expenseData, isLoading: expensesLoading } = trpc.financialManagement.getExpenses.useQuery(
-    farmId && !isConsolidated ? { farmId, category: selectedCategory !== "all" ? selectedCategory : undefined } : undefined,
-    { enabled: !!farmId && !isConsolidated }
+    selectedFarmId && !isConsolidated ? { farmId: selectedFarmId, category: selectedCategory !== "all" ? selectedCategory : undefined } : undefined,
+    { enabled: !!selectedFarmId && !isConsolidated }
   );
 
   // Fetch revenue (only for individual farm view)
   const { data: revenueData, isLoading: revenueLoading } = trpc.financialManagement.getRevenue.useQuery(
-    farmId && !isConsolidated ? { farmId } : undefined,
-    { enabled: !!farmId && !isConsolidated }
+    selectedFarmId && !isConsolidated ? { farmId: selectedFarmId } : undefined,
+    { enabled: !!selectedFarmId && !isConsolidated }
   );
 
   // Fetch budgets
   const { data: budgetData, isLoading: budgetsLoading } = trpc.financialManagement.getBudgets.useQuery(
-    farmId ? { farmId } : undefined,
-    { enabled: !!farmId }
+    selectedFarmId ? { farmId: selectedFarmId } : undefined,
+    { enabled: !!selectedFarmId }
   );
 
   // Fetch expense breakdown
   const { data: expenseBreakdown, isLoading: breakdownLoading } = trpc.financialManagement.getExpenseBreakdown.useQuery(
-    farmId ? { farmId, startDate, endDate } : undefined,
-    { enabled: !!farmId }
+    selectedFarmId ? { farmId: selectedFarmId, startDate, endDate } : undefined,
+    { enabled: !!selectedFarmId }
   );
 
   // Fetch revenue breakdown
   const { data: revenueBreakdown, isLoading: revenueBreakdownLoading } = trpc.financialManagement.getRevenueBreakdown.useQuery(
-    farmId ? { farmId, startDate, endDate } : undefined,
-    { enabled: !!farmId }
+    selectedFarmId ? { farmId: selectedFarmId, startDate, endDate } : undefined,
+    { enabled: !!selectedFarmId }
   );
 
   // Fetch veterinary expenses
   const { data: vetExpenses, isLoading: vetExpensesLoading } = trpc.financialManagement.getVeterinaryExpenses.useQuery(
-    farmId ? { farmId, startDate, endDate } : undefined,
-    { enabled: !!farmId }
+    selectedFarmId ? { farmId: selectedFarmId, startDate, endDate } : undefined,
+    { enabled: !!selectedFarmId }
   );
 
   // Fetch insurance claims
   const { data: insuranceClaims, isLoading: insuranceClaimsLoading } = trpc.financialManagement.getInsuranceClaims.useQuery(
-    farmId ? { farmId } : undefined,
-    { enabled: !!farmId }
+    selectedFarmId ? { farmId: selectedFarmId } : undefined,
+    { enabled: !!selectedFarmId }
   );
 
   // Fetch insurance summary
   const { data: insuranceSummary, isLoading: insuranceSummaryLoading } = trpc.financialManagement.getInsuranceSummary.useQuery(
-    farmId ? { farmId } : undefined,
-    { enabled: !!farmId }
+    selectedFarmId ? { farmId: selectedFarmId } : undefined,
+    { enabled: !!selectedFarmId }
   );
 
   // Fetch veterinary summary
   const { data: vetSummary, isLoading: vetSummaryLoading } = trpc.financialManagement.getVeterinarySummary.useQuery(
-    farmId ? { farmId } : undefined,
-    { enabled: !!farmId }
+    selectedFarmId ? { farmId: selectedFarmId } : undefined,
+    { enabled: !!selectedFarmId }
   );
 
   // ============ MUTATIONS ============
