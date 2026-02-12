@@ -4756,3 +4756,27 @@
 - [x] Create percentage change calculations
 - [x] Build comparison table view
 - [x] Create unit tests for period analysis (27/27 passing)
+
+
+## Feature 3: Farm-to-Farm Comparison (COMPLETED)
+- [x] Design farm comparison data structure
+- [x] Implement backend farm comparison procedures (5 procedures)
+- [x] Create comparison metrics aggregation logic
+- [x] Build farm comparison UI component (FarmComparison.tsx)
+- [x] Add side-by-side comparison charts (revenue, profit margin, budget)
+- [x] Implement variance analysis
+- [x] Create comparison export functionality (table export)
+- [x] Add unit tests for comparison features
+
+## Feature 4: All-Farm Consolidation Dashboard (COMPLETED)
+- [x] Design consolidation data aggregation
+- [x] Implement consolidated financials procedures
+- [x] Implement consolidated budget status procedures
+- [x] Create farm portfolio metrics procedures
+- [x] Implement farm ranking/performance procedures
+- [x] Build consolidation dashboard UI (FarmConsolidationDashboard.tsx)
+- [x] Add consolidated financial cards (portfolio summary)
+- [x] Add farm ranking table with sorting
+- [x] Add drill-down navigation (click to view individual farm)
+- [x] Create consolidation export functionality (table export)
+- [x] Add unit tests for consolidation features (18 tests)
