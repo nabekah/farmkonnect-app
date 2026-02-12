@@ -157,20 +157,31 @@ export const FinancialManagement: React.FC = () => {
 
   // Calculate consolidated summary when "all farms" is selected
   const consolidatedSummary = React.useMemo(() => {
-    if (!isConsolidated || !farms.length) return null;
+    if (!isConsolidated || (!consolidatedExpenses.length && !consolidatedRevenue.length)) return null;
     
-    let totalIncome = 0;
+    let totalRevenue = 0;
     let totalExpenses = 0;
     
-    // This will be populated when we fetch all farm data
-    // For now, return placeholder
+    // Sum consolidated expenses
+    consolidatedExpenses.forEach(exp => {
+      totalExpenses += Number(exp.amount) || 0;
+    });
+    
+    // Sum consolidated revenue
+    consolidatedRevenue.forEach(rev => {
+      totalRevenue += Number(rev.amount) || 0;
+    });
+    
+    const profit = totalRevenue - totalExpenses;
+    const profitMargin = totalRevenue > 0 ? ((profit / totalRevenue) * 100).toFixed(2) : "0";
+    
     return {
-      totalIncome,
+      totalRevenue,
       totalExpenses,
-      netProfit: totalIncome - totalExpenses,
-      profitMargin: totalIncome > 0 ? ((totalIncome - totalExpenses) / totalIncome * 100).toFixed(2) : "0",
+      profit,
+      profitMargin,
     };
-  }, [isConsolidated, farms]);
+  }, [isConsolidated, consolidatedExpenses, consolidatedRevenue]);
 
   // Fetch expenses (only for individual farm view)
   const { data: expenseData, isLoading: expensesLoading } = trpc.financialManagement.getExpenses.useQuery(
@@ -629,7 +640,7 @@ export const FinancialManagement: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Total Income</p>
-                  <p className="text-2xl font-bold">₵{(Number(isConsolidated ? consolidatedSummary?.totalIncome : summary?.totalIncome) || 0).toLocaleString()}</p>
+                  <p className="text-2xl font-bold">₵{(Number(isConsolidated ? consolidatedSummary?.totalRevenue : summary?.totalRevenue) || 0).toLocaleString()}</p>
                 </div>
                 <TrendingUp className="w-8 h-8 text-green-500" />
               </div>

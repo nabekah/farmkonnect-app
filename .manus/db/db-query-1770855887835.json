@@ -1,0 +1,22 @@
+{
+  "query": "\nSELECT \n  'TOTAL EXPENSES' as Metric,\n  ROUND(SUM(amount), 2) as Amount\nFROM expenses\nUNION ALL\nSELECT \n  'TOTAL REVENUE' as Metric,\n  ROUND(SUM(amount), 2) as Amount\nFROM revenue\nUNION ALL\nSELECT \n  'NET PROFIT' as Metric,\n  ROUND((SELECT COALESCE(SUM(amount), 0) FROM revenue) - (SELECT COALESCE(SUM(amount), 0) FROM expenses), 2) as Amount;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2kNF22PapS9mysw.root --database WZQk4bD8DnsRHwYBkmh7FN --execute \nSELECT \n  'TOTAL EXPENSES' as Metric,\n  ROUND(SUM(amount), 2) as Amount\nFROM expenses\nUNION ALL\nSELECT \n  'TOTAL REVENUE' as Metric,\n  ROUND(SUM(amount), 2) as Amount\nFROM revenue\nUNION ALL\nSELECT \n  'NET PROFIT' as Metric,\n  ROUND((SELECT COALESCE(SUM(amount), 0) FROM revenue) - (SELECT COALESCE(SUM(amount), 0) FROM expenses), 2) as Amount;\n",
+  "rows": [
+    {
+      "Metric": "NET PROFIT",
+      "Amount": "11820.00"
+    },
+    {
+      "Metric": "TOTAL REVENUE",
+      "Amount": "22266.00"
+    },
+    {
+      "Metric": "TOTAL EXPENSES",
+      "Amount": "10446.00"
+    }
+  ],
+  "messages": [],
+  "stdout": "Metric\tAmount\nNET PROFIT\t11820.00\nTOTAL REVENUE\t22266.00\nTOTAL EXPENSES\t10446.00\n",
+  "stderr": "",
+  "execution_time_ms": 363
+}

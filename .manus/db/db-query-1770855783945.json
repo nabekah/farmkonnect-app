@@ -1,0 +1,50 @@
+{
+  "query": "\nSELECT \n  expenseType,\n  COUNT(*) as count,\n  SUM(amount) as total,\n  AVG(amount) as average,\n  MAX(amount) as highest,\n  MIN(amount) as lowest\nFROM expenses\nGROUP BY expenseType\nORDER BY total DESC;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2kNF22PapS9mysw.root --database WZQk4bD8DnsRHwYBkmh7FN --execute \nSELECT \n  expenseType,\n  COUNT(*) as count,\n  SUM(amount) as total,\n  AVG(amount) as average,\n  MAX(amount) as highest,\n  MIN(amount) as lowest\nFROM expenses\nGROUP BY expenseType\nORDER BY total DESC;\n",
+  "rows": [
+    {
+      "expenseType": "veterinary",
+      "count": "3",
+      "total": "4800.00",
+      "average": "1600.000000",
+      "highest": "4500.00",
+      "lowest": "150.00"
+    },
+    {
+      "expenseType": "labor",
+      "count": "7",
+      "total": "3346.00",
+      "average": "478.000000",
+      "highest": "550.00",
+      "lowest": "400.00"
+    },
+    {
+      "expenseType": "feed",
+      "count": "3",
+      "total": "1300.00",
+      "average": "433.333333",
+      "highest": "500.00",
+      "lowest": "300.00"
+    },
+    {
+      "expenseType": "fertilizer",
+      "count": "2",
+      "total": "600.00",
+      "average": "300.000000",
+      "highest": "300.00",
+      "lowest": "300.00"
+    },
+    {
+      "expenseType": "maintenance",
+      "count": "2",
+      "total": "400.00",
+      "average": "200.000000",
+      "highest": "200.00",
+      "lowest": "200.00"
+    }
+  ],
+  "messages": [],
+  "stdout": "expenseType\tcount\ttotal\taverage\thighest\tlowest\nveterinary\t3\t4800.00\t1600.000000\t4500.00\t150.00\nlabor\t7\t3346.00\t478.000000\t550.00\t400.00\nfeed\t3\t1300.00\t433.333333\t500.00\t300.00\nfertilizer\t2\t600.00\t300.000000\t300.00\t300.00\nmaintenance\t2\t400.00\t200.000000\t200.00\t200.00\n",
+  "stderr": "",
+  "execution_time_ms": 348
+}

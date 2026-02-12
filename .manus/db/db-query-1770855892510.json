@@ -1,0 +1,50 @@
+{
+  "query": "\nSELECT \n  expenseType as 'Expense Category',\n  COUNT(*) as 'Count',\n  ROUND(SUM(amount), 2) as 'Total Amount',\n  ROUND(AVG(amount), 2) as 'Average',\n  ROUND(MIN(amount), 2) as 'Min',\n  ROUND(MAX(amount), 2) as 'Max'\nFROM expenses\nGROUP BY expenseType\nORDER BY SUM(amount) DESC;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2kNF22PapS9mysw.root --database WZQk4bD8DnsRHwYBkmh7FN --execute \nSELECT \n  expenseType as 'Expense Category',\n  COUNT(*) as 'Count',\n  ROUND(SUM(amount), 2) as 'Total Amount',\n  ROUND(AVG(amount), 2) as 'Average',\n  ROUND(MIN(amount), 2) as 'Min',\n  ROUND(MAX(amount), 2) as 'Max'\nFROM expenses\nGROUP BY expenseType\nORDER BY SUM(amount) DESC;\n",
+  "rows": [
+    {
+      "Expense Category": "veterinary",
+      "Count": "3",
+      "Total Amount": "4800.00",
+      "Average": "1600.00",
+      "Min": "150.00",
+      "Max": "4500.00"
+    },
+    {
+      "Expense Category": "labor",
+      "Count": "7",
+      "Total Amount": "3346.00",
+      "Average": "478.00",
+      "Min": "400.00",
+      "Max": "550.00"
+    },
+    {
+      "Expense Category": "feed",
+      "Count": "3",
+      "Total Amount": "1300.00",
+      "Average": "433.33",
+      "Min": "300.00",
+      "Max": "500.00"
+    },
+    {
+      "Expense Category": "fertilizer",
+      "Count": "2",
+      "Total Amount": "600.00",
+      "Average": "300.00",
+      "Min": "300.00",
+      "Max": "300.00"
+    },
+    {
+      "Expense Category": "maintenance",
+      "Count": "2",
+      "Total Amount": "400.00",
+      "Average": "200.00",
+      "Min": "200.00",
+      "Max": "200.00"
+    }
+  ],
+  "messages": [],
+  "stdout": "Expense Category\tCount\tTotal Amount\tAverage\tMin\tMax\nveterinary\t3\t4800.00\t1600.00\t150.00\t4500.00\nlabor\t7\t3346.00\t478.00\t400.00\t550.00\nfeed\t3\t1300.00\t433.33\t300.00\t500.00\nfertilizer\t2\t600.00\t300.00\t300.00\t300.00\nmaintenance\t2\t400.00\t200.00\t200.00\t200.00\n",
+  "stderr": "",
+  "execution_time_ms": 356
+}

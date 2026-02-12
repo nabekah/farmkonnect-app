@@ -1,0 +1,8 @@
+{
+  "query": "\nSELECT \n  'Expenses' as data_type,\n  COUNT(*) as total_records,\n  SUM(amount) as total_amount,\n  AVG(amount) as avg_amount,\n  MIN(amount) as min_amount,\n  MAX(amount) as max_amount\nFROM expenses\nUNION ALL\nSELECT \n  'Revenue' as data_type,\n  COUNT(*) as total_records,\n  SUM(amount) as total_amount,\n  AVG(amount) as avg_amount,\n  MIN(amount) as min_amount,\n  MAX(amount) as max_amount\nFROM revenue\nUNION ALL\nSELECT \n  'Budgets' as data_type,\n  COUNT(*) as total_records,\n  SUM(budgeted_amount) as total_amount,\n  AVG(budgeted_amount) as avg_amount,\n  MIN(budgeted_amount) as min_amount,\n  MAX(budgeted_amount) as max_amount\nFROM budgets;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2kNF22PapS9mysw.root --database WZQk4bD8DnsRHwYBkmh7FN --execute \nSELECT \n  'Expenses' as data_type,\n  COUNT(*) as total_records,\n  SUM(amount) as total_amount,\n  AVG(amount) as avg_amount,\n  MIN(amount) as min_amount,\n  MAX(amount) as max_amount\nFROM expenses\nUNION ALL\nSELECT \n  'Revenue' as data_type,\n  COUNT(*) as total_records,\n  SUM(amount) as total_amount,\n  AVG(amount) as avg_amount,\n  MIN(amount) as min_amount,\n  MAX(amount) as max_amount\nFROM revenue\nUNION ALL\nSELECT \n  'Budgets' as data_type,\n  COUNT(*) as total_records,\n  SUM(budgeted_amount) as total_amount,\n  AVG(budgeted_amount) as avg_amount,\n  MIN(budgeted_amount) as min_amount,\n  MAX(budgeted_amount) as max_amount\nFROM budgets;\n",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 2: Unknown column 'budgeted_amount' in 'field list'"
+  ]
+}

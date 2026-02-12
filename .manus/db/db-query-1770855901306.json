@@ -1,0 +1,145 @@
+{
+  "query": "\nSELECT \n  'EXPENSE' as Type,\n  id,\n  description,\n  ROUND(amount, 2) as Amount,\n  expenseType as Category,\n  expenseDate as Date,\n  paymentStatus as Status\nFROM expenses\nORDER BY expenseDate DESC\nLIMIT 15;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2kNF22PapS9mysw.root --database WZQk4bD8DnsRHwYBkmh7FN --execute \nSELECT \n  'EXPENSE' as Type,\n  id,\n  description,\n  ROUND(amount, 2) as Amount,\n  expenseType as Category,\n  expenseDate as Date,\n  paymentStatus as Status\nFROM expenses\nORDER BY expenseDate DESC\nLIMIT 15;\n",
+  "rows": [
+    {
+      "Type": "EXPENSE",
+      "id": "6",
+      "description": "Overtime Allowance for farmworker",
+      "Amount": "550.00",
+      "Category": "labor",
+      "Date": "2026-02-09",
+      "Status": "pending"
+    },
+    {
+      "Type": "EXPENSE",
+      "id": "3",
+      "description": "expense discription",
+      "Amount": "300.00",
+      "Category": "feed",
+      "Date": "2026-02-09",
+      "Status": "pending"
+    },
+    {
+      "Type": "EXPENSE",
+      "id": "1",
+      "description": "pay farm worker",
+      "Amount": "499.00",
+      "Category": "labor",
+      "Date": "2026-02-09",
+      "Status": "pending"
+    },
+    {
+      "Type": "EXPENSE",
+      "id": "4",
+      "description": "Paying farm worker",
+      "Amount": "499.00",
+      "Category": "labor",
+      "Date": "2026-02-09",
+      "Status": "pending"
+    },
+    {
+      "Type": "EXPENSE",
+      "id": "7",
+      "description": "Vacinnation for all adult sows",
+      "Amount": "4500.00",
+      "Category": "veterinary",
+      "Date": "2026-02-09",
+      "Status": "pending"
+    },
+    {
+      "Type": "EXPENSE",
+      "id": "2",
+      "description": "pay farm worker",
+      "Amount": "499.00",
+      "Category": "labor",
+      "Date": "2026-02-09",
+      "Status": "pending"
+    },
+    {
+      "Type": "EXPENSE",
+      "id": "5",
+      "description": "Paying farm worker",
+      "Amount": "499.00",
+      "Category": "labor",
+      "Date": "2026-02-09",
+      "Status": "pending"
+    },
+    {
+      "Type": "EXPENSE",
+      "id": "12",
+      "description": "Labor costs",
+      "Amount": "400.00",
+      "Category": "labor",
+      "Date": "2026-02-05",
+      "Status": "paid"
+    },
+    {
+      "Type": "EXPENSE",
+      "id": "17",
+      "description": "Labor costs",
+      "Amount": "400.00",
+      "Category": "labor",
+      "Date": "2026-02-05",
+      "Status": "paid"
+    },
+    {
+      "Type": "EXPENSE",
+      "id": "11",
+      "description": "Fertilizer",
+      "Amount": "300.00",
+      "Category": "fertilizer",
+      "Date": "2026-02-04",
+      "Status": "pending"
+    },
+    {
+      "Type": "EXPENSE",
+      "id": "16",
+      "description": "Fertilizer",
+      "Amount": "300.00",
+      "Category": "fertilizer",
+      "Date": "2026-02-04",
+      "Status": "pending"
+    },
+    {
+      "Type": "EXPENSE",
+      "id": "10",
+      "description": "Equipment maintenance",
+      "Amount": "200.00",
+      "Category": "maintenance",
+      "Date": "2026-02-03",
+      "Status": "paid"
+    },
+    {
+      "Type": "EXPENSE",
+      "id": "15",
+      "description": "Equipment maintenance",
+      "Amount": "200.00",
+      "Category": "maintenance",
+      "Date": "2026-02-03",
+      "Status": "paid"
+    },
+    {
+      "Type": "EXPENSE",
+      "id": "9",
+      "description": "Veterinary consultation",
+      "Amount": "150.00",
+      "Category": "veterinary",
+      "Date": "2026-02-02",
+      "Status": "paid"
+    },
+    {
+      "Type": "EXPENSE",
+      "id": "14",
+      "description": "Veterinary consultation",
+      "Amount": "150.00",
+      "Category": "veterinary",
+      "Date": "2026-02-02",
+      "Status": "paid"
+    }
+  ],
+  "messages": [],
+  "stdout": "Type\tid\tdescription\tAmount\tCategory\tDate\tStatus\nEXPENSE\t6\tOvertime Allowance for farmworker\t550.00\tlabor\t2026-02-09\tpending\nEXPENSE\t3\texpense discription\t300.00\tfeed\t2026-02-09\tpending\nEXPENSE\t1\tpay farm worker\t499.00\tlabor\t2026-02-09\tpending\nEXPENSE\t4\tPaying farm worker\t499.00\tlabor\t2026-02-09\tpending\nEXPENSE\t7\tVacinnation for all adult sows\t4500.00\tveterinary\t2026-02-09\tpending\nEXPENSE\t2\tpay farm worker\t499.00\tlabor\t2026-02-09\tpending\nEXPENSE\t5\tPaying farm worker\t499.00\tlabor\t2026-02-09\tpending\nEXPENSE\t12\tLabor costs\t400.00\tlabor\t2026-02-05\tpaid\nEXPENSE\t17\tLabor costs\t400.00\tlabor\t2026-02-05\tpaid\nEXPENSE\t11\tFertilizer\t300.00\tfertilizer\t2026-02-04\tpending\nEXPENSE\t16\tFertilizer\t300.00\tfertilizer\t2026-02-04\tpending\nEXPENSE\t10\tEquipment maintenance\t200.00\tmaintenance\t2026-02-03\tpaid\nEXPENSE\t15\tEquipment maintenance\t200.00\tmaintenance\t2026-02-03\tpaid\nEXPENSE\t9\tVeterinary consultation\t150.00\tveterinary\t2026-02-02\tpaid\nEXPENSE\t14\tVeterinary consultation\t150.00\tveterinary\t2026-02-02\tpaid\n",
+  "stderr": "",
+  "execution_time_ms": 356
+}

@@ -1,0 +1,42 @@
+{
+  "query": "\nSELECT \n  revenueType as 'Revenue Type',\n  COUNT(*) as 'Count',\n  ROUND(SUM(amount), 2) as 'Total Amount',\n  ROUND(AVG(amount), 2) as 'Average',\n  ROUND(MIN(amount), 2) as 'Min',\n  ROUND(MAX(amount), 2) as 'Max'\nFROM revenue\nGROUP BY revenueType\nORDER BY SUM(amount) DESC;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2kNF22PapS9mysw.root --database WZQk4bD8DnsRHwYBkmh7FN --execute \nSELECT \n  revenueType as 'Revenue Type',\n  COUNT(*) as 'Count',\n  ROUND(SUM(amount), 2) as 'Total Amount',\n  ROUND(AVG(amount), 2) as 'Average',\n  ROUND(MIN(amount), 2) as 'Min',\n  ROUND(MAX(amount), 2) as 'Max'\nFROM revenue\nGROUP BY revenueType\nORDER BY SUM(amount) DESC;\n",
+  "rows": [
+    {
+      "Revenue Type": "animal_sale",
+      "Count": "6",
+      "Total Amount": "18666.00",
+      "Average": "3111.00",
+      "Min": "500.00",
+      "Max": "9876.00"
+    },
+    {
+      "Revenue Type": "crop_sale",
+      "Count": "2",
+      "Total Amount": "1600.00",
+      "Average": "800.00",
+      "Min": "800.00",
+      "Max": "800.00"
+    },
+    {
+      "Revenue Type": "produce_sale",
+      "Count": "2",
+      "Total Amount": "1200.00",
+      "Average": "600.00",
+      "Min": "600.00",
+      "Max": "600.00"
+    },
+    {
+      "Revenue Type": "egg_production",
+      "Count": "2",
+      "Total Amount": "800.00",
+      "Average": "400.00",
+      "Min": "400.00",
+      "Max": "400.00"
+    }
+  ],
+  "messages": [],
+  "stdout": "Revenue Type\tCount\tTotal Amount\tAverage\tMin\tMax\nanimal_sale\t6\t18666.00\t3111.00\t500.00\t9876.00\ncrop_sale\t2\t1600.00\t800.00\t800.00\t800.00\nproduce_sale\t2\t1200.00\t600.00\t600.00\t600.00\negg_production\t2\t800.00\t400.00\t400.00\t400.00\n",
+  "stderr": "",
+  "execution_time_ms": 351
+}

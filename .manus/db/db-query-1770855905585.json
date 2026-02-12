@@ -1,0 +1,118 @@
+{
+  "query": "\nSELECT \n  'REVENUE' as Type,\n  id,\n  description,\n  ROUND(amount, 2) as Amount,\n  revenueType as Category,\n  revenueDate as Date,\n  paymentStatus as Status\nFROM revenue\nORDER BY revenueDate DESC\nLIMIT 15;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2kNF22PapS9mysw.root --database WZQk4bD8DnsRHwYBkmh7FN --execute \nSELECT \n  'REVENUE' as Type,\n  id,\n  description,\n  ROUND(amount, 2) as Amount,\n  revenueType as Category,\n  revenueDate as Date,\n  paymentStatus as Status\nFROM revenue\nORDER BY revenueDate DESC\nLIMIT 15;\n",
+  "rows": [
+    {
+      "Type": "REVENUE",
+      "id": "1",
+      "description": "Sold a live goat ",
+      "Amount": "890.00",
+      "Category": "animal_sale",
+      "Date": "2026-02-09",
+      "Status": "pending"
+    },
+    {
+      "Type": "REVENUE",
+      "id": "2",
+      "description": "Matured bull ",
+      "Amount": "5000.00",
+      "Category": "animal_sale",
+      "Date": "2026-02-09",
+      "Status": "pending"
+    },
+    {
+      "Type": "REVENUE",
+      "id": "3",
+      "description": "sold an animap",
+      "Amount": "500.00",
+      "Category": "animal_sale",
+      "Date": "2026-02-09",
+      "Status": "pending"
+    },
+    {
+      "Type": "REVENUE",
+      "id": "4",
+      "description": "Live boar sales at farm gate",
+      "Amount": "9876.00",
+      "Category": "animal_sale",
+      "Date": "2026-02-09",
+      "Status": "pending"
+    },
+    {
+      "Type": "REVENUE",
+      "id": "12",
+      "description": "Poultry products",
+      "Amount": "400.00",
+      "Category": "egg_production",
+      "Date": "2026-02-04",
+      "Status": "pending"
+    },
+    {
+      "Type": "REVENUE",
+      "id": "8",
+      "description": "Poultry products",
+      "Amount": "400.00",
+      "Category": "egg_production",
+      "Date": "2026-02-04",
+      "Status": "pending"
+    },
+    {
+      "Type": "REVENUE",
+      "id": "7",
+      "description": "Fish sale",
+      "Amount": "600.00",
+      "Category": "produce_sale",
+      "Date": "2026-02-03",
+      "Status": "paid"
+    },
+    {
+      "Type": "REVENUE",
+      "id": "11",
+      "description": "Fish sale",
+      "Amount": "600.00",
+      "Category": "produce_sale",
+      "Date": "2026-02-03",
+      "Status": "paid"
+    },
+    {
+      "Type": "REVENUE",
+      "id": "10",
+      "description": "Crop harvest",
+      "Amount": "800.00",
+      "Category": "crop_sale",
+      "Date": "2026-02-02",
+      "Status": "paid"
+    },
+    {
+      "Type": "REVENUE",
+      "id": "6",
+      "description": "Crop harvest",
+      "Amount": "800.00",
+      "Category": "crop_sale",
+      "Date": "2026-02-02",
+      "Status": "paid"
+    },
+    {
+      "Type": "REVENUE",
+      "id": "9",
+      "description": "Livestock sale",
+      "Amount": "1200.00",
+      "Category": "animal_sale",
+      "Date": "2026-02-01",
+      "Status": "paid"
+    },
+    {
+      "Type": "REVENUE",
+      "id": "5",
+      "description": "Livestock sale",
+      "Amount": "1200.00",
+      "Category": "animal_sale",
+      "Date": "2026-02-01",
+      "Status": "paid"
+    }
+  ],
+  "messages": [],
+  "stdout": "Type\tid\tdescription\tAmount\tCategory\tDate\tStatus\nREVENUE\t1\tSold a live goat \t890.00\tanimal_sale\t2026-02-09\tpending\nREVENUE\t2\tMatured bull \t5000.00\tanimal_sale\t2026-02-09\tpending\nREVENUE\t3\tsold an animap\t500.00\tanimal_sale\t2026-02-09\tpending\nREVENUE\t4\tLive boar sales at farm gate\t9876.00\tanimal_sale\t2026-02-09\tpending\nREVENUE\t12\tPoultry products\t400.00\tegg_production\t2026-02-04\tpending\nREVENUE\t8\tPoultry products\t400.00\tegg_production\t2026-02-04\tpending\nREVENUE\t7\tFish sale\t600.00\tproduce_sale\t2026-02-03\tpaid\nREVENUE\t11\tFish sale\t600.00\tproduce_sale\t2026-02-03\tpaid\nREVENUE\t10\tCrop harvest\t800.00\tcrop_sale\t2026-02-02\tpaid\nREVENUE\t6\tCrop harvest\t800.00\tcrop_sale\t2026-02-02\tpaid\nREVENUE\t9\tLivestock sale\t1200.00\tanimal_sale\t2026-02-01\tpaid\nREVENUE\t5\tLivestock sale\t1200.00\tanimal_sale\t2026-02-01\tpaid\n",
+  "stderr": "",
+  "execution_time_ms": 358
+}

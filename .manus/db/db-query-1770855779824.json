@@ -1,0 +1,26 @@
+{
+  "query": "\nSELECT \n  'Expenses' as data_type,\n  COUNT(*) as total_records,\n  SUM(amount) as total_amount,\n  AVG(amount) as avg_amount,\n  MIN(amount) as min_amount,\n  MAX(amount) as max_amount\nFROM expenses\nUNION ALL\nSELECT \n  'Revenue' as data_type,\n  COUNT(*) as total_records,\n  SUM(amount) as total_amount,\n  AVG(amount) as avg_amount,\n  MIN(amount) as min_amount,\n  MAX(amount) as max_amount\nFROM revenue;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2kNF22PapS9mysw.root --database WZQk4bD8DnsRHwYBkmh7FN --execute \nSELECT \n  'Expenses' as data_type,\n  COUNT(*) as total_records,\n  SUM(amount) as total_amount,\n  AVG(amount) as avg_amount,\n  MIN(amount) as min_amount,\n  MAX(amount) as max_amount\nFROM expenses\nUNION ALL\nSELECT \n  'Revenue' as data_type,\n  COUNT(*) as total_records,\n  SUM(amount) as total_amount,\n  AVG(amount) as avg_amount,\n  MIN(amount) as min_amount,\n  MAX(amount) as max_amount\nFROM revenue;\n",
+  "rows": [
+    {
+      "data_type": "Expenses",
+      "total_records": "17",
+      "total_amount": "10446.00",
+      "avg_amount": "614.470588",
+      "min_amount": "150.00",
+      "max_amount": "4500.00"
+    },
+    {
+      "data_type": "Revenue",
+      "total_records": "12",
+      "total_amount": "22266.00",
+      "avg_amount": "1855.500000",
+      "min_amount": "400.00",
+      "max_amount": "9876.00"
+    }
+  ],
+  "messages": [],
+  "stdout": "data_type\ttotal_records\ttotal_amount\tavg_amount\tmin_amount\tmax_amount\nExpenses\t17\t10446.00\t614.470588\t150.00\t4500.00\nRevenue\t12\t22266.00\t1855.500000\t400.00\t9876.00\n",
+  "stderr": "",
+  "execution_time_ms": 361
+}
