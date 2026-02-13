@@ -3372,3 +3372,69 @@ export const budgetAlertHistory = mysqlTable("budgetAlertHistory", {
 
 export type BudgetAlertHistory = typeof budgetAlertHistory.$inferSelect;
 export type InsertBudgetAlertHistory = typeof budgetAlertHistory.$inferInsert;
+
+
+// ============================================================================
+// EXPENSE APPROVAL WORKFLOW
+// ============================================================================
+
+/**
+ * Expense approvals for multi-level approval workflow
+ */
+export const expenseApprovals = mysqlTable("expenseApprovals", {
+  id: int("id").autoincrement().primaryKey(),
+  expenseId: int("expenseId").notNull(),
+  farmId: int("farmId").notNull(),
+  approvalLevel: mysqlEnum("approvalLevel", ["manager", "director", "cfo", "owner"]).notNull(),
+  approverUserId: int("approverUserId").notNull(),
+  status: mysqlEnum("status", ["pending", "approved", "rejected"]).default("pending").notNull(),
+  comments: text("comments"),
+  approvedAt: timestamp("approvedAt"),
+  rejectedAt: timestamp("rejectedAt"),
+  rejectionReason: text("rejectionReason"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type ExpenseApproval = typeof expenseApprovals.$inferSelect;
+export type InsertExpenseApproval = typeof expenseApprovals.$inferInsert;
+
+/**
+ * Approval thresholds per farm
+ */
+export const approvalThresholds = mysqlTable("approvalThresholds", {
+  id: int("id").autoincrement().primaryKey(),
+  farmId: int("farmId").notNull(),
+  managerThreshold: decimal("managerThreshold", { precision: 12, scale: 2 }).notNull(), // Amount requiring manager approval
+  directorThreshold: decimal("directorThreshold", { precision: 12, scale: 2 }).notNull(), // Amount requiring director approval
+  cfoThreshold: decimal("cfoThreshold", { precision: 12, scale: 2 }).notNull(), // Amount requiring CFO approval
+  currency: varchar("currency", { length: 3 }).default("GHS").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type ApprovalThreshold = typeof approvalThresholds.$inferSelect;
+export type InsertApprovalThreshold = typeof approvalThresholds.$inferInsert;
+
+// ============================================================================
+// FARM-SPECIFIC EXPENSE CATEGORIES
+// ============================================================================
+
+/**
+ * Custom expense categories per farm
+ */
+export const farmExpenseCategories = mysqlTable("farmExpenseCategories", {
+  id: int("id").autoincrement().primaryKey(),
+  farmId: int("farmId").notNull(),
+  categoryName: varchar("categoryName", { length: 100 }).notNull(),
+  categoryType: mysqlEnum("categoryType", ["feed", "medication", "labor", "equipment", "utilities", "transport", "veterinary", "fertilizer", "seeds", "pesticides", "water", "rent", "insurance", "maintenance", "other"]),
+  description: text("description"),
+  isActive: boolean("isActive").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type FarmExpenseCategory = typeof farmExpenseCategories.$inferSelect;
+export type InsertFarmExpenseCategory = typeof farmExpenseCategories.$inferInsert;
+
+
