@@ -1,0 +1,502 @@
+/* ============================================================================
+   RESPONSIVE DESIGN UTILITIES - Phase 1 Foundation
+   ============================================================================ */
+
+/* Mobile-First Approach: Base styles for mobile, enhanced with media queries */
+
+/* ============================================================================
+   MOBILE BREAKPOINTS (< 640px)
+   ============================================================================ */
+
+@media (max-width: 639px) {
+  /* Typography for mobile */
+  h1 {
+    @apply text-2xl font-bold leading-tight;
+  }
+
+  h2 {
+    @apply text-xl font-semibold leading-snug;
+  }
+
+  h3 {
+    @apply text-lg font-semibold;
+  }
+
+  h4, h5, h6 {
+    @apply text-base font-semibold;
+  }
+
+  p {
+    @apply text-sm leading-relaxed;
+  }
+
+  /* Touch targets - minimum 44x44px for mobile accessibility */
+  button,
+  a[role="button"],
+  input[type="button"],
+  input[type="submit"],
+  input[type="reset"] {
+    @apply min-h-[44px] min-w-[44px] px-3 py-2.5;
+  }
+
+  /* Form elements */
+  input,
+  textarea,
+  select {
+    @apply text-base; /* Prevents zoom on iOS */
+    @apply p-3;
+  }
+
+  /* Tables - convert to card layout on mobile */
+  table {
+    @apply w-full;
+  }
+
+  thead {
+    @apply hidden;
+  }
+
+  tbody tr {
+    @apply block mb-4 border rounded-lg p-4;
+  }
+
+  tbody td {
+    @apply block pb-2 before:content-[attr(data-label)] before:font-bold before:mr-2;
+  }
+
+  /* Modals and dialogs */
+  .dialog-content,
+  .modal-content {
+    @apply w-[95vw] max-h-[90vh] rounded-lg;
+  }
+
+  /* Navigation */
+  nav {
+    @apply flex-col gap-2;
+  }
+
+  /* Grid layouts */
+  .grid {
+    @apply grid-cols-1 gap-3;
+  }
+
+  .grid-cols-2 {
+    @apply grid-cols-1;
+  }
+
+  .grid-cols-3 {
+    @apply grid-cols-1;
+  }
+
+  .grid-cols-4 {
+    @apply grid-cols-2;
+  }
+
+  /* Spacing */
+  main {
+    @apply p-3;
+  }
+
+  section {
+    @apply p-3 mb-3;
+  }
+
+  /* Sidebar - hidden on mobile */
+  .sidebar {
+    @apply hidden;
+  }
+
+  /* Images - responsive */
+  img {
+    @apply max-w-full h-auto;
+  }
+
+  /* Flex containers */
+  .flex-row {
+    @apply flex-col;
+  }
+}
+
+/* ============================================================================
+   TABLET BREAKPOINTS (640px - 1024px)
+   ============================================================================ */
+
+@media (min-width: 640px) and (max-width: 1023px) {
+  /* Typography for tablet */
+  h1 {
+    @apply text-3xl font-bold;
+  }
+
+  h2 {
+    @apply text-2xl font-semibold;
+  }
+
+  h3 {
+    @apply text-xl font-semibold;
+  }
+
+  p {
+    @apply text-base leading-relaxed;
+  }
+
+  /* Touch targets - still important on tablet */
+  button,
+  a[role="button"] {
+    @apply min-h-[44px] px-4 py-2.5;
+  }
+
+  /* Form elements */
+  input,
+  textarea,
+  select {
+    @apply p-2.5;
+  }
+
+  /* Tables - partial card layout */
+  table {
+    @apply w-full text-sm;
+  }
+
+  /* Grid layouts */
+  .grid-cols-1 {
+    @apply md:grid-cols-2;
+  }
+
+  .grid-cols-2 {
+    @apply md:grid-cols-2;
+  }
+
+  .grid-cols-3 {
+    @apply md:grid-cols-2;
+  }
+
+  .grid-cols-4 {
+    @apply md:grid-cols-3;
+  }
+
+  /* Spacing */
+  main {
+    @apply p-4;
+  }
+
+  section {
+    @apply p-4 mb-4;
+  }
+
+  /* Sidebar - reduced width */
+  .sidebar {
+    @apply w-48;
+  }
+
+  /* Modals */
+  .dialog-content,
+  .modal-content {
+    @apply w-[90vw] max-w-2xl;
+  }
+}
+
+/* ============================================================================
+   DESKTOP BREAKPOINTS (1024px - 1440px)
+   ============================================================================ */
+
+@media (min-width: 1024px) and (max-width: 1439px) {
+  /* Typography for desktop */
+  h1 {
+    @apply text-4xl font-bold;
+  }
+
+  h2 {
+    @apply text-3xl font-semibold;
+  }
+
+  h3 {
+    @apply text-2xl font-semibold;
+  }
+
+  p {
+    @apply text-base leading-relaxed;
+  }
+
+  /* Touch targets - standard size */
+  button,
+  a[role="button"] {
+    @apply min-h-[40px] px-4 py-2;
+  }
+
+  /* Form elements */
+  input,
+  textarea,
+  select {
+    @apply p-2;
+  }
+
+  /* Tables - full display */
+  table {
+    @apply w-full;
+  }
+
+  thead {
+    @apply table-header-group;
+  }
+
+  tbody tr {
+    @apply table-row;
+  }
+
+  tbody td {
+    @apply table-cell;
+  }
+
+  /* Grid layouts */
+  .grid-cols-1 {
+    @apply lg:grid-cols-3;
+  }
+
+  .grid-cols-2 {
+    @apply lg:grid-cols-3;
+  }
+
+  .grid-cols-3 {
+    @apply lg:grid-cols-3;
+  }
+
+  .grid-cols-4 {
+    @apply lg:grid-cols-4;
+  }
+
+  /* Spacing */
+  main {
+    @apply p-6;
+  }
+
+  section {
+    @apply p-6 mb-6;
+  }
+
+  /* Sidebar - standard width */
+  .sidebar {
+    @apply w-64;
+  }
+
+  /* Modals */
+  .dialog-content,
+  .modal-content {
+    @apply w-auto max-w-4xl;
+  }
+}
+
+/* ============================================================================
+   LARGE DESKTOP BREAKPOINTS (1440px+)
+   ============================================================================ */
+
+@media (min-width: 1440px) {
+  /* Typography for large desktop */
+  h1 {
+    @apply text-5xl font-bold;
+  }
+
+  h2 {
+    @apply text-4xl font-semibold;
+  }
+
+  h3 {
+    @apply text-3xl font-semibold;
+  }
+
+  p {
+    @apply text-lg leading-relaxed;
+  }
+
+  /* Grid layouts */
+  .grid-cols-1 {
+    @apply xl:grid-cols-4;
+  }
+
+  .grid-cols-2 {
+    @apply xl:grid-cols-4;
+  }
+
+  .grid-cols-3 {
+    @apply xl:grid-cols-4;
+  }
+
+  .grid-cols-4 {
+    @apply xl:grid-cols-5;
+  }
+
+  /* Spacing */
+  main {
+    @apply p-8;
+  }
+
+  section {
+    @apply p-8 mb-8;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    @apply w-72;
+  }
+}
+
+/* ============================================================================
+   RESPONSIVE UTILITIES - Use Tailwind's built-in responsive prefixes
+   ============================================================================ */
+
+/* Examples of responsive utilities using Tailwind's built-in system:
+   - p-3 sm:p-4 md:p-5 lg:p-6 xl:p-8 (responsive padding)
+   - gap-3 sm:gap-4 md:gap-5 lg:gap-6 (responsive gap)
+   - text-xs sm:text-sm md:text-base (responsive text)
+   - grid-cols-1 sm:grid-cols-2 md:grid-cols-3 (responsive grid)
+   - flex-col sm:flex-row (responsive flex direction)
+*/
+
+/* Hide/show based on breakpoint */
+.hide-mobile {
+  @apply hidden sm:block;
+}
+
+.hide-tablet {
+  @apply hidden md:block;
+}
+
+.hide-desktop {
+  @apply hidden lg:block;
+}
+
+.show-mobile {
+  @apply block sm:hidden;
+}
+
+.show-tablet {
+  @apply block md:hidden;
+}
+
+.show-desktop {
+  @apply block lg:hidden;
+}
+
+/* ============================================================================
+   RESPONSIVE IMAGES
+   ============================================================================ */
+
+img.responsive {
+  @apply max-w-full h-auto;
+}
+
+picture {
+  @apply block;
+}
+
+/* Responsive background images */
+.bg-responsive {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* ============================================================================
+   RESPONSIVE CONTAINERS - Use Tailwind's container utility
+   ============================================================================ */
+
+/* Use Tailwind's built-in container utility with responsive modifiers:
+   - container (centers content with responsive padding)
+   - max-w-2xl sm:max-w-4xl md:max-w-6xl (responsive max-width)
+*/
+
+/* ============================================================================
+   RESPONSIVE TYPOGRAPHY SYSTEM
+   ============================================================================ */
+
+/* Display sizes */
+.display-lg {
+  @apply text-4xl sm:text-5xl md:text-6xl font-bold;
+}
+
+.display-md {
+  @apply text-3xl sm:text-4xl md:text-5xl font-bold;
+}
+
+.display-sm {
+  @apply text-2xl sm:text-3xl md:text-4xl font-bold;
+}
+
+/* Heading sizes */
+.heading-lg {
+  @apply text-2xl sm:text-3xl md:text-4xl font-semibold;
+}
+
+.heading-md {
+  @apply text-xl sm:text-2xl md:text-3xl font-semibold;
+}
+
+.heading-sm {
+  @apply text-lg sm:text-xl md:text-2xl font-semibold;
+}
+
+/* Body text */
+.body-lg {
+  @apply text-base sm:text-lg leading-relaxed;
+}
+
+.body-md {
+  @apply text-sm sm:text-base leading-relaxed;
+}
+
+.body-sm {
+  @apply text-xs sm:text-sm leading-relaxed;
+}
+
+/* ============================================================================
+   RESPONSIVE LAYOUT HELPERS
+   ============================================================================ */
+
+/* Responsive sidebar layout */
+.layout-with-sidebar {
+  @apply flex flex-col md:flex-row gap-4;
+}
+
+.layout-with-sidebar .sidebar {
+  @apply w-full md:w-64 order-2 md:order-1;
+}
+
+.layout-with-sidebar .content {
+  @apply w-full md:flex-1 order-1 md:order-2;
+}
+
+/* Responsive two-column layout */
+.layout-two-column {
+  @apply grid grid-cols-1 md:grid-cols-2 gap-4;
+}
+
+/* Responsive three-column layout */
+.layout-three-column {
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4;
+}
+
+/* ============================================================================
+   RESPONSIVE FORM ELEMENTS
+   ============================================================================ */
+
+.form-group {
+  @apply mb-4;
+}
+
+.form-group label {
+  @apply block text-sm font-medium mb-2;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  @apply w-full;
+}
+
+/* Responsive form layout */
+.form-row {
+  @apply grid grid-cols-1 sm:grid-cols-2 gap-4;
+}
+
+.form-row.three-column {
+  @apply grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4;
+}

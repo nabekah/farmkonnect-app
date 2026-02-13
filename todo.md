@@ -4963,3 +4963,9 @@ All components are integrated into the Financial Management Dashboard and tested
 - [x] Team Collaboration Features with role-based access control (6 procedures, 3 roles: manager/accountant/viewer, activity audit log)
 - [x] Create comprehensive tests for both features (44 tests passing)
 - [x] Verify all features working end-to-end
+
+
+## Deferred Features (To Implement Later)
+- [ ] User Onboarding Wizard - Guided setup flow for new farms
+- [ ] Mobile-Responsive Dashboard - Optimize analytics and team management for mobile
+- [ ] Automated Reporting - Scheduled report generation and email delivery

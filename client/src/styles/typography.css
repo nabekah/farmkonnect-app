@@ -1,0 +1,552 @@
+/* ============================================================================
+   TYPOGRAPHY & COLOR SYSTEM - Phase 1 Foundation
+   ============================================================================ */
+
+/* ============================================================================
+   TYPOGRAPHY SCALE
+   ============================================================================ */
+
+/* Display Sizes - For large headlines */
+.text-display-lg {
+  @apply text-5xl font-bold leading-tight tracking-tight;
+}
+
+.text-display-md {
+  @apply text-4xl font-bold leading-tight tracking-tight;
+}
+
+.text-display-sm {
+  @apply text-3xl font-bold leading-tight tracking-tight;
+}
+
+/* Heading Sizes */
+.text-heading-lg {
+  @apply text-3xl font-semibold leading-snug tracking-tight;
+}
+
+.text-heading-md {
+  @apply text-2xl font-semibold leading-snug tracking-tight;
+}
+
+.text-heading-sm {
+  @apply text-xl font-semibold leading-snug tracking-tight;
+}
+
+.text-heading-xs {
+  @apply text-lg font-semibold leading-snug;
+}
+
+/* Body Text Sizes */
+.text-body-lg {
+  @apply text-lg leading-relaxed;
+}
+
+.text-body-md {
+  @apply text-base leading-relaxed;
+}
+
+.text-body-sm {
+  @apply text-sm leading-relaxed;
+}
+
+.text-body-xs {
+  @apply text-xs leading-relaxed;
+}
+
+/* Caption and Small Text */
+.text-caption {
+  @apply text-xs font-medium uppercase tracking-wide;
+}
+
+.text-label {
+  @apply text-sm font-semibold uppercase tracking-wide;
+}
+
+/* ============================================================================
+   FONT WEIGHTS
+   ============================================================================ */
+
+.font-thin {
+  font-weight: 100;
+}
+
+.font-extralight {
+  font-weight: 200;
+}
+
+.font-light {
+  font-weight: 300;
+}
+
+.font-normal {
+  font-weight: 400;
+}
+
+.font-medium {
+  font-weight: 500;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.font-extrabold {
+  font-weight: 800;
+}
+
+.font-black {
+  font-weight: 900;
+}
+
+/* ============================================================================
+   LINE HEIGHT VARIATIONS
+   ============================================================================ */
+
+.leading-tight {
+  line-height: 1.25;
+}
+
+.leading-snug {
+  line-height: 1.375;
+}
+
+.leading-normal {
+  line-height: 1.5;
+}
+
+.leading-relaxed {
+  line-height: 1.625;
+}
+
+.leading-loose {
+  line-height: 2;
+}
+
+/* ============================================================================
+   LETTER SPACING
+   ============================================================================ */
+
+.tracking-tighter {
+  letter-spacing: -0.05em;
+}
+
+.tracking-tight {
+  letter-spacing: -0.025em;
+}
+
+.tracking-normal {
+  letter-spacing: 0em;
+}
+
+.tracking-wide {
+  letter-spacing: 0.025em;
+}
+
+.tracking-wider {
+  letter-spacing: 0.05em;
+}
+
+.tracking-widest {
+  letter-spacing: 0.1em;
+}
+
+/* ============================================================================
+   TEXT ALIGNMENT
+   ============================================================================ */
+
+.text-left {
+  text-align: left;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.text-justify {
+  text-align: justify;
+}
+
+/* ============================================================================
+   TEXT TRANSFORM
+   ============================================================================ */
+
+.uppercase {
+  text-transform: uppercase;
+}
+
+.lowercase {
+  text-transform: lowercase;
+}
+
+.capitalize {
+  text-transform: capitalize;
+}
+
+.normal-case {
+  text-transform: none;
+}
+
+/* ============================================================================
+   TEXT DECORATION
+   ============================================================================ */
+
+.underline {
+  text-decoration: underline;
+}
+
+.line-through {
+  text-decoration: line-through;
+}
+
+.no-underline {
+  text-decoration: none;
+}
+
+/* ============================================================================
+   TEXT TRUNCATION
+   ============================================================================ */
+
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-4 {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ============================================================================
+   COLOR PALETTE UTILITIES
+   ============================================================================ */
+
+/* Primary Colors */
+.text-primary {
+  @apply text-primary;
+}
+
+.text-primary-foreground {
+  @apply text-primary-foreground;
+}
+
+.bg-primary {
+  @apply bg-primary;
+}
+
+.bg-primary-foreground {
+  @apply bg-primary-foreground;
+}
+
+/* Secondary Colors */
+.text-secondary {
+  @apply text-secondary;
+}
+
+.text-secondary-foreground {
+  @apply text-secondary-foreground;
+}
+
+.bg-secondary {
+  @apply bg-secondary;
+}
+
+.bg-secondary-foreground {
+  @apply bg-secondary-foreground;
+}
+
+/* Accent Colors */
+.text-accent {
+  @apply text-accent;
+}
+
+.text-accent-foreground {
+  @apply text-accent-foreground;
+}
+
+.bg-accent {
+  @apply bg-accent;
+}
+
+.bg-accent-foreground {
+  @apply bg-accent-foreground;
+}
+
+/* Destructive Colors */
+.text-destructive {
+  @apply text-destructive;
+}
+
+.text-destructive-foreground {
+  @apply text-destructive-foreground;
+}
+
+.bg-destructive {
+  @apply bg-destructive;
+}
+
+.bg-destructive-foreground {
+  @apply bg-destructive-foreground;
+}
+
+/* Muted Colors */
+.text-muted {
+  @apply text-muted-foreground;
+}
+
+.bg-muted {
+  @apply bg-muted;
+}
+
+/* ============================================================================
+   SEMANTIC COLOR UTILITIES
+   ============================================================================ */
+
+/* Success */
+.text-success {
+  @apply text-green-600 dark:text-green-400;
+}
+
+.bg-success {
+  @apply bg-green-50 dark:bg-green-950;
+}
+
+.border-success {
+  @apply border-green-200 dark:border-green-800;
+}
+
+/* Warning */
+.text-warning {
+  @apply text-amber-600 dark:text-amber-400;
+}
+
+.bg-warning {
+  @apply bg-amber-50 dark:bg-amber-950;
+}
+
+.border-warning {
+  @apply border-amber-200 dark:border-amber-800;
+}
+
+/* Error */
+.text-error {
+  @apply text-red-600 dark:text-red-400;
+}
+
+.bg-error {
+  @apply bg-red-50 dark:bg-red-950;
+}
+
+.border-error {
+  @apply border-red-200 dark:border-red-800;
+}
+
+/* Info */
+.text-info {
+  @apply text-blue-600 dark:text-blue-400;
+}
+
+.bg-info {
+  @apply bg-blue-50 dark:bg-blue-950;
+}
+
+.border-info {
+  @apply border-blue-200 dark:border-blue-800;
+}
+
+/* ============================================================================
+   TEXT HIERARCHY HELPERS
+   ============================================================================ */
+
+/* Primary text - main content */
+.text-hierarchy-primary {
+  @apply text-foreground font-medium;
+}
+
+/* Secondary text - supporting content */
+.text-hierarchy-secondary {
+  @apply text-muted-foreground font-normal;
+}
+
+/* Tertiary text - subtle content */
+.text-hierarchy-tertiary {
+  @apply text-muted-foreground/70 font-normal;
+}
+
+/* Disabled text */
+.text-hierarchy-disabled {
+  @apply text-muted-foreground/50 font-normal;
+}
+
+/* ============================================================================
+   EMPHASIS STYLES
+   ============================================================================ */
+
+.text-emphasis-high {
+  @apply font-bold text-foreground;
+}
+
+.text-emphasis-medium {
+  @apply font-semibold text-foreground;
+}
+
+.text-emphasis-low {
+  @apply font-normal text-muted-foreground;
+}
+
+/* ============================================================================
+   LINK STYLES
+   ============================================================================ */
+
+a {
+  @apply text-primary hover:text-primary/80 transition-colors;
+}
+
+a:focus-visible {
+  @apply outline-ring outline-2 outline-offset-2;
+}
+
+.link-primary {
+  @apply text-primary hover:text-primary/80 transition-colors;
+}
+
+.link-secondary {
+  @apply text-secondary hover:text-secondary/80 transition-colors;
+}
+
+.link-muted {
+  @apply text-muted-foreground hover:text-foreground transition-colors;
+}
+
+/* ============================================================================
+   CODE & MONOSPACE
+   ============================================================================ */
+
+code,
+pre {
+  @apply font-mono text-sm;
+}
+
+code {
+  @apply bg-muted px-2 py-1 rounded;
+}
+
+pre {
+  @apply bg-muted p-4 rounded-lg overflow-auto;
+}
+
+/* ============================================================================
+   BLOCKQUOTE STYLES
+   ============================================================================ */
+
+blockquote {
+  @apply border-l-4 border-primary pl-4 py-2 italic text-muted-foreground;
+}
+
+/* ============================================================================
+   LISTS
+   ============================================================================ */
+
+ul,
+ol {
+  @apply list-inside;
+}
+
+ul {
+  @apply list-disc;
+}
+
+ol {
+  @apply list-decimal;
+}
+
+li {
+  @apply mb-2;
+}
+
+/* ============================================================================
+   RESPONSIVE TYPOGRAPHY
+   ============================================================================ */
+
+@media (max-width: 640px) {
+  .text-display-lg {
+    @apply text-3xl;
+  }
+
+  .text-display-md {
+    @apply text-2xl;
+  }
+
+  .text-display-sm {
+    @apply text-xl;
+  }
+
+  .text-heading-lg {
+    @apply text-2xl;
+  }
+
+  .text-heading-md {
+    @apply text-xl;
+  }
+
+  .text-heading-sm {
+    @apply text-lg;
+  }
+
+  .text-body-lg {
+    @apply text-base;
+  }
+
+  .text-body-md {
+    @apply text-sm;
+  }
+}
+
+/* ============================================================================
+   PRINT STYLES
+   ============================================================================ */
+
+@media print {
+  body {
+    @apply bg-white text-black;
+  }
+
+  a {
+    @apply text-black underline;
+  }
+
+  .no-print {
+    @apply hidden;
+  }
+}

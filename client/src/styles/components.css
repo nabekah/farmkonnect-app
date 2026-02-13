@@ -1,0 +1,538 @@
+/* ============================================================================
+   COMPONENT STYLING - Phase 1 Foundation
+   ============================================================================ */
+
+/* ============================================================================
+   BUTTON STYLES
+   ============================================================================ */
+
+button,
+[role="button"],
+input[type="button"],
+input[type="submit"],
+input[type="reset"] {
+  @apply inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors;
+  @apply focus-visible:outline-ring focus-visible:outline-2 focus-visible:outline-offset-2;
+  @apply disabled:pointer-events-none disabled:opacity-50;
+}
+
+/* Button variants */
+.btn-primary {
+  @apply bg-primary text-primary-foreground hover:bg-primary/90;
+}
+
+.btn-secondary {
+  @apply bg-secondary text-secondary-foreground hover:bg-secondary/80;
+}
+
+.btn-accent {
+  @apply bg-accent text-accent-foreground hover:bg-accent/80;
+}
+
+.btn-destructive {
+  @apply bg-destructive text-destructive-foreground hover:bg-destructive/90;
+}
+
+.btn-outline {
+  @apply border border-input bg-background hover:bg-accent hover:text-accent-foreground;
+}
+
+.btn-ghost {
+  @apply hover:bg-accent hover:text-accent-foreground;
+}
+
+.btn-link {
+  @apply text-primary underline-offset-4 hover:underline;
+}
+
+/* Button sizes */
+.btn-sm {
+  @apply h-8 px-3 text-xs;
+}
+
+.btn-md {
+  @apply h-10 px-4 py-2;
+}
+
+.btn-lg {
+  @apply h-12 px-8;
+}
+
+.btn-xl {
+  @apply h-14 px-10 text-lg;
+}
+
+/* ============================================================================
+   CARD STYLES
+   ============================================================================ */
+
+.card {
+  @apply rounded-lg border border-border bg-card text-card-foreground shadow-sm;
+  @apply p-6;
+}
+
+.card-header {
+  @apply flex flex-col space-y-1.5 p-6;
+}
+
+.card-title {
+  @apply text-2xl font-semibold leading-none tracking-tight;
+}
+
+.card-description {
+  @apply text-sm text-muted-foreground;
+}
+
+.card-content {
+  @apply p-6 pt-0;
+}
+
+.card-footer {
+  @apply flex items-center p-6 pt-0;
+}
+
+/* Card variants */
+.card-elevated {
+  @apply shadow-md hover:shadow-lg transition-shadow;
+}
+
+.card-outlined {
+  @apply border-2 border-border;
+}
+
+.card-filled {
+  @apply bg-muted;
+}
+
+/* ============================================================================
+   INPUT & FORM STYLES
+   ============================================================================ */
+
+input,
+textarea,
+select {
+  @apply flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm;
+  @apply placeholder:text-muted-foreground;
+  @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
+  @apply disabled:cursor-not-allowed disabled:opacity-50;
+  @apply transition-colors;
+}
+
+textarea {
+  @apply min-h-[80px] py-2;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  @apply h-4 w-4;
+}
+
+/* Form group */
+.form-group {
+  @apply space-y-2;
+}
+
+.form-label {
+  @apply text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70;
+}
+
+.form-description {
+  @apply text-sm text-muted-foreground;
+}
+
+.form-error {
+  @apply text-sm font-medium text-destructive;
+}
+
+/* ============================================================================
+   MODAL & DIALOG STYLES
+   ============================================================================ */
+
+.modal-overlay {
+  @apply fixed inset-0 z-50 bg-background/80 backdrop-blur-sm;
+}
+
+.modal-content {
+  @apply fixed left-[50%] top-[50%] z-50 w-full max-w-lg translate-x-[-50%] translate-y-[-50%];
+  @apply rounded-lg border border-border bg-background p-6 shadow-lg;
+  @apply duration-200;
+}
+
+.modal-header {
+  @apply flex flex-col space-y-1.5;
+}
+
+.modal-title {
+  @apply text-lg font-semibold leading-none tracking-tight;
+}
+
+.modal-description {
+  @apply text-sm text-muted-foreground;
+}
+
+.modal-body {
+  @apply py-4;
+}
+
+.modal-footer {
+  @apply flex justify-end space-x-2 pt-6;
+}
+
+/* ============================================================================
+   NAVIGATION STYLES
+   ============================================================================ */
+
+nav {
+  @apply flex items-center space-x-1;
+}
+
+.nav-item {
+  @apply px-3 py-2 rounded-md text-sm font-medium transition-colors;
+  @apply hover:bg-accent hover:text-accent-foreground;
+  @apply focus-visible:outline-ring focus-visible:outline-2 focus-visible:outline-offset-2;
+}
+
+.nav-item.active {
+  @apply bg-primary text-primary-foreground;
+}
+
+/* Breadcrumb */
+.breadcrumb {
+  @apply flex items-center space-x-2 text-sm;
+}
+
+.breadcrumb-item {
+  @apply text-muted-foreground;
+}
+
+.breadcrumb-item.active {
+  @apply text-foreground font-medium;
+}
+
+.breadcrumb-separator {
+  @apply text-muted-foreground;
+}
+
+/* ============================================================================
+   BADGE & CHIP STYLES
+   ============================================================================ */
+
+.badge {
+  @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold;
+  @apply transition-colors;
+}
+
+.badge-primary {
+  @apply bg-primary text-primary-foreground;
+}
+
+.badge-secondary {
+  @apply bg-secondary text-secondary-foreground;
+}
+
+.badge-accent {
+  @apply bg-accent text-accent-foreground;
+}
+
+.badge-destructive {
+  @apply bg-destructive text-destructive-foreground;
+}
+
+.badge-outline {
+  @apply border border-primary text-primary;
+}
+
+/* Chip */
+.chip {
+  @apply inline-flex items-center rounded-full px-3 py-1 text-sm font-medium;
+  @apply bg-muted text-muted-foreground;
+  @apply transition-colors;
+}
+
+.chip:hover {
+  @apply bg-muted/80;
+}
+
+.chip.active {
+  @apply bg-primary text-primary-foreground;
+}
+
+/* ============================================================================
+   TOOLTIP STYLES
+   ============================================================================ */
+
+.tooltip {
+  @apply relative inline-block;
+}
+
+.tooltip-content {
+  @apply absolute bottom-full left-1/2 z-50 mb-2 hidden w-max -translate-x-1/2;
+  @apply rounded-md bg-popover px-3 py-1.5 text-sm text-popover-foreground shadow-md;
+  @apply border border-border;
+}
+
+.tooltip:hover .tooltip-content {
+  @apply block;
+}
+
+/* ============================================================================
+   DROPDOWN STYLES
+   ============================================================================ */
+
+.dropdown {
+  @apply relative inline-block;
+}
+
+.dropdown-trigger {
+  @apply inline-flex items-center justify-center;
+}
+
+.dropdown-content {
+  @apply absolute right-0 top-full z-50 mt-2 hidden w-56 rounded-md border border-border;
+  @apply bg-popover p-1 shadow-md;
+}
+
+.dropdown:hover .dropdown-content,
+.dropdown.active .dropdown-content {
+  @apply block;
+}
+
+.dropdown-item {
+  @apply block w-full px-2 py-1.5 text-left text-sm;
+  @apply rounded-sm hover:bg-accent hover:text-accent-foreground;
+  @apply transition-colors;
+}
+
+.dropdown-separator {
+  @apply my-1 h-px bg-border;
+}
+
+/* ============================================================================
+   ALERT STYLES
+   ============================================================================ */
+
+.alert {
+  @apply relative w-full rounded-lg border p-4;
+}
+
+.alert-title {
+  @apply mb-1 font-medium leading-none tracking-tight;
+}
+
+.alert-description {
+  @apply text-sm [&_p]:leading-relaxed;
+}
+
+.alert-success {
+  @apply border-green-200 bg-green-50 text-green-900 dark:border-green-800 dark:bg-green-950 dark:text-green-50;
+}
+
+.alert-warning {
+  @apply border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-50;
+}
+
+.alert-error {
+  @apply border-red-200 bg-red-50 text-red-900 dark:border-red-800 dark:bg-red-950 dark:text-red-50;
+}
+
+.alert-info {
+  @apply border-blue-200 bg-blue-50 text-blue-900 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-50;
+}
+
+/* ============================================================================
+   PROGRESS BAR STYLES
+   ============================================================================ */
+
+.progress {
+  @apply relative h-2 w-full overflow-hidden rounded-full bg-muted;
+}
+
+.progress-bar {
+  @apply h-full bg-primary transition-all;
+}
+
+.progress-bar.success {
+  @apply bg-green-500;
+}
+
+.progress-bar.warning {
+  @apply bg-amber-500;
+}
+
+.progress-bar.error {
+  @apply bg-red-500;
+}
+
+/* ============================================================================
+   SKELETON LOADING STYLES
+   ============================================================================ */
+
+.skeleton {
+  @apply animate-pulse rounded-md bg-muted;
+}
+
+.skeleton-text {
+  @apply skeleton h-4 w-full;
+}
+
+.skeleton-circle {
+  @apply skeleton rounded-full;
+}
+
+.skeleton-rect {
+  @apply skeleton;
+}
+
+/* ============================================================================
+   SHADOW UTILITIES
+   ============================================================================ */
+
+.shadow-xs {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.shadow-sm {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.shadow-md {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+}
+
+.shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+}
+
+.shadow-xl {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+}
+
+.shadow-2xl {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* ============================================================================
+   BORDER RADIUS UTILITIES
+   ============================================================================ */
+
+.rounded-xs {
+  border-radius: 0.25rem;
+}
+
+.rounded-sm {
+  border-radius: 0.375rem;
+}
+
+.rounded-md {
+  border-radius: 0.5rem;
+}
+
+.rounded-lg {
+  border-radius: 0.75rem;
+}
+
+.rounded-xl {
+  border-radius: 1rem;
+}
+
+.rounded-2xl {
+  border-radius: 1.5rem;
+}
+
+.rounded-full {
+  border-radius: 9999px;
+}
+
+/* ============================================================================
+   SPACING UTILITIES
+   ============================================================================ */
+
+.gap-xs {
+  gap: 0.25rem;
+}
+
+.gap-sm {
+  gap: 0.5rem;
+}
+
+.gap-md {
+  gap: 1rem;
+}
+
+.gap-lg {
+  gap: 1.5rem;
+}
+
+.gap-xl {
+  gap: 2rem;
+}
+
+.gap-2xl {
+  gap: 3rem;
+}
+
+/* ============================================================================
+   FOCUS STYLES
+   ============================================================================ */
+
+.focus-ring {
+  @apply focus-visible:outline-ring focus-visible:outline-2 focus-visible:outline-offset-2;
+}
+
+.focus-ring-primary {
+  @apply focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2;
+}
+
+.focus-ring-secondary {
+  @apply focus-visible:outline-secondary focus-visible:outline-2 focus-visible:outline-offset-2;
+}
+
+/* ============================================================================
+   HOVER STATES
+   ============================================================================ */
+
+.hover-lift {
+  @apply transition-transform hover:scale-105 hover:shadow-lg;
+}
+
+.hover-fade {
+  @apply transition-opacity hover:opacity-80;
+}
+
+.hover-color {
+  @apply transition-colors hover:bg-accent;
+}
+
+/* ============================================================================
+   DISABLED STATES
+   ============================================================================ */
+
+:disabled,
+[aria-disabled="true"],
+.disabled {
+  @apply cursor-not-allowed opacity-50;
+}
+
+/* ============================================================================
+   ACTIVE STATES
+   ============================================================================ */
+
+.active {
+  @apply bg-primary text-primary-foreground;
+}
+
+/* ============================================================================
+   TRANSITIONS
+   ============================================================================ */
+
+.transition-fast {
+  @apply transition-all duration-150;
+}
+
+.transition-normal {
+  @apply transition-all duration-300;
+}
+
+.transition-slow {
+  @apply transition-all duration-500;
+}
