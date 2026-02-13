@@ -44,6 +44,9 @@ import { BudgetAlertsPanel } from "./BudgetAlertsPanel";
 import { ExpenseReconciliation } from "./ExpenseReconciliation";
 import { CashFlowProjections } from "./CashFlowProjections";
 import { FinancialAlerts } from "./FinancialAlerts";
+import { ExpenseApprovalWorkflow } from "./ExpenseApprovalWorkflow";
+import { AutomatedReminders } from "./AutomatedReminders";
+import { FinancialDashboardExport } from "./FinancialDashboardExport";
 
 interface FinancialManagementModuleProps {
   farmId: string;
@@ -193,7 +196,7 @@ export function FinancialManagementModule({
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-10">
+        <TabsList className="grid w-full grid-cols-12 overflow-x-auto">
           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
           <TabsTrigger value="expenses">Expenses</TabsTrigger>
           <TabsTrigger value="revenue">Revenue</TabsTrigger>
@@ -204,6 +207,9 @@ export function FinancialManagementModule({
           <TabsTrigger value="reconciliation">Reconciliation</TabsTrigger>
           <TabsTrigger value="cashflow">Cash Flow</TabsTrigger>
           <TabsTrigger value="financial-alerts">Warnings</TabsTrigger>
+          <TabsTrigger value="approvals">Approvals</TabsTrigger>
+          <TabsTrigger value="reminders">Reminders</TabsTrigger>
+          <TabsTrigger value="export">Export</TabsTrigger>
         </TabsList>
 
         {/* Dashboard Tab */}
@@ -531,6 +537,21 @@ export function FinancialManagementModule({
         {/* Financial Alerts Tab */}
         <TabsContent value="financial-alerts" className="space-y-6">
           <FinancialAlerts farmId={parseInt(farmId)} />
+        </TabsContent>
+
+        {/* Approvals Tab */}
+        <TabsContent value="approvals" className="space-y-6">
+          <ExpenseApprovalWorkflow farmId={parseInt(farmId)} />
+        </TabsContent>
+
+        {/* Reminders Tab */}
+        <TabsContent value="reminders" className="space-y-6">
+          <AutomatedReminders farmId={parseInt(farmId)} />
+        </TabsContent>
+
+        {/* Export Tab */}
+        <TabsContent value="export" className="space-y-6">
+          <FinancialDashboardExport farmId={parseInt(farmId)} />
         </TabsContent>
       </Tabs>
 
