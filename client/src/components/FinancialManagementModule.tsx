@@ -36,6 +36,8 @@ import {
 } from "lucide-react";
 import { AddExpenseModal } from "./AddExpenseModal";
 import { AddRevenueModal } from "./AddRevenueModal";
+import { ExpenseRevenueFilter } from "./ExpenseRevenueFilter";
+import { BulkCSVImport } from "./BulkCSVImport";
 
 interface FinancialManagementModuleProps {
   farmId: string;
@@ -45,12 +47,21 @@ export function FinancialManagementModule({
   farmId,
 }: FinancialManagementModuleProps) {
   const { user } = useAuth();
+  const utils = trpc.useUtils();
   const [period, setPeriod] = useState<"week" | "month" | "quarter" | "year">(
     "month"
   );
   const [activeTab, setActiveTab] = useState("dashboard");
   const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false);
   const [isAddRevenueOpen, setIsAddRevenueOpen] = useState(false);
+  const [expenseFilters, setExpenseFilters] = useState<any>(null);
+  const [revenueFilters, setRevenueFilters] = useState<any>(null);
+
+  const handleDataRefresh = async () => {
+    await utils.financialAnalysis.getFinancialOverview.invalidate();
+    await utils.financialAnalysis.getExpenses.invalidate();
+    await utils.financialAnalysis.getRevenue.invalidate();
+  };
 
   // Fetch financial data
   const { data: overview } = trpc.financialAnalysis.getFinancialOverview.useQuery(
@@ -293,6 +304,16 @@ export function FinancialManagementModule({
 
         {/* Expenses Tab */}
         <TabsContent value="expenses" className="space-y-6">
+          <BulkCSVImport
+            farmId={parseInt(farmId)}
+            isRevenue={false}
+            onImportSuccess={handleDataRefresh}
+          />
+          <ExpenseRevenueFilter
+            onFilterChange={setExpenseFilters}
+            categories={[...new Set(expenses?.map((e: any) => e.categoryName) || [])]}
+            isRevenue={false}
+          />
           <Card>
             <CardHeader>
               <CardTitle>Expense Tracking</CardTitle>
@@ -302,7 +323,7 @@ export function FinancialManagementModule({
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {expenses?.map((expense, index) => (
+                {(expenseFilters ? filteredExpenses : expenses)?.map((expense: any, index: number) => (
                   <div
                     key={index}
                     className="flex items-center justify-between p-4 border rounded-lg"
@@ -330,6 +351,16 @@ export function FinancialManagementModule({
 
         {/* Revenue Tab */}
         <TabsContent value="revenue" className="space-y-6">
+          <BulkCSVImport
+            farmId={parseInt(farmId)}
+            isRevenue={true}
+            onImportSuccess={handleDataRefresh}
+          />
+          <ExpenseRevenueFilter
+            onFilterChange={setRevenueFilters}
+            categories={[...new Set(revenue?.map((r: any) => r.revenueType) || [])]}
+            isRevenue={true}
+          />
           <Card>
             <CardHeader>
               <CardTitle>Revenue Tracking</CardTitle>
@@ -339,7 +370,7 @@ export function FinancialManagementModule({
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {revenue?.map((rev, index) => (
+                {(revenueFilters ? filteredRevenue : revenue)?.map((rev: any, index: number) => (
                   <div
                     key={index}
                     className="flex items-center justify-between p-4 border rounded-lg"
@@ -459,19 +490,13 @@ export function FinancialManagementModule({
         isOpen={isAddExpenseOpen}
         onClose={() => setIsAddExpenseOpen(false)}
         farmId={parseInt(farmId)}
-        onExpenseAdded={() => {
-          // Refresh data after adding expense
-          // The queries will automatically refetch due to cache invalidation
-        }}
+        onExpenseAdded={handleDataRefresh}
       />
       <AddRevenueModal
         isOpen={isAddRevenueOpen}
         onClose={() => setIsAddRevenueOpen(false)}
         farmId={parseInt(farmId)}
-        onRevenueAdded={() => {
-          // Refresh data after adding revenue
-          // The queries will automatically refetch due to cache invalidation
-        }}
+        onRevenueAdded={handleDataRefresh}
       />
     </div>
   );
