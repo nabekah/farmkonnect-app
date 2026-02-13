@@ -4898,6 +4898,7 @@ All components are integrated into the Financial Management Dashboard and tested
 - [x] Verified revenue mutation is properly wired
 - [x] Checked database insertion for revenue entries
 - [x] Added console logging for revenue submission
+- [x] Fixed .returning() error in addRevenue and addExpense mutations (15 tests passing)
 
 ## New Features Implementation (Completed)
 - [x] Implement Expense Reconciliation with bank statement import

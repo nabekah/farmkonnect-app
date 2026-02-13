@@ -49,7 +49,7 @@ export const expenseRevenueEntryRouter = router({
         }
 
         // Insert expense
-        const result = await db
+        await db
           .insert(expenses)
           .values({
             farmId: input.farmId,
@@ -59,12 +59,10 @@ export const expenseRevenueEntryRouter = router({
             date: input.date,
             quantity: input.quantity || null,
             notes: input.notes || null,
-          })
-          .returning();
+          });
 
         return {
           success: true,
-          expense: result[0],
           message: `Expense of GHS ${input.amount} added successfully`,
         };
       } catch (error: any) {
@@ -99,7 +97,7 @@ export const expenseRevenueEntryRouter = router({
         }
 
         // Insert revenue
-        const result = await db
+        await db
           .insert(revenue)
           .values({
             farmId: input.farmId,
@@ -111,12 +109,10 @@ export const expenseRevenueEntryRouter = router({
             buyer: input.buyer || null,
             invoiceNumber: input.invoiceNumber || null,
             paymentStatus: input.paymentStatus,
-          })
-          .returning();
+          });
 
         return {
           success: true,
-          revenue: result[0],
           message: `Revenue of GHS ${input.amount} added successfully`,
         };
       } catch (error: any) {
