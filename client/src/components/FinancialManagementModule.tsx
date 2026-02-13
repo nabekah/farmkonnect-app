@@ -41,6 +41,9 @@ import { BulkCSVImport } from "./BulkCSVImport";
 import { FarmSelector } from "./FarmSelector";
 import { RecurringTransactionsManager } from "./RecurringTransactionsManager";
 import { BudgetAlertsPanel } from "./BudgetAlertsPanel";
+import { ExpenseReconciliation } from "./ExpenseReconciliation";
+import { CashFlowProjections } from "./CashFlowProjections";
+import { FinancialAlerts } from "./FinancialAlerts";
 
 interface FinancialManagementModuleProps {
   farmId: string;
@@ -190,7 +193,7 @@ export function FinancialManagementModule({
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-7">
+        <TabsList className="grid w-full grid-cols-10">
           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
           <TabsTrigger value="expenses">Expenses</TabsTrigger>
           <TabsTrigger value="revenue">Revenue</TabsTrigger>
@@ -198,6 +201,9 @@ export function FinancialManagementModule({
           <TabsTrigger value="recurring">Recurring</TabsTrigger>
           <TabsTrigger value="alerts">Alerts</TabsTrigger>
           <TabsTrigger value="reports">Reports</TabsTrigger>
+          <TabsTrigger value="reconciliation">Reconciliation</TabsTrigger>
+          <TabsTrigger value="cashflow">Cash Flow</TabsTrigger>
+          <TabsTrigger value="financial-alerts">Warnings</TabsTrigger>
         </TabsList>
 
         {/* Dashboard Tab */}
@@ -510,6 +516,21 @@ export function FinancialManagementModule({
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Expense Reconciliation Tab */}
+        <TabsContent value="reconciliation" className="space-y-6">
+          <ExpenseReconciliation farmId={parseInt(farmId)} />
+        </TabsContent>
+
+        {/* Cash Flow Projections Tab */}
+        <TabsContent value="cashflow" className="space-y-6">
+          <CashFlowProjections farmId={parseInt(farmId)} />
+        </TabsContent>
+
+        {/* Financial Alerts Tab */}
+        <TabsContent value="financial-alerts" className="space-y-6">
+          <FinancialAlerts farmId={parseInt(farmId)} />
         </TabsContent>
       </Tabs>
 

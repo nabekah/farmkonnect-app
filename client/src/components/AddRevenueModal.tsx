@@ -77,6 +77,7 @@ export function AddRevenueModal({ isOpen, onClose, farmId, onRevenueAdded }: Add
     if (!validateForm()) return;
 
     try {
+      console.log('Submitting revenue:', { farmId, ...formData });
       await addRevenueMutation.mutateAsync({
         farmId,
         type: formData.type,
@@ -89,6 +90,7 @@ export function AddRevenueModal({ isOpen, onClose, farmId, onRevenueAdded }: Add
         paymentStatus: formData.paymentStatus as 'pending' | 'paid' | 'partial',
       });
 
+      console.log('Revenue added successfully!');
       setSuccessMessage('Revenue added successfully!');
       setTimeout(() => {
         setFormData({
@@ -106,6 +108,7 @@ export function AddRevenueModal({ isOpen, onClose, farmId, onRevenueAdded }: Add
         onClose();
       }, 1500);
     } catch (error: any) {
+      console.error('Revenue submission error:', error);
       setErrors({ submit: error.message || 'Failed to add revenue' });
     }
   };
