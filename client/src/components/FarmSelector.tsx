@@ -26,8 +26,8 @@ export function FarmSelector({
   const { user } = useAuth();
 
   // Fetch user's farms
-  const { data: farms, isLoading } = trpc.farms.listFarms.useQuery(
-    { userId: user?.id || '' },
+  const { data: farms, isLoading } = trpc.farms.list.useQuery(
+    undefined,
     { enabled: !!user?.id }
   );
 
