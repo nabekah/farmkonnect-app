@@ -71,6 +71,8 @@ import { PestDiseaseManagementUI } from "./components/PestDiseaseManagementUI";
 import { ImageUploadDiseaseAnalysis } from "./components/ImageUploadDiseaseAnalysis";
 import { ResistanceMonitoringDashboard } from "./components/ResistanceMonitoringDashboard";
 import { ChemicalInventoryUI } from "./components/ChemicalInventoryUI";
+import { WeatherIntegrationUI } from "./components/WeatherIntegrationUI";
+import { FinancialAnalyticsDashboard } from "./components/FinancialAnalyticsDashboard";
 import { FloatingElements } from "./components/FloatingElements";
 import { BreadcrumbProvider } from "./contexts/BreadcrumbContext";
 import { CommandPalette } from "./components/CommandPalette";
@@ -275,6 +277,20 @@ function Router() {
         {() => (
           <DashboardLayout>
             <ChemicalInventoryUI />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/weather-integration">
+        {() => (
+          <DashboardLayout>
+            <WeatherIntegrationUI />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/financial-analytics">
+        {() => (
+          <DashboardLayout>
+            <FinancialAnalyticsDashboard />
           </DashboardLayout>
         )}
       </Route>
