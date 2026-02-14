@@ -332,6 +332,8 @@ export const navigationStructure: MenuGroup[] = [
       { icon: Copy, label: "Task Templates", path: "/task-templates" },
       { icon: AlertCircle, label: "Alert Dashboard", path: "/alert-dashboard" },
       { icon: Calendar, label: "Worker Availability", path: "/worker-availability" },
+      { icon: TrendingUp, label: "Performance Trends", path: "/performance-trends" },
+      { icon: Clock, label: "Shift Management", path: "/shift-management" },
       { icon: BarChart3, label: "Performance Analytics", path: "/worker-performance" },
     ],
   },

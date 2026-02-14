@@ -142,6 +142,8 @@ import { TaskCompletionTracking } from "./components/TaskCompletionTracking";
 import { TaskTemplatesUI } from "./components/TaskTemplatesUI";
 import { AlertDashboard } from "./components/AlertDashboard";
 import { WorkerAvailabilityCalendar } from "./components/WorkerAvailabilityCalendar";
+import { WorkerPerformanceTrends } from "./components/WorkerPerformanceTrends";
+import { ShiftManagement } from "./components/ShiftManagement";
 
 function Router() {
   return (
@@ -340,6 +342,20 @@ function Router() {
         {() => (
           <DashboardLayout>
             <WorkerAvailabilityCalendar />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/performance-trends">
+        {() => (
+          <DashboardLayout>
+            <WorkerPerformanceTrends />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/shift-management">
+        {() => (
+          <DashboardLayout>
+            <ShiftManagement />
           </DashboardLayout>
         )}
       </Route>
