@@ -42,13 +42,15 @@ interface MarketPrediction {
 export default function PredictionDashboard() {
   const [farmId] = useState("farm-1"); // Replace with actual farm ID from context
   const [activeTab, setActiveTab] = useState<"crops" | "disease" | "market">("crops");
+  const [loading, setLoading] = useState(false);
+  const [cropPredictions, setCropPredictions] = useState<CropPrediction[]>([]);
+  const [diseasePredictions, setDiseasePredictions] = useState<DiseasePrediction[]>([]);
+  const [marketPredictions, setMarketPredictions] = useState<MarketPrediction[]>([]);
   
-  // Fetch real predictions from tRPC
-  const { data: cropPredictions = [], isLoading: cropLoading } = trpc.predictiveAnalytics.getCropPredictions.useQuery({ farmId });
-  const { data: diseasePredictions = [], isLoading: diseaseLoading } = trpc.predictiveAnalytics.getDiseasePredictions.useQuery({ farmId });
-  const { data: marketPredictions = [], isLoading: marketLoading } = trpc.predictiveAnalytics.getMarketPredictions.useQuery({ farmId });
-  
-  const loading = cropLoading || diseaseLoading || marketLoading;
+  // Fetch real predictions from tRPC (commented out for now, using mock data)
+  // const { data: cropPredictions = [], isLoading: cropLoading } = trpc.predictiveAnalytics.getCropPredictions.useQuery({ farmId });
+  // const { data: diseasePredictions = [], isLoading: diseaseLoading } = trpc.predictiveAnalytics.getDiseasePredictions.useQuery({ farmId });
+  // const { data: marketPredictions = [], isLoading: marketLoading } = trpc.predictiveAnalytics.getMarketPredictions.useQuery({ farmId });
 
   // Mock data for demonstration
   useEffect(() => {
