@@ -3438,3 +3438,188 @@ export type FarmExpenseCategory = typeof farmExpenseCategories.$inferSelect;
 export type InsertFarmExpenseCategory = typeof farmExpenseCategories.$inferInsert;
 
 
+
+// ============================================================================
+// LABOR MANAGEMENT - TASK ASSIGNMENT & TRACKING
+// ============================================================================
+
+/**
+ * Task Assignments - Assign specific tasks to workers
+ */
+export const taskAssignments = mysqlTable("taskAssignments", {
+  id: int("id").autoincrement().primaryKey(),
+  taskId: varchar("taskId", { length: 64 }).notNull().unique(), // UUID
+  farmId: int("farmId").notNull(),
+  workerId: int("workerId").notNull(), // Reference to user assigned to task
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  taskType: mysqlEnum("taskType", [
+    "planting",
+    "weeding",
+    "irrigation",
+    "harvesting",
+    "maintenance",
+    "spraying",
+    "feeding",
+    "health_check",
+    "cleaning",
+    "repair",
+    "inspection",
+    "other"
+  ]).notNull(),
+  priority: mysqlEnum("priority", ["low", "medium", "high", "urgent"]).default("medium").notNull(),
+  status: mysqlEnum("status", ["pending", "in_progress", "completed", "cancelled", "on_hold"]).default("pending").notNull(),
+  dueDate: timestamp("dueDate").notNull(),
+  estimatedHours: decimal("estimatedHours", { precision: 8, scale: 2 }).notNull(),
+  actualHours: decimal("actualHours", { precision: 8, scale: 2 }),
+  completedAt: timestamp("completedAt"),
+  notes: text("notes"),
+  templateId: int("templateId"), // Reference to task template if created from template
+  createdBy: int("createdBy").notNull(), // User who created the task
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type TaskAssignment = typeof taskAssignments.$inferSelect;
+export type InsertTaskAssignment = typeof taskAssignments.$inferInsert;
+
+/**
+ * Task Completion Records - Track completion details and efficiency
+ */
+export const taskCompletionRecords = mysqlTable("taskCompletionRecords", {
+  id: int("id").autoincrement().primaryKey(),
+  recordId: varchar("recordId", { length: 64 }).notNull().unique(), // UUID
+  taskId: varchar("taskId", { length: 64 }).notNull(),
+  workerId: int("workerId").notNull(),
+  farmId: int("farmId").notNull(),
+  completedAt: timestamp("completedAt").notNull(),
+  estimatedHours: decimal("estimatedHours", { precision: 8, scale: 2 }).notNull(),
+  actualHours: decimal("actualHours", { precision: 8, scale: 2 }).notNull(),
+  efficiency: decimal("efficiency", { precision: 5, scale: 2 }).notNull(), // Percentage: (estimated/actual)*100
+  qualityRating: int("qualityRating"), // 1-5 rating
+  notes: text("notes"),
+  photoUrls: text("photoUrls"), // JSON array of completion photo URLs
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type TaskCompletionRecord = typeof taskCompletionRecords.$inferSelect;
+export type InsertTaskCompletionRecord = typeof taskCompletionRecords.$inferInsert;
+
+/**
+ * Worker Performance Alerts - Track efficiency alerts and thresholds
+ */
+export const workerPerformanceAlerts = mysqlTable("workerPerformanceAlerts", {
+  id: int("id").autoincrement().primaryKey(),
+  alertId: varchar("alertId", { length: 64 }).notNull().unique(), // UUID
+  farmId: int("farmId").notNull(),
+  workerId: int("workerId").notNull(),
+  alertType: mysqlEnum("alertType", [
+    "low_efficiency",
+    "time_overrun",
+    "quality_issue",
+    "missed_deadline",
+    "high_performer",
+    "performance_improvement"
+  ]).notNull(),
+  threshold: varchar("threshold", { length: 100 }).notNull(), // e.g., "efficiency < 85%"
+  currentValue: varchar("currentValue", { length: 100 }).notNull(), // e.g., "efficiency: 78%"
+  taskId: varchar("taskId", { length: 64 }), // Reference to related task
+  severity: mysqlEnum("severity", ["info", "warning", "critical"]).default("warning").notNull(),
+  isResolved: boolean("isResolved").default(false).notNull(),
+  resolvedAt: timestamp("resolvedAt"),
+  resolvedNotes: text("resolvedNotes"),
+  notificationSent: boolean("notificationSent").default(false).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type WorkerPerformanceAlert = typeof workerPerformanceAlerts.$inferSelect;
+export type InsertWorkerPerformanceAlert = typeof workerPerformanceAlerts.$inferInsert;
+
+/**
+ * Task Templates - Reusable task templates for bulk assignment
+ */
+export const taskTemplates = mysqlTable("taskTemplates", {
+  id: int("id").autoincrement().primaryKey(),
+  templateId: varchar("templateId", { length: 64 }).notNull().unique(), // UUID
+  farmId: int("farmId").notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  taskType: mysqlEnum("taskType", [
+    "planting",
+    "weeding",
+    "irrigation",
+    "harvesting",
+    "maintenance",
+    "spraying",
+    "feeding",
+    "health_check",
+    "cleaning",
+    "repair",
+    "inspection",
+    "other"
+  ]).notNull(),
+  defaultPriority: mysqlEnum("defaultPriority", ["low", "medium", "high", "urgent"]).default("medium").notNull(),
+  defaultEstimatedHours: decimal("defaultEstimatedHours", { precision: 8, scale: 2 }).notNull(),
+  defaultDescription: text("defaultDescription"),
+  recurrencePattern: mysqlEnum("recurrencePattern", ["once", "daily", "weekly", "biweekly", "monthly", "quarterly", "yearly"]).default("once").notNull(),
+  recurrenceDayOfWeek: varchar("recurrenceDayOfWeek", { length: 50 }), // JSON array for weekly: ["Monday", "Wednesday"]
+  recurrenceDayOfMonth: int("recurrenceDayOfMonth"), // For monthly recurrence
+  isActive: boolean("isActive").default(true).notNull(),
+  createdBy: int("createdBy").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type TaskTemplate = typeof taskTemplates.$inferSelect;
+export type InsertTaskTemplate = typeof taskTemplates.$inferInsert;
+
+/**
+ * Bulk Task Assignments - Track bulk assignment operations
+ */
+export const bulkTaskAssignments = mysqlTable("bulkTaskAssignments", {
+  id: int("id").autoincrement().primaryKey(),
+  bulkId: varchar("bulkId", { length: 64 }).notNull().unique(), // UUID
+  farmId: int("farmId").notNull(),
+  templateId: int("templateId").notNull(), // Reference to task template
+  workerIds: text("workerIds").notNull(), // JSON array of worker IDs
+  totalTasks: int("totalTasks").notNull(),
+  successCount: int("successCount").default(0).notNull(),
+  failureCount: int("failureCount").default(0).notNull(),
+  status: mysqlEnum("status", ["pending", "processing", "completed", "failed"]).default("pending").notNull(),
+  startDate: timestamp("startDate").notNull(),
+  endDate: timestamp("endDate"),
+  errorLog: text("errorLog"), // JSON array of errors
+  createdBy: int("createdBy").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  completedAt: timestamp("completedAt"),
+});
+
+export type BulkTaskAssignment = typeof bulkTaskAssignments.$inferSelect;
+export type InsertBulkTaskAssignment = typeof bulkTaskAssignments.$inferInsert;
+
+/**
+ * Worker Performance Metrics - Aggregated performance data
+ */
+export const workerPerformanceMetrics = mysqlTable("workerPerformanceMetrics", {
+  id: int("id").autoincrement().primaryKey(),
+  metricsId: varchar("metricsId", { length: 64 }).notNull().unique(), // UUID
+  farmId: int("farmId").notNull(),
+  workerId: int("workerId").notNull(),
+  period: mysqlEnum("period", ["daily", "weekly", "monthly", "yearly"]).notNull(),
+  periodDate: date("periodDate").notNull(),
+  totalTasks: int("totalTasks").default(0).notNull(),
+  completedTasks: int("completedTasks").default(0).notNull(),
+  cancelledTasks: int("cancelledTasks").default(0).notNull(),
+  averageEfficiency: decimal("averageEfficiency", { precision: 5, scale: 2 }), // Average efficiency percentage
+  totalHoursEstimated: decimal("totalHoursEstimated", { precision: 10, scale: 2 }).default("0"),
+  totalHoursActual: decimal("totalHoursActual", { precision: 10, scale: 2 }).default("0"),
+  averageQualityRating: decimal("averageQualityRating", { precision: 3, scale: 1 }), // 1-5 average
+  tasksOverdue: int("tasksOverdue").default(0).notNull(),
+  lowEfficiencyCount: int("lowEfficiencyCount").default(0).notNull(), // Tasks with efficiency < 85%
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type WorkerPerformanceMetrics = typeof workerPerformanceMetrics.$inferSelect;
+export type InsertWorkerPerformanceMetrics = typeof workerPerformanceMetrics.$inferInsert;

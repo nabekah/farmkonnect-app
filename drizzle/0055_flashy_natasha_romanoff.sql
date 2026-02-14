@@ -1,0 +1,123 @@
+CREATE TABLE `bulkTaskAssignments` (
+	`id` int AUTO_INCREMENT NOT NULL,
+	`bulkId` varchar(64) NOT NULL,
+	`farmId` int NOT NULL,
+	`templateId` int NOT NULL,
+	`workerIds` text NOT NULL,
+	`totalTasks` int NOT NULL,
+	`successCount` int NOT NULL DEFAULT 0,
+	`failureCount` int NOT NULL DEFAULT 0,
+	`status` enum('pending','processing','completed','failed') NOT NULL DEFAULT 'pending',
+	`startDate` timestamp NOT NULL,
+	`endDate` timestamp,
+	`errorLog` text,
+	`createdBy` int NOT NULL,
+	`createdAt` timestamp NOT NULL DEFAULT (now()),
+	`completedAt` timestamp,
+	CONSTRAINT `bulkTaskAssignments_id` PRIMARY KEY(`id`),
+	CONSTRAINT `bulkTaskAssignments_bulkId_unique` UNIQUE(`bulkId`)
+);
+--> statement-breakpoint
+CREATE TABLE `taskAssignments` (
+	`id` int AUTO_INCREMENT NOT NULL,
+	`taskId` varchar(64) NOT NULL,
+	`farmId` int NOT NULL,
+	`workerId` int NOT NULL,
+	`title` varchar(255) NOT NULL,
+	`description` text,
+	`taskType` enum('planting','weeding','irrigation','harvesting','maintenance','spraying','feeding','health_check','cleaning','repair','inspection','other') NOT NULL,
+	`priority` enum('low','medium','high','urgent') NOT NULL DEFAULT 'medium',
+	`status` enum('pending','in_progress','completed','cancelled','on_hold') NOT NULL DEFAULT 'pending',
+	`dueDate` timestamp NOT NULL,
+	`estimatedHours` decimal(8,2) NOT NULL,
+	`actualHours` decimal(8,2),
+	`completedAt` timestamp,
+	`notes` text,
+	`templateId` int,
+	`createdBy` int NOT NULL,
+	`createdAt` timestamp NOT NULL DEFAULT (now()),
+	`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `taskAssignments_id` PRIMARY KEY(`id`),
+	CONSTRAINT `taskAssignments_taskId_unique` UNIQUE(`taskId`)
+);
+--> statement-breakpoint
+CREATE TABLE `taskCompletionRecords` (
+	`id` int AUTO_INCREMENT NOT NULL,
+	`recordId` varchar(64) NOT NULL,
+	`taskId` varchar(64) NOT NULL,
+	`workerId` int NOT NULL,
+	`farmId` int NOT NULL,
+	`completedAt` timestamp NOT NULL,
+	`estimatedHours` decimal(8,2) NOT NULL,
+	`actualHours` decimal(8,2) NOT NULL,
+	`efficiency` decimal(5,2) NOT NULL,
+	`qualityRating` int,
+	`notes` text,
+	`photoUrls` text,
+	`createdAt` timestamp NOT NULL DEFAULT (now()),
+	CONSTRAINT `taskCompletionRecords_id` PRIMARY KEY(`id`),
+	CONSTRAINT `taskCompletionRecords_recordId_unique` UNIQUE(`recordId`)
+);
+--> statement-breakpoint
+CREATE TABLE `taskTemplates` (
+	`id` int AUTO_INCREMENT NOT NULL,
+	`templateId` varchar(64) NOT NULL,
+	`farmId` int NOT NULL,
+	`name` varchar(255) NOT NULL,
+	`description` text,
+	`taskType` enum('planting','weeding','irrigation','harvesting','maintenance','spraying','feeding','health_check','cleaning','repair','inspection','other') NOT NULL,
+	`defaultPriority` enum('low','medium','high','urgent') NOT NULL DEFAULT 'medium',
+	`defaultEstimatedHours` decimal(8,2) NOT NULL,
+	`defaultDescription` text,
+	`recurrencePattern` enum('once','daily','weekly','biweekly','monthly','quarterly','yearly') NOT NULL DEFAULT 'once',
+	`recurrenceDayOfWeek` varchar(50),
+	`recurrenceDayOfMonth` int,
+	`isActive` boolean NOT NULL DEFAULT true,
+	`createdBy` int NOT NULL,
+	`createdAt` timestamp NOT NULL DEFAULT (now()),
+	`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `taskTemplates_id` PRIMARY KEY(`id`),
+	CONSTRAINT `taskTemplates_templateId_unique` UNIQUE(`templateId`)
+);
+--> statement-breakpoint
+CREATE TABLE `workerPerformanceAlerts` (
+	`id` int AUTO_INCREMENT NOT NULL,
+	`alertId` varchar(64) NOT NULL,
+	`farmId` int NOT NULL,
+	`workerId` int NOT NULL,
+	`alertType` enum('low_efficiency','time_overrun','quality_issue','missed_deadline','high_performer','performance_improvement') NOT NULL,
+	`threshold` varchar(100) NOT NULL,
+	`currentValue` varchar(100) NOT NULL,
+	`taskId` varchar(64),
+	`severity` enum('info','warning','critical') NOT NULL DEFAULT 'warning',
+	`isResolved` boolean NOT NULL DEFAULT false,
+	`resolvedAt` timestamp,
+	`resolvedNotes` text,
+	`notificationSent` boolean NOT NULL DEFAULT false,
+	`createdAt` timestamp NOT NULL DEFAULT (now()),
+	`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `workerPerformanceAlerts_id` PRIMARY KEY(`id`),
+	CONSTRAINT `workerPerformanceAlerts_alertId_unique` UNIQUE(`alertId`)
+);
+--> statement-breakpoint
+CREATE TABLE `workerPerformanceMetrics` (
+	`id` int AUTO_INCREMENT NOT NULL,
+	`metricsId` varchar(64) NOT NULL,
+	`farmId` int NOT NULL,
+	`workerId` int NOT NULL,
+	`period` enum('daily','weekly','monthly','yearly') NOT NULL,
+	`periodDate` date NOT NULL,
+	`totalTasks` int NOT NULL DEFAULT 0,
+	`completedTasks` int NOT NULL DEFAULT 0,
+	`cancelledTasks` int NOT NULL DEFAULT 0,
+	`averageEfficiency` decimal(5,2),
+	`totalHoursEstimated` decimal(10,2) DEFAULT '0',
+	`totalHoursActual` decimal(10,2) DEFAULT '0',
+	`averageQualityRating` decimal(3,1),
+	`tasksOverdue` int NOT NULL DEFAULT 0,
+	`lowEfficiencyCount` int NOT NULL DEFAULT 0,
+	`createdAt` timestamp NOT NULL DEFAULT (now()),
+	`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `workerPerformanceMetrics_id` PRIMARY KEY(`id`),
+	CONSTRAINT `workerPerformanceMetrics_metricsId_unique` UNIQUE(`metricsId`)
+);

@@ -328,6 +328,7 @@ export const navigationStructure: MenuGroup[] = [
       { icon: Users, label: "Worker Directory", path: "/labor-management" },
       { icon: ListTodo, label: "Task Assignment", path: "/task-assignment" },
       { icon: CheckCircle, label: "Task Completion", path: "/task-completion-tracking" },
+      { icon: Copy, label: "Task Templates", path: "/task-templates" },
       { icon: BarChart3, label: "Performance Analytics", path: "/worker-performance" },
     ],
   },

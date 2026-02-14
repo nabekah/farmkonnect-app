@@ -139,6 +139,7 @@ import { FarmConsolidationDashboard } from "./components/FarmConsolidationDashbo
 import { FarmDetailedAnalytics } from "./components/FarmDetailedAnalytics";
 import { TaskAssignmentUI } from "./components/TaskAssignmentUI";
 import { TaskCompletionTracking } from "./components/TaskCompletionTracking";
+import { TaskTemplatesUI } from "./components/TaskTemplatesUI";
 
 function Router() {
   return (
@@ -316,6 +317,13 @@ function Router() {
         {() => (
           <DashboardLayout>
             <TaskCompletionTracking />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/task-templates">
+        {() => (
+          <DashboardLayout>
+            <TaskTemplatesUI />
           </DashboardLayout>
         )}
       </Route>
