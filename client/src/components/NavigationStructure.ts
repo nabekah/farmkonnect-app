@@ -320,6 +320,19 @@ export const navigationStructure: MenuGroup[] = [
   },
 
   {
+    title: "Labor Management",
+    description: "Worker management, task assignment, and performance tracking",
+    collapsible: true,
+    defaultExpanded: true,
+    items: [
+      { icon: Users, label: "Worker Directory", path: "/labor-management" },
+      { icon: ListTodo, label: "Task Assignment", path: "/task-assignment" },
+      { icon: CheckCircle, label: "Task Completion", path: "/task-completion-tracking" },
+      { icon: BarChart3, label: "Performance Analytics", path: "/worker-performance" },
+    ],
+  },
+
+  {
     title: "Financial Management",
     description: "Income, expenses, budgets, and financial planning",
     collapsible: true,

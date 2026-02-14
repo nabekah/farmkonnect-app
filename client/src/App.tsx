@@ -137,6 +137,8 @@ import CooperativeDashboard from "./pages/CooperativeDashboard";
 import { FarmComparison } from "./components/FarmComparison";
 import { FarmConsolidationDashboard } from "./components/FarmConsolidationDashboard";
 import { FarmDetailedAnalytics } from "./components/FarmDetailedAnalytics";
+import { TaskAssignmentUI } from "./components/TaskAssignmentUI";
+import { TaskCompletionTracking } from "./components/TaskCompletionTracking";
 
 function Router() {
   return (
@@ -300,6 +302,20 @@ function Router() {
         {() => (
           <DashboardLayout>
             <LaborManagementUI />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/task-assignment">
+        {() => (
+          <DashboardLayout>
+            <TaskAssignmentUI />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/task-completion-tracking">
+        {() => (
+          <DashboardLayout>
+            <TaskCompletionTracking />
           </DashboardLayout>
         )}
       </Route>
