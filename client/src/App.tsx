@@ -68,6 +68,9 @@ import { IrrigationCostAnalysisUI } from "./components/IrrigationCostAnalysisUI"
 import { CampaignSchedulerUI } from "./components/CampaignSchedulerUI";
 import { CampaignMonitorUI } from "./components/CampaignMonitorUI";
 import { PestDiseaseManagementUI } from "./components/PestDiseaseManagementUI";
+import { ImageUploadDiseaseAnalysis } from "./components/ImageUploadDiseaseAnalysis";
+import { ResistanceMonitoringDashboard } from "./components/ResistanceMonitoringDashboard";
+import { ChemicalInventoryUI } from "./components/ChemicalInventoryUI";
 import { FloatingElements } from "./components/FloatingElements";
 import { BreadcrumbProvider } from "./contexts/BreadcrumbContext";
 import { CommandPalette } from "./components/CommandPalette";
@@ -251,6 +254,27 @@ function Router() {
         {() => (
           <DashboardLayout>
             <PestDiseaseManagementUI />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/disease-analysis">
+        {() => (
+          <DashboardLayout>
+            <ImageUploadDiseaseAnalysis />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/resistance-monitoring">
+        {() => (
+          <DashboardLayout>
+            <ResistanceMonitoringDashboard />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/chemical-inventory">
+        {() => (
+          <DashboardLayout>
+            <ChemicalInventoryUI />
           </DashboardLayout>
         )}
       </Route>
