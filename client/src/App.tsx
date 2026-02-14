@@ -65,6 +65,8 @@ import { InventoryManagement } from "./pages/InventoryManagement";
 import { SoilHealthRecommendations } from "./pages/SoilHealthRecommendations";
 import { FertilizerCostDashboard } from "./pages/FertilizerCostDashboard";
 import { IrrigationCostAnalysisUI } from "./components/IrrigationCostAnalysisUI";
+import { CampaignSchedulerUI } from "./components/CampaignSchedulerUI";
+import { CampaignMonitorUI } from "./components/CampaignMonitorUI";
 import { FloatingElements } from "./components/FloatingElements";
 import { BreadcrumbProvider } from "./contexts/BreadcrumbContext";
 import { CommandPalette } from "./components/CommandPalette";
@@ -227,6 +229,20 @@ function Router() {
         {() => (
           <DashboardLayout>
             <IrrigationCostAnalysisUI />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/campaign-scheduler">
+        {() => (
+          <DashboardLayout>
+            <CampaignSchedulerUI />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/campaign-monitor">
+        {() => (
+          <DashboardLayout>
+            <CampaignMonitorUI />
           </DashboardLayout>
         )}
       </Route>

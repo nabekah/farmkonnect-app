@@ -43,6 +43,10 @@ import {
   Zap,
   Layers,
   Calculator,
+  Eye,
+  Filter,
+  Send,
+  Library,
 } from "lucide-react";
 
 export interface MenuItem {
@@ -257,6 +261,18 @@ export const navigationStructure: MenuGroup[] = [
     items: [
       { icon: Bell, label: "Notification Settings", path: "/notification-settings" },
       { icon: History, label: "Alert History", path: "/alert-history" },
+      { icon: Bell, label: "Notification Center", path: "/notification-center" },
+      { icon: Briefcase, label: "Campaign Monitor", path: "/campaign-monitor" },
+      { icon: Calendar, label: "Campaign Scheduler", path: "/campaign-scheduler" },
+      { icon: Users, label: "Recipient Management", path: "/recipient-management" },
+      { icon: FileText, label: "Campaign Templates", path: "/campaign-templates" },
+      { icon: Eye, label: "Template Preview", path: "/template-preview" },
+      { icon: Filter, label: "Recipient Filters", path: "/recipient-filters" },
+      { icon: Send, label: "Bulk Messaging", path: "/bulk-messaging" },
+      { icon: Library, label: "Template Library", path: "/template-library" },
+      { icon: Smartphone, label: "Push Notifications", path: "/push-notifications" },
+      { icon: Zap, label: "Smart Scheduler", path: "/smart-scheduler" },
+      { icon: CheckCircle, label: "Approval Workflow", path: "/approval-workflow" },
     ],
   },
 
