@@ -318,3 +318,80 @@ export function broadcastCooperativeUpdate(cooperativeId: number, action: string
     wsServer.broadcastToAll(message);
   }
 }
+
+// Real-time task and shift updates
+export function broadcastTaskUpdate(farmId: number, taskId: number, action: string, data?: any) {
+  const message = {
+    type: 'task_update',
+    data: {
+      taskId,
+      action,
+      data,
+      timestamp: new Date().toISOString(),
+    },
+  };
+  if (wsServer) {
+    wsServer.broadcastToFarm(farmId, message);
+  }
+}
+
+export function broadcastShiftUpdate(farmId: number, shiftId: number, action: string, data?: any) {
+  const message = {
+    type: 'shift_update',
+    data: {
+      shiftId,
+      action,
+      data,
+      timestamp: new Date().toISOString(),
+    },
+  };
+  if (wsServer) {
+    wsServer.broadcastToFarm(farmId, message);
+  }
+}
+
+export function broadcastWorkerAvailabilityUpdate(farmId: number, workerId: number, availability: any) {
+  const message = {
+    type: 'worker_availability_update',
+    data: {
+      workerId,
+      availability,
+      timestamp: new Date().toISOString(),
+    },
+  };
+  if (wsServer) {
+    wsServer.broadcastToFarm(farmId, message);
+  }
+}
+
+export function broadcastTaskStatusChange(farmId: number, taskId: number, workerId: number, oldStatus: string, newStatus: string) {
+  const message = {
+    type: 'task_status_change',
+    data: {
+      taskId,
+      workerId,
+      oldStatus,
+      newStatus,
+      timestamp: new Date().toISOString(),
+    },
+  };
+  if (wsServer) {
+    wsServer.broadcastToFarm(farmId, message);
+  }
+}
+
+export function broadcastShiftAssignment(farmId: number, shiftId: number, workerId: number, workerName: string) {
+  const message = {
+    type: 'shift_assigned',
+    data: {
+      shiftId,
+      workerId,
+      workerName,
+      timestamp: new Date().toISOString(),
+    },
+  };
+  if (wsServer) {
+    wsServer.broadcastToFarm(farmId, message);
+    wsServer.broadcastToUser(workerId, message);
+  }
+}

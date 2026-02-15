@@ -16,6 +16,7 @@ import AppointmentsScreen from "./screens/AppointmentsScreen";
 import FinancialScreen from "./screens/FinancialScreen";
 import NotificationsScreen from "./screens/NotificationsScreen";
 import SettingsScreen from "./screens/SettingsScreen";
+import TaskAssignmentScreen from "./screens/TaskAssignmentScreen";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -43,6 +44,15 @@ const DashboardTabs = () => {
           title: "Dashboard",
           tabBarLabel: "Home",
           tabBarIcon: ({ color }) => <DashboardIcon color={color} />,
+        }}
+      />
+      <Tab.Screen
+        name="Tasks"
+        component={TaskAssignmentScreen}
+        options={{
+          title: "Tasks",
+          tabBarLabel: "Tasks",
+          tabBarIcon: ({ color }) => <TaskIcon color={color} />,
         }}
       />
       <Tab.Screen
@@ -161,6 +171,9 @@ export default function App() {
 // Icon components (simplified)
 const DashboardIcon = ({ color }: { color: string }) => (
   <Text style={{ fontSize: 20, color }}>📊</Text>
+);
+const TaskIcon = ({ color }: { color: string }) => (
+  <Text style={{ fontSize: 20, color }}>✓</Text>
 );
 const AppointmentIcon = ({ color }: { color: string }) => (
   <Text style={{ fontSize: 20, color }}>📅</Text>

@@ -181,6 +181,7 @@ import { adminRouter } from "./routers/adminRouter";
 import { chatbotRouter } from "./routers/chatbotRouter";
 import { weatherAlertsRouter } from "./routers/weatherAlertsRouter";
 import { pushNotificationIntegrationRouter } from "./routers/pushNotificationIntegration";
+import { notificationEventHandlersRouter } from "./routers/notificationEventHandlers";
 import { z } from "zod";
 import { getDb } from "./db";
 import { TRPCError } from "@trpc/server";
@@ -305,6 +306,7 @@ export const appRouter = router({
   chatbot: chatbotRouter,
   weatherAlerts: weatherAlertsRouter,
   pushNotificationIntegration: pushNotificationIntegrationRouter,
+  notificationEventHandlers: notificationEventHandlersRouter,
   // accountingExport: accountingExportRouter,
   // expenseNotifications: expenseNotifications,
   // farmAnalytics: farmAnalytics,
