@@ -2,9 +2,9 @@ import { router, protectedProcedure } from "../_core/trpc";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { getDb } from "../db";
-
-// Using raw SQL queries for database operations
-// This approach is consistent with other routers in the codebase
+import { taskAssignments, users } from "../../drizzle/schema";
+import { eq, and } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 
 export const taskAssignmentDatabaseRouter = router({
   /**
@@ -17,18 +17,32 @@ export const taskAssignmentDatabaseRouter = router({
         const db = await getDb();
         if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database unavailable" });
 
-        const result = await db.query.raw(
-          `SELECT ta.id, ta.taskId, ta.title, ta.description, ta.taskType, ta.priority, ta.status,
-                  ta.dueDate, ta.estimatedHours, ta.actualHours, ta.workerId, u.name as workerName,
-                  ta.createdAt, ta.updatedAt, ta.farmId
-           FROM taskAssignments ta
-           LEFT JOIN users u ON ta.workerId = u.id
-           WHERE ta.farmId = ?
-           ORDER BY ta.createdAt DESC`,
-          [input.farmId]
-        );
+        const result = await db
+          .select({
+            id: taskAssignments.id,
+            taskId: taskAssignments.taskId,
+            title: taskAssignments.title,
+            description: taskAssignments.description,
+            taskType: taskAssignments.taskType,
+            priority: taskAssignments.priority,
+            status: taskAssignments.status,
+            dueDate: taskAssignments.dueDate,
+            estimatedHours: taskAssignments.estimatedHours,
+            actualHours: taskAssignments.actualHours,
+            workerId: taskAssignments.workerId,
+            workerName: users.name,
+            createdAt: taskAssignments.createdAt,
+            updatedAt: taskAssignments.updatedAt,
+            farmId: taskAssignments.farmId
+          })
+          .from(taskAssignments)
+          .leftJoin(users, eq(taskAssignments.workerId, users.id))
+          .where(eq(taskAssignments.farmId, input.farmId))
+          .orderBy(sql`${taskAssignments.createdAt} DESC`);
+
         return result || [];
       } catch (error) {
+        console.error("Error fetching tasks:", error);
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to fetch tasks" });
       }
     }),
@@ -43,18 +57,15 @@ export const taskAssignmentDatabaseRouter = router({
         const db = await getDb();
         if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database unavailable" });
 
-        const result = await db.query.raw(
-          `SELECT ta.id, ta.taskId, ta.title, ta.description, ta.taskType, ta.priority, ta.status,
-                  ta.dueDate, ta.estimatedHours, ta.actualHours, ta.workerId, u.name as workerName,
-                  ta.createdAt, ta.updatedAt, ta.farmId
-           FROM taskAssignments ta
-           LEFT JOIN users u ON ta.workerId = u.id
-           WHERE ta.taskId = ?
-           LIMIT 1`,
-          [input.taskId]
-        );
-        return result?.[0] || null;
+        const result = await db
+          .select()
+          .from(taskAssignments)
+          .where(eq(taskAssignments.taskId, input.taskId))
+          .limit(1);
+
+        return result[0] || null;
       } catch (error) {
+        console.error("Error fetching task:", error);
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to fetch task" });
       }
     }),
@@ -66,7 +77,7 @@ export const taskAssignmentDatabaseRouter = router({
     .input(
       z.object({
         farmId: z.number(),
-        workerId: z.number(),
+        workerId: z.number().nullable(),
         title: z.string().min(1),
         description: z.string().optional(),
         taskType: z.string(),
@@ -82,25 +93,24 @@ export const taskAssignmentDatabaseRouter = router({
 
         const taskId = `task_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-        await db.query.raw(
-          `INSERT INTO taskAssignments (taskId, farmId, workerId, title, description, taskType, priority, status, dueDate, estimatedHours, createdBy, createdAt, updatedAt)
-           VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, NOW(), NOW())`,
-          [
-            taskId,
-            input.farmId,
-            input.workerId,
-            input.title,
-            input.description || null,
-            input.taskType,
-            input.priority,
-            input.dueDate,
-            input.estimatedHours,
-            ctx.user.id,
-          ]
-        );
+        await db.insert(taskAssignments).values({
+          taskId,
+          farmId: input.farmId,
+          workerId: input.workerId,
+          title: input.title,
+          description: input.description || null,
+          taskType: input.taskType,
+          priority: input.priority,
+          status: 'pending',
+          dueDate: input.dueDate,
+          estimatedHours: input.estimatedHours,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        });
 
         return { taskId, success: true };
       } catch (error) {
+        console.error("Error creating task:", error);
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to create task" });
       }
     }),
@@ -121,24 +131,19 @@ export const taskAssignmentDatabaseRouter = router({
         const db = await getDb();
         if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database unavailable" });
 
-        let query = `UPDATE taskAssignments SET status = ?, updatedAt = NOW()`;
-        const params: any[] = [input.status];
-
-        if (input.status === "completed") {
-          query += `, completedAt = NOW()`;
-          if (input.actualHours) {
-            query += `, actualHours = ?`;
-            params.push(input.actualHours);
-          }
+        const updateData: any = { status: input.status, updatedAt: new Date() };
+        if (input.status === "completed" && input.actualHours) {
+          updateData.actualHours = input.actualHours;
         }
 
-        query += ` WHERE taskId = ?`;
-        params.push(input.taskId);
-
-        await db.query.raw(query, params);
+        await db
+          .update(taskAssignments)
+          .set(updateData)
+          .where(eq(taskAssignments.taskId, input.taskId));
 
         return { success: true };
       } catch (error) {
+        console.error("Error updating task status:", error);
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to update task" });
       }
     }),
@@ -162,39 +167,21 @@ export const taskAssignmentDatabaseRouter = router({
         const db = await getDb();
         if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database unavailable" });
 
-        const updates: string[] = ["updatedAt = NOW()"];
-        const params: any[] = [];
+        const updateData: any = { updatedAt: new Date() };
+        if (input.title) updateData.title = input.title;
+        if (input.description) updateData.description = input.description;
+        if (input.priority) updateData.priority = input.priority;
+        if (input.dueDate) updateData.dueDate = input.dueDate;
+        if (input.estimatedHours) updateData.estimatedHours = input.estimatedHours;
 
-        if (input.title) {
-          updates.push("title = ?");
-          params.push(input.title);
-        }
-        if (input.description) {
-          updates.push("description = ?");
-          params.push(input.description);
-        }
-        if (input.priority) {
-          updates.push("priority = ?");
-          params.push(input.priority);
-        }
-        if (input.dueDate) {
-          updates.push("dueDate = ?");
-          params.push(input.dueDate);
-        }
-        if (input.estimatedHours) {
-          updates.push("estimatedHours = ?");
-          params.push(input.estimatedHours);
-        }
-
-        params.push(input.taskId);
-
-        await db.query.raw(
-          `UPDATE taskAssignments SET ${updates.join(", ")} WHERE taskId = ?`,
-          params
-        );
+        await db
+          .update(taskAssignments)
+          .set(updateData)
+          .where(eq(taskAssignments.taskId, input.taskId));
 
         return { success: true };
       } catch (error) {
+        console.error("Error updating task:", error);
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to update task" });
       }
     }),
@@ -209,13 +196,14 @@ export const taskAssignmentDatabaseRouter = router({
         const db = await getDb();
         if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database unavailable" });
 
-        await db.query.raw(
-          `UPDATE taskAssignments SET status = 'cancelled', updatedAt = NOW() WHERE taskId = ?`,
-          [input.taskId]
-        );
+        await db
+          .update(taskAssignments)
+          .set({ status: 'cancelled', updatedAt: new Date() })
+          .where(eq(taskAssignments.taskId, input.taskId));
 
         return { success: true };
       } catch (error) {
+        console.error("Error deleting task:", error);
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to delete task" });
       }
     }),
@@ -235,18 +223,18 @@ export const taskAssignmentDatabaseRouter = router({
         const db = await getDb();
         if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database unavailable" });
 
-        const result = await db.query.raw(
-          `SELECT ta.id, ta.taskId, ta.title, ta.description, ta.taskType, ta.priority, ta.status,
-                  ta.dueDate, ta.estimatedHours, ta.actualHours, ta.workerId, u.name as workerName,
-                  ta.createdAt, ta.updatedAt
-           FROM taskAssignments ta
-           LEFT JOIN users u ON ta.workerId = u.id
-           WHERE ta.farmId = ? AND ta.status = ?
-           ORDER BY ta.dueDate DESC`,
-          [input.farmId, input.status]
-        );
+        const result = await db
+          .select()
+          .from(taskAssignments)
+          .where(and(
+            eq(taskAssignments.farmId, input.farmId),
+            eq(taskAssignments.status, input.status)
+          ))
+          .orderBy(sql`${taskAssignments.dueDate} DESC`);
+
         return result || [];
       } catch (error) {
+        console.error("Error fetching tasks by status:", error);
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to fetch tasks" });
       }
     }),
@@ -261,21 +249,23 @@ export const taskAssignmentDatabaseRouter = router({
         const db = await getDb();
         if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database unavailable" });
 
-        const result = await db.query.raw(
-          `SELECT 
-            COUNT(*) as total,
-            SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending,
-            SUM(CASE WHEN status = 'in_progress' THEN 1 ELSE 0 END) as inProgress,
-            SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed,
-            SUM(CASE WHEN status = 'cancelled' THEN 1 ELSE 0 END) as cancelled
-           FROM taskAssignments
-           WHERE farmId = ?`,
-          [input.farmId]
-        );
+        const result = await db
+          .select({
+            total: sql<number>`COUNT(*)`,
+            pending: sql<number>`SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END)`,
+            inProgress: sql<number>`SUM(CASE WHEN status = 'in_progress' THEN 1 ELSE 0 END)`,
+            completed: sql<number>`SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END)`,
+            cancelled: sql<number>`SUM(CASE WHEN status = 'cancelled' THEN 1 ELSE 0 END)`
+          })
+          .from(taskAssignments)
+          .where(eq(taskAssignments.farmId, input.farmId));
 
         return result?.[0] || { total: 0, pending: 0, inProgress: 0, completed: 0, cancelled: 0 };
       } catch (error) {
+        console.error("Error fetching task stats:", error);
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to fetch task stats" });
       }
     }),
 });
+
+export default taskAssignmentDatabaseRouter;
