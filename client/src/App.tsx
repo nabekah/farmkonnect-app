@@ -316,15 +316,11 @@ function Router() {
         )}
       </Route>
       <Route path="/task-assignment">
-        {() => {
-          const { user } = useAuth();
-          const userFarmId = user?.farmId || 1; // Default to farm 1 if not set
-          return (
-            <DashboardLayout>
-              <TaskAssignmentUIWithDatabase farmId={userFarmId} />
-            </DashboardLayout>
-          );
-        }}
+        {() => (
+          <DashboardLayout>
+            <TaskAssignmentUI />
+          </DashboardLayout>
+        )}
       </Route>
       <Route path="/task-completion-tracking">
         {() => (
