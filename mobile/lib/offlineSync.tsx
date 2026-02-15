@@ -231,3 +231,195 @@ export const useOfflineMutation = (resource: string) => {
 
   return { mutate, isLoading };
 };
+
+// Enhanced caching for tasks, shifts, workers, notifications
+const CACHE_KEYS = {
+  TASKS: "farmkonnect_cached_tasks",
+  SHIFTS: "farmkonnect_cached_shifts",
+  WORKERS: "farmkonnect_cached_workers",
+  NOTIFICATIONS: "farmkonnect_cached_notifications",
+  LAST_SYNC: "farmkonnect_last_sync_time",
+};
+
+// Cache task data
+export const cacheTask = async (task: any) => {
+  try {
+    const tasks = await AsyncStorage.getItem(CACHE_KEYS.TASKS);
+    const taskList = tasks ? JSON.parse(tasks) : [];
+    const index = taskList.findIndex((t: any) => t.id === task.id);
+    if (index >= 0) {
+      taskList[index] = { ...taskList[index], ...task, cachedAt: Date.now() };
+    } else {
+      taskList.push({ ...task, cachedAt: Date.now() });
+    }
+    await AsyncStorage.setItem(CACHE_KEYS.TASKS, JSON.stringify(taskList));
+    console.log("[OfflineSync] Task cached:", task.id);
+  } catch (error) {
+    console.error("[OfflineSync] Error caching task:", error);
+  }
+};
+
+// Cache shift data
+export const cacheShift = async (shift: any) => {
+  try {
+    const shifts = await AsyncStorage.getItem(CACHE_KEYS.SHIFTS);
+    const shiftList = shifts ? JSON.parse(shifts) : [];
+    const index = shiftList.findIndex((s: any) => s.id === shift.id);
+    if (index >= 0) {
+      shiftList[index] = { ...shiftList[index], ...shift, cachedAt: Date.now() };
+    } else {
+      shiftList.push({ ...shift, cachedAt: Date.now() });
+    }
+    await AsyncStorage.setItem(CACHE_KEYS.SHIFTS, JSON.stringify(shiftList));
+    console.log("[OfflineSync] Shift cached:", shift.id);
+  } catch (error) {
+    console.error("[OfflineSync] Error caching shift:", error);
+  }
+};
+
+// Cache worker data
+export const cacheWorker = async (worker: any) => {
+  try {
+    const workers = await AsyncStorage.getItem(CACHE_KEYS.WORKERS);
+    const workerList = workers ? JSON.parse(workers) : [];
+    const index = workerList.findIndex((w: any) => w.id === worker.id);
+    if (index >= 0) {
+      workerList[index] = { ...workerList[index], ...worker, cachedAt: Date.now() };
+    } else {
+      workerList.push({ ...worker, cachedAt: Date.now() });
+    }
+    await AsyncStorage.setItem(CACHE_KEYS.WORKERS, JSON.stringify(workerList));
+    console.log("[OfflineSync] Worker cached:", worker.id);
+  } catch (error) {
+    console.error("[OfflineSync] Error caching worker:", error);
+  }
+};
+
+// Cache notification data
+export const cacheNotification = async (notification: any) => {
+  try {
+    const notifications = await AsyncStorage.getItem(CACHE_KEYS.NOTIFICATIONS);
+    const notificationList = notifications ? JSON.parse(notifications) : [];
+    notificationList.unshift({ ...notification, cachedAt: Date.now() });
+    // Keep only last 100 notifications
+    if (notificationList.length > 100) {
+      notificationList.pop();
+    }
+    await AsyncStorage.setItem(CACHE_KEYS.NOTIFICATIONS, JSON.stringify(notificationList));
+    console.log("[OfflineSync] Notification cached");
+  } catch (error) {
+    console.error("[OfflineSync] Error caching notification:", error);
+  }
+};
+
+// Get cached tasks
+export const getCachedTasks = async (): Promise<any[]> => {
+  try {
+    const data = await AsyncStorage.getItem(CACHE_KEYS.TASKS);
+    return data ? JSON.parse(data) : [];
+  } catch (error) {
+    console.error("[OfflineSync] Error getting cached tasks:", error);
+    return [];
+  }
+};
+
+// Get cached shifts
+export const getCachedShifts = async (): Promise<any[]> => {
+  try {
+    const data = await AsyncStorage.getItem(CACHE_KEYS.SHIFTS);
+    return data ? JSON.parse(data) : [];
+  } catch (error) {
+    console.error("[OfflineSync] Error getting cached shifts:", error);
+    return [];
+  }
+};
+
+// Get cached workers
+export const getCachedWorkers = async (): Promise<any[]> => {
+  try {
+    const data = await AsyncStorage.getItem(CACHE_KEYS.WORKERS);
+    return data ? JSON.parse(data) : [];
+  } catch (error) {
+    console.error("[OfflineSync] Error getting cached workers:", error);
+    return [];
+  }
+};
+
+// Get cached notifications
+export const getCachedNotifications = async (): Promise<any[]> => {
+  try {
+    const data = await AsyncStorage.getItem(CACHE_KEYS.NOTIFICATIONS);
+    return data ? JSON.parse(data) : [];
+  } catch (error) {
+    console.error("[OfflineSync] Error getting cached notifications:", error);
+    return [];
+  }
+};
+
+// Hook to use cached tasks
+export const useCachedTasks = () => {
+  const [tasks, setTasks] = useState<any[]>([]);
+  const { isOnline } = useOfflineSync();
+
+  useEffect(() => {
+    loadCachedTasks();
+  }, [isOnline]);
+
+  const loadCachedTasks = async () => {
+    const cachedTasks = await getCachedTasks();
+    setTasks(cachedTasks);
+  };
+
+  return { tasks, setTasks, loadCachedTasks };
+};
+
+// Hook to use cached shifts
+export const useCachedShifts = () => {
+  const [shifts, setShifts] = useState<any[]>([]);
+  const { isOnline } = useOfflineSync();
+
+  useEffect(() => {
+    loadCachedShifts();
+  }, [isOnline]);
+
+  const loadCachedShifts = async () => {
+    const cachedShifts = await getCachedShifts();
+    setShifts(cachedShifts);
+  };
+
+  return { shifts, setShifts, loadCachedShifts };
+};
+
+// Hook to use cached workers
+export const useCachedWorkers = () => {
+  const [workers, setWorkers] = useState<any[]>([]);
+  const { isOnline } = useOfflineSync();
+
+  useEffect(() => {
+    loadCachedWorkers();
+  }, [isOnline]);
+
+  const loadCachedWorkers = async () => {
+    const cachedWorkers = await getCachedWorkers();
+    setWorkers(cachedWorkers);
+  };
+
+  return { workers, setWorkers, loadCachedWorkers };
+};
+
+// Hook to use cached notifications
+export const useCachedNotifications = () => {
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const { isOnline } = useOfflineSync();
+
+  useEffect(() => {
+    loadCachedNotifications();
+  }, [isOnline]);
+
+  const loadCachedNotifications = async () => {
+    const cachedNotifications = await getCachedNotifications();
+    setNotifications(cachedNotifications);
+  };
+
+  return { notifications, setNotifications, loadCachedNotifications };
+};

@@ -28,6 +28,8 @@ import { assetRouter } from "./assetRouter";
 import { reportingRouter } from "./reportingRouter";
 import { analyticsRouter } from "./analyticsRouter";
 import { notificationSettingsRouter } from "./notificationSettingsRouter";
+import { shiftAssignmentWithNotificationsRouter } from "./routers/shiftAssignmentWithNotifications";
+import { taskAssignmentWithNotificationsRouter } from "./routers/taskAssignmentWithNotifications";
 import { financialAnalysisRouter } from "./routers/financialAnalysis";
 import { rbacRouter } from "./routers/rbac";
 import { invitationsRouter } from "./routers/invitations";
@@ -1042,6 +1044,8 @@ export const appRouter = router({
   security: securityRouter,
   passwordReset: passwordResetRouter,
   activityApproval: activityApprovalRouter,
+  shiftAssignmentWithNotifications: shiftAssignmentWithNotificationsRouter,
+  taskAssignmentWithNotifications: taskAssignmentWithNotificationsRouter,
 });
 
 export type AppRouter = typeof appRouter;
