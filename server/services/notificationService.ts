@@ -387,3 +387,127 @@ export async function logNotificationDelivery(
     console.error('Failed to log notification delivery:', error);
   }
 }
+
+
+/**
+ * Send compliance violation alert for Labor Management
+ */
+export async function sendComplianceViolationAlert(
+  workerEmail: string,
+  workerPhone: string | undefined,
+  violationType: string,
+  severity: 'low' | 'medium' | 'high' | 'critical',
+  description: string,
+  farmName: string
+): Promise<NotificationResult> {
+  return sendMultiChannelNotification({
+    recipientEmail: workerEmail,
+    recipientPhone: workerPhone,
+    type: 'compliance',
+    subject: `Compliance Alert: ${violationType}`,
+    message: description,
+    animalName: 'N/A',
+    farmName,
+    urgency: severity as 'low' | 'medium' | 'high',
+  });
+}
+
+/**
+ * Send staffing shortage alert for Labor Management
+ */
+export async function sendStaffingShortageAlert(
+  managerEmail: string,
+  managerPhone: string | undefined,
+  shiftDate: string,
+  workersNeeded: number,
+  workersAvailable: number,
+  farmName: string
+): Promise<NotificationResult> {
+  const shortage = workersNeeded - workersAvailable;
+  const message = `Staffing Shortage Alert: ${shortage} workers needed on ${shiftDate}. Only ${workersAvailable} available out of ${workersNeeded} required.`;
+
+  return sendMultiChannelNotification({
+    recipientEmail: managerEmail,
+    recipientPhone: managerPhone,
+    type: 'compliance',
+    subject: 'Staffing Shortage Alert',
+    message,
+    animalName: 'N/A',
+    farmName,
+    urgency: 'high',
+  });
+}
+
+/**
+ * Send shift change notification for Labor Management
+ */
+export async function sendShiftChangeNotification(
+  workerEmail: string,
+  workerPhone: string | undefined,
+  oldShiftDate: string,
+  newShiftDate: string,
+  reason: string | undefined,
+  farmName: string
+): Promise<NotificationResult> {
+  const message = `Your shift has been changed from ${oldShiftDate} to ${newShiftDate}. ${reason ? `Reason: ${reason}` : ''}`;
+
+  return sendMultiChannelNotification({
+    recipientEmail: workerEmail,
+    recipientPhone: workerPhone,
+    type: 'appointment',
+    subject: 'Shift Schedule Changed',
+    message,
+    animalName: 'N/A',
+    farmName,
+    urgency: 'medium',
+  });
+}
+
+/**
+ * Send time off request status notification for Labor Management
+ */
+export async function sendTimeOffStatusNotification(
+  workerEmail: string,
+  workerPhone: string | undefined,
+  status: 'approved' | 'rejected',
+  startDate: string,
+  endDate: string,
+  farmName: string
+): Promise<NotificationResult> {
+  const message = `Your time off request for ${startDate} to ${endDate} has been ${status.toUpperCase()}.`;
+
+  return sendMultiChannelNotification({
+    recipientEmail: workerEmail,
+    recipientPhone: workerPhone,
+    type: 'appointment',
+    subject: `Time Off Request ${status.toUpperCase()}`,
+    message,
+    animalName: 'N/A',
+    farmName,
+    urgency: status === 'approved' ? 'low' : 'medium',
+  });
+}
+
+/**
+ * Send performance alert for Labor Management
+ */
+export async function sendPerformanceAlert(
+  workerEmail: string,
+  workerPhone: string | undefined,
+  metric: string,
+  value: number,
+  threshold: number,
+  alertMessage: string,
+  farmName: string
+): Promise<NotificationResult> {
+  return sendMultiChannelNotification({
+    recipientEmail: workerEmail,
+    recipientPhone: workerPhone,
+    type: 'health_alert',
+    subject: `Performance Alert: ${metric}`,
+    message: `${alertMessage}\n\nCurrent: ${value}, Threshold: ${threshold}`,
+    animalName: 'N/A',
+    farmName,
+    urgency: value < threshold ? 'high' : 'medium',
+  });
+}

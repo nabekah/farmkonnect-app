@@ -144,6 +144,9 @@ import { AlertDashboard } from "./components/AlertDashboard";
 import { WorkerAvailabilityCalendar } from "./components/WorkerAvailabilityCalendar";
 import { WorkerPerformanceTrends } from "./components/WorkerPerformanceTrends";
 import { ShiftManagement } from "./components/ShiftManagement";
+import { ComplianceDashboard } from "./components/ComplianceDashboard";
+import AdvancedAnalyticsDashboard from "./pages/AdvancedAnalyticsDashboard";
+import AISchedulingDashboard from "./pages/AISchedulingDashboard";
 
 function Router() {
   return (
@@ -894,6 +897,41 @@ function Router() {
         {() => (
           <DashboardLayout>
             <WorkerStatusDashboard />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/labor/compliance-dashboard">
+        {() => (
+          <DashboardLayout>
+            <ComplianceDashboard />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/labor/shift-management">
+        {() => (
+          <DashboardLayout>
+            <ShiftManagement />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/labor/advanced-analytics">
+        {() => (
+          <DashboardLayout>
+            <AdvancedAnalyticsDashboard />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/labor/ai-scheduling">
+        {() => (
+          <DashboardLayout>
+            <AISchedulingDashboard />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/labor/worker-performance">
+        {() => (
+          <DashboardLayout>
+            <WorkerPerformanceTrends />
           </DashboardLayout>
         )}
       </Route>

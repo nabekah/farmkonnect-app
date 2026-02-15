@@ -49,6 +49,7 @@ import {
   Send,
   Library,
   Copy,
+  AlertTriangle,
 } from "lucide-react";
 
 export interface MenuItem {
@@ -210,12 +211,26 @@ export const navigationStructure: MenuGroup[] = [
   },
 
   {
-    title: "Operations & Management",
-    description: "Workforce, assets, and logistics",
+    title: "Labor Management",
+    description: "Workforce scheduling, compliance, and analytics",
     collapsible: true,
     defaultExpanded: false,
     items: [
-      { icon: UserCog, label: "Workforce", path: "/workforce-management" },
+      { icon: Users, label: "Workforce", path: "/workforce-management" },
+      { icon: Calendar, label: "Shift Management", path: "/labor/shift-management" },
+      { icon: Shield, label: "Compliance Dashboard", path: "/labor/compliance-dashboard" },
+      { icon: BarChart3, label: "Advanced Analytics", path: "/labor/advanced-analytics" },
+      { icon: Brain, label: "AI Scheduling", path: "/labor/ai-scheduling" },
+      { icon: TrendingUp, label: "Worker Performance", path: "/labor/worker-performance" },
+    ],
+  },
+
+  {
+    title: "Operations & Management",
+    description: "Assets and logistics",
+    collapsible: true,
+    defaultExpanded: false,
+    items: [
       { icon: Wrench, label: "Asset Management", path: "/asset-management" },
       { icon: Truck, label: "Transport & Logistics", path: "/transport" },
       { icon: Heart, label: "Health Management", path: "/health-management" },
