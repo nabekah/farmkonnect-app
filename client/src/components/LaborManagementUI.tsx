@@ -1,14 +1,14 @@
-'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { Users, Calendar, CheckCircle, AlertCircle, TrendingUp, DollarSign, Clock } from 'lucide-react';
+import { Users, Calendar, CheckCircle, AlertCircle, TrendingUp, DollarSign, Clock, Loader } from 'lucide-react';
+import { trpc } from '@/lib/trpc';
 
 interface Worker {
-  id: string;
+  id: number;
   name: string;
   role: string;
   status: 'active' | 'on_leave' | 'inactive';
@@ -35,42 +35,64 @@ interface ScheduleEntry {
   endTime: string;
 }
 
-export const LaborManagementUI = () => {
+export const LaborManagementUI = ({ farmId = 1 }: { farmId?: number }) => {
   const [activeTab, setActiveTab] = useState('overview');
-  const [workers, setWorkers] = useState<Worker[]>([]);
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [schedule, setSchedule] = useState<ScheduleEntry[]>([]);
   const [selectedWeek, setSelectedWeek] = useState('current');
 
-  useEffect(() => {
-    // Mock data
-    setWorkers([
-      { id: 'w1', name: 'John Doe', role: 'Field Worker', status: 'active', hourlyRate: 15, tasksCompleted: 24, rating: 4.8 },
-      { id: 'w2', name: 'Jane Smith', role: 'Supervisor', status: 'active', hourlyRate: 25, tasksCompleted: 18, rating: 4.9 },
-      { id: 'w3', name: 'Mike Johnson', role: 'Equipment Operator', status: 'active', hourlyRate: 20, tasksCompleted: 16, rating: 4.5 },
-      { id: 'w4', name: 'Sarah Williams', role: 'Field Worker', status: 'on_leave', hourlyRate: 15, tasksCompleted: 20, rating: 4.7 }
-    ]);
+  // Fetch data from database
+  const { data: dashboardData, isLoading: dashboardLoading } = trpc.laborManagement.dashboard.summary.useQuery({ farmId });
+  const { data: workerShiftsData, isLoading: shiftsLoading } = trpc.laborManagement.workerShifts.list.useQuery({ farmId });
+  const { data: performanceData, isLoading: performanceLoading } = trpc.laborManagement.performance.list.useQuery({ farmId });
+  const { data: workersData, isLoading: workersLoading } = trpc.workforce.workers.list.useQuery({ farmId, status: 'active' });
+  const { data: availabilityData, isLoading: availabilityLoading } = trpc.laborManagement.availability.list.useQuery({ farmId });
 
-    setTasks([
-      { id: 't1', title: 'Prepare field for planting', assignedTo: 'w1', status: 'in_progress', priority: 'high', dueDate: '2026-02-16', estimatedHours: 8 },
-      { id: 't2', title: 'Irrigation system check', assignedTo: 'w2', status: 'pending', priority: 'medium', dueDate: '2026-02-18', estimatedHours: 6 },
-      { id: 't3', title: 'Equipment maintenance', assignedTo: 'w3', status: 'completed', priority: 'medium', dueDate: '2026-02-14', estimatedHours: 4 },
-      { id: 't4', title: 'Fertilizer application', assignedTo: 'w1', status: 'pending', priority: 'high', dueDate: '2026-02-17', estimatedHours: 6 }
-    ]);
+  // Transform workers data
+  const workers = useMemo(() => {
+    if (!workersData) return [];
+    return workersData.map((worker: any) => ({
+      id: worker.id,
+      name: worker.name,
+      role: worker.position || 'Field Worker',
+      status: worker.status as 'active' | 'on_leave' | 'inactive',
+      hourlyRate: worker.hourlyRate || 15,
+      tasksCompleted: performanceData?.filter((p: any) => p.workerId === worker.id).reduce((sum: number, p: any) => sum + (p.tasksCompleted || 0), 0) || 0,
+      rating: performanceData?.filter((p: any) => p.workerId === worker.id).reduce((sum: number, p: any) => sum + (p.rating || 0), 0) / (performanceData?.filter((p: any) => p.workerId === worker.id).length || 1) || 4.5
+    }));
+  }, [workersData, performanceData]);
 
-    setSchedule([
-      { date: '2026-02-14', workerId: 'w1', taskId: 't1', startTime: '06:00', endTime: '14:00' },
-      { date: '2026-02-14', workerId: 'w2', taskId: 't2', startTime: '08:00', endTime: '16:00' },
-      { date: '2026-02-14', workerId: 'w3', taskId: 't3', startTime: '07:00', endTime: '15:00' }
-    ]);
-  }, []);
+  // Transform shift data to tasks
+  const tasks = useMemo(() => {
+    if (!workerShiftsData) return [];
+    return workerShiftsData.map((shift: any, idx: number) => ({
+      id: `t${idx}`,
+      title: `Shift Assignment`,
+      assignedTo: `w${shift.workerId}`,
+      status: shift.status === 'completed' ? 'completed' : shift.status === 'confirmed' ? 'in_progress' : 'pending',
+      priority: 'medium' as const,
+      dueDate: new Date(shift.date).toISOString().split('T')[0],
+      estimatedHours: 8
+    }));
+  }, [workerShiftsData]);
 
+  // Transform shift data to schedule
+  const schedule = useMemo(() => {
+    if (!workerShiftsData) return [];
+    return workerShiftsData.map((shift: any) => ({
+      date: new Date(shift.date).toISOString().split('T')[0],
+      workerId: `w${shift.workerId}`,
+      taskId: `t${shift.id}`,
+      startTime: '06:00',
+      endTime: '14:00'
+    }));
+  }, [workerShiftsData]);
+
+  // Calculate metrics
   const activeWorkers = workers.filter(w => w.status === 'active').length;
   const totalTasksCompleted = tasks.filter(t => t.status === 'completed').length;
-  const averageRating = (workers.reduce((sum, w) => sum + w.rating, 0) / workers.length).toFixed(1);
+  const averageRating = workers.length > 0 ? (workers.reduce((sum, w) => sum + w.rating, 0) / workers.length).toFixed(1) : '0';
   const totalPayroll = workers.reduce((sum, w) => sum + (w.tasksCompleted * 8 * w.hourlyRate), 0);
 
-  const performanceData = workers.map(w => ({
+  const performanceChartData = workers.map(w => ({
     name: w.name.split(' ')[0],
     tasksCompleted: w.tasksCompleted,
     rating: w.rating * 10
@@ -81,6 +103,19 @@ export const LaborManagementUI = () => {
     { name: 'In Progress', value: tasks.filter(t => t.status === 'in_progress').length, color: '#3b82f6' },
     { name: 'Pending', value: tasks.filter(t => t.status === 'pending').length, color: '#f59e0b' }
   ];
+
+  const isLoading = dashboardLoading || shiftsLoading || performanceLoading || workersLoading || availabilityLoading;
+
+  if (isLoading) {
+    return (
+      <div className="w-full max-w-7xl mx-auto p-6 flex items-center justify-center h-96">
+        <div className="flex flex-col items-center gap-2">
+          <Loader className="w-8 h-8 animate-spin text-blue-600" />
+          <p className="text-gray-600">Loading Labor Management data...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-7xl mx-auto p-6 space-y-6">
@@ -181,7 +216,7 @@ export const LaborManagementUI = () => {
                 <CardTitle>Active Tasks</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                {tasks.filter(t => t.status !== 'completed').map(task => (
+                {tasks.filter(t => t.status !== 'completed').slice(0, 5).map(task => (
                   <div key={task.id} className="p-3 border rounded-lg">
                     <div className="flex items-center justify-between mb-2">
                       <p className="font-semibold text-sm">{task.title}</p>
@@ -211,7 +246,7 @@ export const LaborManagementUI = () => {
                       <p className="text-sm text-gray-600">{worker.role}</p>
                       <div className="flex gap-4 mt-2 text-xs text-gray-500">
                         <span>Tasks: {worker.tasksCompleted}</span>
-                        <span>Rating: {worker.rating}/5</span>
+                        <span>Rating: {worker.rating.toFixed(1)}/5</span>
                         <span>${worker.hourlyRate}/hr</span>
                       </div>
                     </div>
@@ -232,10 +267,10 @@ export const LaborManagementUI = () => {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>Weekly Schedule</CardTitle>
-                <select className="px-3 py-1 border rounded text-sm">
-                  <option>Current Week</option>
-                  <option>Next Week</option>
-                  <option>Previous Week</option>
+                <select className="px-3 py-1 border rounded text-sm" value={selectedWeek} onChange={(e) => setSelectedWeek(e.target.value)}>
+                  <option value="current">Current Week</option>
+                  <option value="next">Next Week</option>
+                  <option value="previous">Previous Week</option>
                 </select>
               </div>
             </CardHeader>
@@ -253,16 +288,15 @@ export const LaborManagementUI = () => {
                   </thead>
                   <tbody>
                     {schedule.map((entry, idx) => {
-                      const worker = workers.find(w => w.id === entry.workerId);
-                      const task = tasks.find(t => t.id === entry.taskId);
+                      const worker = workers.find(w => w.id.toString() === entry.workerId.replace('w', ''));
                       const startHour = parseInt(entry.startTime.split(':')[0]);
                       const endHour = parseInt(entry.endTime.split(':')[0]);
                       const hours = endHour - startHour;
                       return (
                         <tr key={idx} className="border-b hover:bg-gray-50">
-                          <td className="p-2">{worker?.name}</td>
+                          <td className="p-2">{worker?.name || 'Unknown'}</td>
                           <td className="p-2">{entry.date}</td>
-                          <td className="p-2">{task?.title}</td>
+                          <td className="p-2">Shift Assignment</td>
                           <td className="p-2">{entry.startTime} - {entry.endTime}</td>
                           <td className="p-2">{hours}h</td>
                         </tr>
@@ -282,7 +316,7 @@ export const LaborManagementUI = () => {
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={performanceData}>
+                <BarChart data={performanceChartData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="name" />
                   <YAxis />
@@ -299,19 +333,21 @@ export const LaborManagementUI = () => {
             <CardHeader>
               <CardTitle>Performance Summary</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
-              {workers.map(worker => (
-                <div key={worker.id} className="p-3 border rounded-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <p className="font-semibold">{worker.name}</p>
-                    <p className="text-sm text-gray-600">{worker.tasksCompleted} tasks</p>
+            <CardContent>
+              <div className="space-y-3">
+                {workers.map(worker => (
+                  <div key={worker.id} className="p-3 border rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="font-semibold text-sm">{worker.name}</p>
+                      <span className="text-sm font-semibold text-blue-600">{worker.rating.toFixed(1)}/5</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="bg-blue-600 h-2 rounded-full" style={{ width: `${(worker.rating / 5) * 100}%` }}></div>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">{worker.tasksCompleted} tasks completed</p>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-green-500 h-2 rounded-full" style={{ width: `${(worker.rating / 5) * 100}%` }}></div>
-                  </div>
-                  <p className="text-xs text-gray-500 mt-1">Rating: {worker.rating}/5</p>
-                </div>
-              ))}
+                ))}
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -319,5 +355,3 @@ export const LaborManagementUI = () => {
     </div>
   );
 };
-
-export default LaborManagementUI;

@@ -3796,3 +3796,228 @@ export const fieldManagementPlans = mysqlTable("fieldManagementPlans", {
 
 export type FieldManagementPlan = typeof fieldManagementPlans.$inferSelect;
 export type InsertFieldManagementPlan = typeof fieldManagementPlans.$inferInsert;
+
+
+// ============================================================================
+// LABOR MANAGEMENT - SHIFT TEMPLATES
+// ============================================================================
+/**
+ * Shift Templates - Predefined shift patterns for farm operations
+ * Used to schedule workers for different time periods
+ */
+export const shiftTemplates = mysqlTable("shiftTemplates", {
+  id: int("id").autoincrement().primaryKey(),
+  farmId: int("farmId").notNull(),
+  name: varchar("name", { length: 100 }).notNull(), // e.g., "Early Morning", "Standard Day"
+  startTime: varchar("startTime", { length: 5 }).notNull(), // HH:MM format
+  endTime: varchar("endTime", { length: 5 }).notNull(), // HH:MM format
+  duration: int("duration").notNull(), // in hours
+  description: text("description"),
+  color: varchar("color", { length: 50 }), // for UI display
+  isActive: boolean("isActive").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type ShiftTemplate = typeof shiftTemplates.$inferSelect;
+export type InsertShiftTemplate = typeof shiftTemplates.$inferInsert;
+
+// ============================================================================
+// LABOR MANAGEMENT - WORKER SHIFTS
+// ============================================================================
+/**
+ * Worker Shifts - Assignment of workers to shifts on specific dates
+ */
+export const workerShifts = mysqlTable("workerShifts", {
+  id: int("id").autoincrement().primaryKey(),
+  farmId: int("farmId").notNull(),
+  workerId: int("workerId").notNull(),
+  shiftId: int("shiftId").notNull(),
+  date: date("date").notNull(),
+  status: mysqlEnum("status", ["scheduled", "pending_approval", "confirmed", "completed", "cancelled"]).default("scheduled").notNull(),
+  notes: text("notes"),
+  approvedBy: int("approvedBy"), // User ID of approver
+  approvedAt: timestamp("approvedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type WorkerShift = typeof workerShifts.$inferSelect;
+export type InsertWorkerShift = typeof workerShifts.$inferInsert;
+
+// ============================================================================
+// LABOR MANAGEMENT - TIME OFF REQUESTS
+// ============================================================================
+/**
+ * Time Off Requests - Worker requests for leave, vacation, etc.
+ */
+export const timeOffRequests = mysqlTable("timeOffRequests", {
+  id: int("id").autoincrement().primaryKey(),
+  farmId: int("farmId").notNull(),
+  workerId: int("workerId").notNull(),
+  startDate: date("startDate").notNull(),
+  endDate: date("endDate").notNull(),
+  reason: varchar("reason", { length: 255 }).notNull(), // e.g., "Personal leave", "Sick leave", "Vacation"
+  type: mysqlEnum("type", ["personal", "sick", "vacation", "emergency", "other"]).default("personal").notNull(),
+  status: mysqlEnum("status", ["pending", "approved", "rejected", "cancelled"]).default("pending").notNull(),
+  notes: text("notes"),
+  requestedAt: timestamp("requestedAt").defaultNow().notNull(),
+  approvedBy: int("approvedBy"), // User ID of approver
+  approvedAt: timestamp("approvedAt"),
+  rejectionReason: text("rejectionReason"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type TimeOffRequest = typeof timeOffRequests.$inferSelect;
+export type InsertTimeOffRequest = typeof timeOffRequests.$inferInsert;
+
+// ============================================================================
+// LABOR MANAGEMENT - WORKER PERFORMANCE
+// ============================================================================
+/**
+ * Worker Performance - Daily performance metrics for workers
+ */
+export const workerPerformance = mysqlTable("workerPerformance", {
+  id: int("id").autoincrement().primaryKey(),
+  farmId: int("farmId").notNull(),
+  workerId: int("workerId").notNull(),
+  date: date("date").notNull(),
+  tasksCompleted: int("tasksCompleted").default(0).notNull(),
+  tasksInProgress: int("tasksInProgress").default(0).notNull(),
+  tasksPending: int("tasksPending").default(0).notNull(),
+  rating: decimal("rating", { precision: 3, scale: 1 }).default(0), // 0-5 rating
+  hoursWorked: decimal("hoursWorked", { precision: 5, scale: 2 }).default(0), // in hours
+  productivity: decimal("productivity", { precision: 5, scale: 2 }).default(0), // percentage
+  notes: text("notes"),
+  recordedBy: int("recordedBy"), // User ID who recorded
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type WorkerPerformance = typeof workerPerformance.$inferSelect;
+export type InsertWorkerPerformance = typeof workerPerformance.$inferInsert;
+
+// ============================================================================
+// LABOR MANAGEMENT - WORKER AVAILABILITY
+// ============================================================================
+/**
+ * Worker Availability - Daily availability tracking for workers
+ */
+export const workerAvailability = mysqlTable("workerAvailability", {
+  id: int("id").autoincrement().primaryKey(),
+  farmId: int("farmId").notNull(),
+  workerId: int("workerId").notNull(),
+  date: date("date").notNull(),
+  availableHours: int("availableHours").default(8).notNull(), // total hours available
+  scheduledHours: int("scheduledHours").default(0).notNull(), // hours already scheduled
+  status: mysqlEnum("status", ["available", "busy", "overbooked", "off"]).default("available").notNull(),
+  reason: varchar("reason", { length: 255 }), // reason if off or overbooked
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type WorkerAvailability = typeof workerAvailability.$inferSelect;
+export type InsertWorkerAvailability = typeof workerAvailability.$inferInsert;
+
+// ============================================================================
+// LABOR MANAGEMENT - PAYROLL RECORDS
+// ============================================================================
+/**
+ * Payroll Records - Payroll calculation and payment tracking
+ */
+export const payrollRecords = mysqlTable("payrollRecords", {
+  id: int("id").autoincrement().primaryKey(),
+  farmId: int("farmId").notNull(),
+  workerId: int("workerId").notNull(),
+  payrollPeriodStart: date("payrollPeriodStart").notNull(),
+  payrollPeriodEnd: date("payrollPeriodEnd").notNull(),
+  hoursWorked: decimal("hoursWorked", { precision: 8, scale: 2 }).default(0),
+  hourlyRate: decimal("hourlyRate", { precision: 10, scale: 2 }).notNull(),
+  basePay: decimal("basePay", { precision: 15, scale: 2 }).default(0),
+  overtimeHours: decimal("overtimeHours", { precision: 8, scale: 2 }).default(0),
+  overtimeRate: decimal("overtimeRate", { precision: 10, scale: 2 }), // usually 1.5x hourly rate
+  overtimePay: decimal("overtimePay", { precision: 15, scale: 2 }).default(0),
+  bonuses: decimal("bonuses", { precision: 15, scale: 2 }).default(0),
+  deductions: decimal("deductions", { precision: 15, scale: 2 }).default(0),
+  totalPay: decimal("totalPay", { precision: 15, scale: 2 }).default(0),
+  status: mysqlEnum("status", ["draft", "approved", "paid", "pending"]).default("draft").notNull(),
+  paidAt: timestamp("paidAt"),
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type PayrollRecord = typeof payrollRecords.$inferSelect;
+export type InsertPayrollRecord = typeof payrollRecords.$inferInsert;
+
+// ============================================================================
+// LABOR MANAGEMENT - COMPLIANCE LOGS
+// ============================================================================
+/**
+ * Compliance Logs - Track labor law compliance (breaks, overtime, etc.)
+ */
+export const complianceLogs = mysqlTable("complianceLogs", {
+  id: int("id").autoincrement().primaryKey(),
+  farmId: int("farmId").notNull(),
+  workerId: int("workerId").notNull(),
+  date: date("date").notNull(),
+  breaksTaken: int("breaksTaken").default(0), // number of breaks
+  breakDurationMinutes: int("breakDurationMinutes").default(0), // total break time
+  overtimeHours: decimal("overtimeHours", { precision: 5, scale: 2 }).default(0),
+  complianceStatus: mysqlEnum("complianceStatus", ["compliant", "warning", "violation"]).default("compliant").notNull(),
+  violationType: varchar("violationType", { length: 100 }), // e.g., "excessive_overtime", "insufficient_breaks"
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type ComplianceLog = typeof complianceLogs.$inferSelect;
+export type InsertComplianceLog = typeof complianceLogs.$inferInsert;
+
+// ============================================================================
+// LABOR MANAGEMENT - WORKER SKILLS
+// ============================================================================
+/**
+ * Worker Skills - Track skills and certifications of workers
+ */
+export const workerSkills = mysqlTable("workerSkills", {
+  id: int("id").autoincrement().primaryKey(),
+  farmId: int("farmId").notNull(),
+  workerId: int("workerId").notNull(),
+  skillName: varchar("skillName", { length: 100 }).notNull(), // e.g., "Irrigation", "Pest Control"
+  proficiencyLevel: mysqlEnum("proficiencyLevel", ["beginner", "intermediate", "advanced", "expert"]).default("beginner").notNull(),
+  certificationNumber: varchar("certificationNumber", { length: 100 }),
+  certificationExpiry: date("certificationExpiry"),
+  yearsOfExperience: int("yearsOfExperience").default(0),
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type WorkerSkill = typeof workerSkills.$inferSelect;
+export type InsertWorkerSkill = typeof workerSkills.$inferInsert;
+
+// ============================================================================
+// LABOR MANAGEMENT - WORKER PERFORMANCE HISTORY
+// ============================================================================
+/**
+ * Worker Performance History - Historical performance data for analytics
+ */
+export const workerPerformanceHistory = mysqlTable("workerPerformanceHistory", {
+  id: int("id").autoincrement().primaryKey(),
+  farmId: int("farmId").notNull(),
+  workerId: int("workerId").notNull(),
+  month: varchar("month", { length: 7 }).notNull(), // YYYY-MM format
+  averageRating: decimal("averageRating", { precision: 3, scale: 1 }).default(0),
+  totalTasksCompleted: int("totalTasksCompleted").default(0),
+  totalHoursWorked: decimal("totalHoursWorked", { precision: 8, scale: 2 }).default(0),
+  averageProductivity: decimal("averageProductivity", { precision: 5, scale: 2 }).default(0),
+  attendanceRate: decimal("attendanceRate", { precision: 5, scale: 2 }).default(0), // percentage
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type WorkerPerformanceHistory = typeof workerPerformanceHistory.$inferSelect;
+export type InsertWorkerPerformanceHistory = typeof workerPerformanceHistory.$inferInsert;

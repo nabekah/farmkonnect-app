@@ -1,6 +1,5 @@
-'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -8,435 +7,216 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import { Clock, Plus, X, CheckCircle, AlertCircle, Calendar, Users, Zap } from 'lucide-react';
+import { Clock, Plus, X, CheckCircle, AlertCircle, Calendar, Users, Zap, Loader } from 'lucide-react';
+import { trpc } from '@/lib/trpc';
 
 interface Shift {
-  shiftId: string;
+  id: number;
   name: string;
   startTime: string;
   endTime: string;
   duration: number;
   color: string;
-  description: string;
+  description?: string;
 }
 
 interface WorkerShift {
+  id: number;
   workerId: number;
   workerName: string;
   date: string;
-  shiftId: string;
+  shiftId: number;
   shiftName: string;
-  status: 'scheduled' | 'pending_approval' | 'confirmed' | 'completed';
+  status: 'scheduled' | 'pending_approval' | 'confirmed' | 'completed' | 'cancelled';
   notes?: string;
 }
 
 interface TimeOffRequest {
-  requestId: string;
+  id: number;
   workerId: number;
   workerName: string;
   startDate: string;
   endDate: string;
   reason: string;
-  status: 'pending' | 'approved' | 'rejected';
+  status: 'pending' | 'approved' | 'rejected' | 'cancelled';
   requestedAt: string;
 }
 
-export const ShiftManagement = () => {
+export const ShiftManagement = ({ farmId = 1 }: { farmId?: number }) => {
   const [activeTab, setActiveTab] = useState('shifts');
-  const [selectedDate, setSelectedDate] = useState('2026-02-14');
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [showNewShiftDialog, setShowNewShiftDialog] = useState(false);
   const [showScheduleDialog, setShowScheduleDialog] = useState(false);
   const [selectedWorker, setSelectedWorker] = useState<number | null>(null);
 
-  const workers = [
-    { id: 1, name: 'John Smith' },
-    { id: 2, name: 'Maria Garcia' },
-    { id: 3, name: 'Ahmed Hassan' },
-    { id: 4, name: 'Sarah Johnson' },
-    { id: 5, name: 'David Chen' },
-    { id: 6, name: 'Emma Wilson' },
-  ];
+  // Fetch data from database
+  const { data: shiftsData, isLoading: shiftsLoading } = trpc.laborManagement.shifts.list.useQuery({ farmId });
+  const { data: workerShiftsData, isLoading: workerShiftsLoading } = trpc.laborManagement.workerShifts.list.useQuery({ farmId });
+  const { data: timeOffData, isLoading: timeOffLoading } = trpc.laborManagement.timeOff.list.useQuery({ farmId });
+  const { data: workersData, isLoading: workersLoading } = trpc.workforce.workers.list.useQuery({ farmId, status: 'active' });
 
-  // Mock shift templates
-  const [shifts, setShifts] = useState<Shift[]>([
-    {
-      shiftId: 'shift_1',
-      name: 'Early Morning',
-      startTime: '06:00',
-      endTime: '14:00',
-      duration: 8,
-      color: 'bg-orange-100 border-orange-300',
-      description: 'Early morning shift for field preparation',
-    },
-    {
-      shiftId: 'shift_2',
-      name: 'Standard Day',
-      startTime: '08:00',
-      endTime: '16:00',
-      duration: 8,
-      color: 'bg-blue-100 border-blue-300',
-      description: 'Standard working hours',
-    },
-    {
-      shiftId: 'shift_3',
-      name: 'Afternoon',
-      startTime: '14:00',
-      endTime: '22:00',
-      duration: 8,
-      color: 'bg-purple-100 border-purple-300',
-      description: 'Afternoon to evening shift',
-    },
-    {
-      shiftId: 'shift_4',
-      name: 'Half Day',
-      startTime: '08:00',
-      endTime: '12:00',
-      duration: 4,
-      color: 'bg-green-100 border-green-300',
-      description: 'Half day shift for light tasks',
-    },
-  ]);
+  // Transform shift templates
+  const shifts = useMemo(() => {
+    if (!shiftsData) return [];
+    const colors = ['bg-orange-100 border-orange-300', 'bg-blue-100 border-blue-300', 'bg-green-100 border-green-300', 'bg-purple-100 border-purple-300'];
+    return shiftsData.map((shift: any, idx: number) => ({
+      id: shift.id,
+      name: shift.name,
+      startTime: shift.startTime,
+      endTime: shift.endTime,
+      duration: shift.duration,
+      color: shift.color || colors[idx % colors.length],
+      description: shift.description
+    }));
+  }, [shiftsData]);
 
-  // Mock worker schedules
-  const [workerShifts, setWorkerShifts] = useState<WorkerShift[]>([
-    {
-      workerId: 1,
-      workerName: 'John Smith',
-      date: '2026-02-14',
-      shiftId: 'shift_2',
-      shiftName: 'Standard Day',
-      status: 'confirmed',
-    },
-    {
-      workerId: 2,
-      workerName: 'Maria Garcia',
-      date: '2026-02-14',
-      shiftId: 'shift_1',
-      shiftName: 'Early Morning',
-      status: 'confirmed',
-    },
-    {
-      workerId: 3,
-      workerName: 'Ahmed Hassan',
-      date: '2026-02-14',
-      shiftId: 'shift_2',
-      shiftName: 'Standard Day',
-      status: 'confirmed',
-    },
-    {
-      workerId: 4,
-      workerName: 'Sarah Johnson',
-      date: '2026-02-14',
-      shiftId: 'shift_3',
-      shiftName: 'Afternoon',
-      status: 'pending_approval',
-    },
-    {
-      workerId: 5,
-      workerName: 'David Chen',
-      date: '2026-02-14',
-      shiftId: 'shift_2',
-      shiftName: 'Standard Day',
-      status: 'confirmed',
-    },
-    {
-      workerId: 6,
-      workerName: 'Emma Wilson',
-      date: '2026-02-14',
-      shiftId: 'shift_4',
-      shiftName: 'Half Day',
-      status: 'confirmed',
-    },
-  ]);
+  // Transform worker shifts
+  const workerShifts = useMemo(() => {
+    if (!workerShiftsData || !workersData) return [];
+    return workerShiftsData.map((ws: any) => {
+      const worker = workersData.find((w: any) => w.id === ws.workerId);
+      const shift = shifts.find(s => s.id === ws.shiftId);
+      return {
+        id: ws.id,
+        workerId: ws.workerId,
+        workerName: worker?.name || 'Unknown',
+        date: new Date(ws.date).toISOString().split('T')[0],
+        shiftId: ws.shiftId,
+        shiftName: shift?.name || 'Unknown Shift',
+        status: ws.status,
+        notes: ws.notes
+      };
+    });
+  }, [workerShiftsData, workersData, shifts]);
 
-  // Mock time off requests
-  const [timeOffRequests, setTimeOffRequests] = useState<TimeOffRequest[]>([
-    {
-      requestId: 'req_1',
-      workerId: 1,
-      workerName: 'John Smith',
-      startDate: '2026-02-17',
-      endDate: '2026-02-19',
-      reason: 'Personal leave',
-      status: 'pending',
-      requestedAt: '2026-02-14T10:30:00',
-    },
-    {
-      requestId: 'req_2',
-      workerId: 2,
-      workerName: 'Maria Garcia',
-      startDate: '2026-02-20',
-      endDate: '2026-02-21',
-      reason: 'Medical appointment',
-      status: 'approved',
-      requestedAt: '2026-02-13T14:00:00',
-    },
-    {
-      requestId: 'req_3',
-      workerId: 3,
-      workerName: 'Ahmed Hassan',
-      startDate: '2026-02-24',
-      endDate: '2026-02-25',
-      reason: 'Family event',
-      status: 'pending',
-      requestedAt: '2026-02-14T09:00:00',
-    },
-  ]);
+  // Transform time off requests
+  const timeOffRequests = useMemo(() => {
+    if (!timeOffData || !workersData) return [];
+    return timeOffData.map((req: any) => {
+      const worker = workersData.find((w: any) => w.id === req.workerId);
+      return {
+        id: req.id,
+        workerId: req.workerId,
+        workerName: worker?.name || 'Unknown',
+        startDate: new Date(req.startDate).toISOString().split('T')[0],
+        endDate: new Date(req.endDate).toISOString().split('T')[0],
+        reason: req.reason,
+        status: req.status,
+        requestedAt: new Date(req.requestedAt).toISOString()
+      };
+    });
+  }, [timeOffData, workersData]);
 
-  const getTodaySchedule = () => {
-    return workerShifts.filter(ws => ws.date === selectedDate);
-  };
+  // Get shifts for selected date
+  const shiftsForDate = workerShifts.filter(ws => ws.date === selectedDate);
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'confirmed':
-        return <Badge className="bg-green-600">Confirmed</Badge>;
-      case 'pending_approval':
-        return <Badge className="bg-yellow-600">Pending</Badge>;
-      case 'completed':
-        return <Badge className="bg-blue-600">Completed</Badge>;
-      default:
-        return <Badge>{status}</Badge>;
+  // Mutations
+  const assignWorkerShift = trpc.laborManagement.workerShifts.assign.useMutation();
+  const approveTimeOff = trpc.laborManagement.timeOff.approve.useMutation();
+  const rejectTimeOff = trpc.laborManagement.timeOff.reject.useMutation();
+
+  const isLoading = shiftsLoading || workerShiftsLoading || timeOffLoading || workersLoading;
+
+  const handleAssignShift = async (workerId: number, shiftId: number) => {
+    try {
+      await assignWorkerShift.mutateAsync({
+        farmId,
+        workerId,
+        shiftId,
+        date: selectedDate
+      });
+      setShowScheduleDialog(false);
+      setSelectedWorker(null);
+    } catch (error) {
+      console.error('Failed to assign shift:', error);
     }
   };
 
-  const handleApproveTimeOff = (requestId: string) => {
-    setTimeOffRequests(requests =>
-      requests.map(r =>
-        r.requestId === requestId ? { ...r, status: 'approved' } : r
-      )
-    );
+  const handleApproveTimeOff = async (requestId: number, approverId: number) => {
+    try {
+      await approveTimeOff.mutateAsync({
+        id: requestId,
+        approvedBy: approverId
+      });
+    } catch (error) {
+      console.error('Failed to approve time off:', error);
+    }
   };
 
-  const handleRejectTimeOff = (requestId: string) => {
-    setTimeOffRequests(requests =>
-      requests.map(r =>
-        r.requestId === requestId ? { ...r, status: 'rejected' } : r
-      )
-    );
+  const handleRejectTimeOff = async (requestId: number, approverId: number, reason: string) => {
+    try {
+      await rejectTimeOff.mutateAsync({
+        id: requestId,
+        approvedBy: approverId,
+        rejectionReason: reason
+      });
+    } catch (error) {
+      console.error('Failed to reject time off:', error);
+    }
   };
 
-  const todaySchedule = getTodaySchedule();
-  const pendingApprovals = workerShifts.filter(ws => ws.status === 'pending_approval').length;
-  const pendingTimeOff = timeOffRequests.filter(r => r.status === 'pending').length;
+  if (isLoading) {
+    return (
+      <div className="w-full max-w-6xl mx-auto p-6 flex items-center justify-center h-96">
+        <div className="flex flex-col items-center gap-2">
+          <Loader className="w-8 h-8 animate-spin text-blue-600" />
+          <p className="text-gray-600">Loading Shift Management data...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="w-full max-w-7xl mx-auto p-6 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold mb-2">Shift Management</h1>
-        <p className="text-gray-600">Manage worker shifts, schedules, and time-off requests</p>
-      </div>
-
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
-              <Users className="w-4 h-4" /> Scheduled Today
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">{todaySchedule.length}</p>
-            <p className="text-xs text-gray-600 mt-2">workers on shift</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
-              <Clock className="w-4 h-4" /> Shift Templates
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">{shifts.length}</p>
-            <p className="text-xs text-gray-600 mt-2">available shifts</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 text-yellow-600" /> Pending Approvals
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold text-yellow-600">{pendingApprovals}</p>
-            <p className="text-xs text-gray-600 mt-2">shift requests</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-blue-600" /> Time-Off Requests
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold text-blue-600">{pendingTimeOff}</p>
-            <p className="text-xs text-gray-600 mt-2">pending approval</p>
-          </CardContent>
-        </Card>
+    <div className="w-full max-w-6xl mx-auto p-6 space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold">Shift Management</h1>
+        <Dialog open={showNewShiftDialog} onOpenChange={setShowNewShiftDialog}>
+          <DialogTrigger asChild>
+            <Button className="bg-blue-600 hover:bg-blue-700 flex items-center gap-2">
+              <Plus className="w-4 h-4" /> New Shift Template
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create New Shift Template</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <Input placeholder="Shift Name (e.g., Early Morning)" />
+              <Input type="time" placeholder="Start Time" />
+              <Input type="time" placeholder="End Time" />
+              <Input placeholder="Description" />
+              <Button className="w-full bg-blue-600 hover:bg-blue-700">Create Shift</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="shifts">Daily Schedule</TabsTrigger>
-          <TabsTrigger value="templates">Shift Templates</TabsTrigger>
-          <TabsTrigger value="timeoff">Time-Off Requests</TabsTrigger>
-          <TabsTrigger value="conflicts">Conflicts</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="shifts">Shift Templates</TabsTrigger>
+          <TabsTrigger value="schedule">Schedule</TabsTrigger>
+          <TabsTrigger value="timeoff">Time Off</TabsTrigger>
         </TabsList>
 
-        {/* Daily Schedule Tab */}
         <TabsContent value="shifts" className="space-y-6">
-          <div className="flex gap-4 items-end">
-            <div className="flex-1">
-              <label className="text-sm font-medium">Select Date</label>
-              <Input
-                type="date"
-                value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-              />
-            </div>
-            <Dialog open={showScheduleDialog} onOpenChange={setShowScheduleDialog}>
-              <DialogTrigger asChild>
-                <Button className="gap-2">
-                  <Plus className="w-4 h-4" /> Assign Shift
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Assign Shift</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <div>
-                    <label className="text-sm font-medium">Worker</label>
-                    <Select value={selectedWorker?.toString() || ''} onValueChange={(val) => setSelectedWorker(parseInt(val))}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select worker" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {workers.map(w => (
-                          <SelectItem key={w.id} value={w.id.toString()}>
-                            {w.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium">Shift</label>
-                    <Select>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select shift" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {shifts.map(s => (
-                          <SelectItem key={s.shiftId} value={s.shiftId}>
-                            {s.name} ({s.startTime} - {s.endTime})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <Button className="w-full">Assign Shift</Button>
-                </div>
-              </DialogContent>
-            </Dialog>
-          </div>
-
-          <div className="space-y-3">
-            {todaySchedule.length === 0 ? (
-              <Card>
-                <CardContent className="pt-12 pb-12 text-center">
-                  <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-lg font-semibold">No shifts scheduled</p>
-                  <p className="text-gray-600">Assign shifts for this date</p>
-                </CardContent>
-              </Card>
-            ) : (
-              todaySchedule.map(ws => {
-                const shift = shifts.find(s => s.shiftId === ws.shiftId);
-                return (
-                  <Card key={`${ws.workerId}-${ws.date}`} className={`border ${shift?.color}`}>
-                    <CardContent className="pt-6">
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <h4 className="font-semibold text-lg">{ws.workerName}</h4>
-                          <p className="text-sm text-gray-600 mt-1">
-                            {ws.shiftName} • {shift?.startTime} - {shift?.endTime}
-                          </p>
-                          <p className="text-xs text-gray-600 mt-1">{shift?.description}</p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {getStatusBadge(ws.status)}
-                          <Button variant="ghost" size="sm">
-                            <X className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })
-            )}
-          </div>
-        </TabsContent>
-
-        {/* Shift Templates Tab */}
-        <TabsContent value="templates" className="space-y-6">
-          <Dialog open={showNewShiftDialog} onOpenChange={setShowNewShiftDialog}>
-            <DialogTrigger asChild>
-              <Button className="gap-2">
-                <Plus className="w-4 h-4" /> Create Shift Template
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Create Shift Template</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium">Shift Name</label>
-                  <Input placeholder="e.g., Early Morning" />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium">Start Time</label>
-                    <Input type="time" />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium">End Time</label>
-                    <Input type="time" />
-                  </div>
-                </div>
-                <div>
-                  <label className="text-sm font-medium">Description</label>
-                  <Input placeholder="Shift description" />
-                </div>
-                <Button className="w-full">Create Template</Button>
-              </div>
-            </DialogContent>
-          </Dialog>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {shifts.map(shift => (
-              <Card key={shift.shiftId} className={`border ${shift.color}`}>
+              <Card key={shift.id} className={`border-2 ${shift.color}`}>
                 <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle>{shift.name}</CardTitle>
-                    <Button variant="ghost" size="sm">
-                      <X className="w-4 h-4" />
-                    </Button>
-                  </div>
+                  <CardTitle className="text-lg">{shift.name}</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2">
-                  <p className="text-sm text-gray-700">{shift.description}</p>
+                <CardContent className="space-y-3">
                   <div className="flex items-center gap-2 text-sm">
                     <Clock className="w-4 h-4" />
                     <span>{shift.startTime} - {shift.endTime}</span>
                   </div>
-                  <div className="text-sm">
-                    <span className="font-semibold">{shift.duration} hours</span>
+                  <div className="text-sm text-gray-600">
+                    <p>Duration: {shift.duration} hours</p>
+                    {shift.description && <p className="mt-2">{shift.description}</p>}
+                  </div>
+                  <div className="flex gap-2 pt-2">
+                    <Button size="sm" variant="outline" className="flex-1">Edit</Button>
+                    <Button size="sm" variant="outline" className="flex-1 text-red-600">Delete</Button>
                   </div>
                 </CardContent>
               </Card>
@@ -444,105 +224,152 @@ export const ShiftManagement = () => {
           </div>
         </TabsContent>
 
-        {/* Time-Off Requests Tab */}
-        <TabsContent value="timeoff" className="space-y-6">
-          <div className="space-y-3">
-            {timeOffRequests.map(request => (
-              <Card key={request.requestId}>
-                <CardContent className="pt-6">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <h4 className="font-semibold">{request.workerName}</h4>
-                      <p className="text-sm text-gray-600 mt-1">
-                        {new Date(request.startDate).toLocaleDateString()} - {new Date(request.endDate).toLocaleDateString()}
-                      </p>
-                      <p className="text-sm text-gray-700 mt-2">
-                        <span className="font-medium">Reason:</span> {request.reason}
-                      </p>
-                      <p className="text-xs text-gray-500 mt-2">
-                        Requested: {new Date(request.requestedAt).toLocaleString()}
-                      </p>
-                    </div>
-                    <div className="flex flex-col gap-2">
-                      {request.status === 'pending' ? (
-                        <>
-                          <Badge className="bg-yellow-600">Pending</Badge>
-                          <div className="flex gap-2">
-                            <Button
-                              size="sm"
-                              className="bg-green-600 hover:bg-green-700"
-                              onClick={() => handleApproveTimeOff(request.requestId)}
-                            >
-                              <CheckCircle className="w-3 h-3" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              onClick={() => handleRejectTimeOff(request.requestId)}
-                            >
-                              <X className="w-3 h-3" />
-                            </Button>
-                          </div>
-                        </>
-                      ) : request.status === 'approved' ? (
-                        <Badge className="bg-green-600">Approved</Badge>
-                      ) : (
-                        <Badge variant="destructive">Rejected</Badge>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
-
-        {/* Conflicts Tab */}
-        <TabsContent value="conflicts" className="space-y-6">
+        <TabsContent value="schedule" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <AlertCircle className="w-5 h-5 text-green-600" /> Scheduling Status
-              </CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle>Schedule for {selectedDate}</CardTitle>
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="date"
+                    value={selectedDate}
+                    onChange={(e) => setSelectedDate(e.target.value)}
+                    className="w-40"
+                  />
+                  <Dialog open={showScheduleDialog} onOpenChange={setShowScheduleDialog}>
+                    <DialogTrigger asChild>
+                      <Button className="bg-blue-600 hover:bg-blue-700 flex items-center gap-2">
+                        <Plus className="w-4 h-4" /> Assign Shift
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Assign Shift to Worker</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <Select onValueChange={(val) => setSelectedWorker(parseInt(val))}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select Worker" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {workersData?.map((worker: any) => (
+                              <SelectItem key={worker.id} value={worker.id.toString()}>
+                                {worker.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Select>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select Shift" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {shifts.map(shift => (
+                              <SelectItem key={shift.id} value={shift.id.toString()}>
+                                {shift.name} ({shift.startTime} - {shift.endTime})
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Button
+                          className="w-full bg-blue-600 hover:bg-blue-700"
+                          onClick={() => {
+                            if (selectedWorker) {
+                              const shiftId = shifts[0]?.id || 1;
+                              handleAssignShift(selectedWorker, shiftId);
+                            }
+                          }}
+                        >
+                          Assign Shift
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <div className="p-4 bg-green-50 border border-green-200 rounded">
-                  <p className="font-semibold text-green-900">No Conflicts Detected</p>
-                  <p className="text-sm text-green-800 mt-1">
-                    All current shifts are properly scheduled with no overbooking or conflicts.
-                  </p>
-                </div>
+              <div className="space-y-3">
+                {shiftsForDate.length > 0 ? (
+                  shiftsForDate.map(ws => (
+                    <div key={ws.id} className="p-4 border rounded-lg flex items-center justify-between">
+                      <div>
+                        <p className="font-semibold">{ws.workerName}</p>
+                        <p className="text-sm text-gray-600">{ws.shiftName}</p>
+                        {ws.notes && <p className="text-xs text-gray-500 mt-1">{ws.notes}</p>}
+                      </div>
+                      <Badge
+                        variant="outline"
+                        className={`
+                          ${ws.status === 'confirmed' ? 'bg-green-100 text-green-800' : ''}
+                          ${ws.status === 'pending_approval' ? 'bg-yellow-100 text-yellow-800' : ''}
+                          ${ws.status === 'scheduled' ? 'bg-blue-100 text-blue-800' : ''}
+                          ${ws.status === 'completed' ? 'bg-gray-100 text-gray-800' : ''}
+                        `}
+                      >
+                        {ws.status}
+                      </Badge>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-center text-gray-500 py-8">No shifts scheduled for this date</p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-                <div className="space-y-3">
-                  <h4 className="font-semibold">Coverage Analysis</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <div className="p-3 bg-blue-50 border border-blue-200 rounded">
-                      <p className="text-sm text-gray-600">Early Morning Shifts</p>
-                      <p className="text-2xl font-bold text-blue-600">2</p>
-                      <p className="text-xs text-gray-600 mt-1">workers scheduled</p>
+        <TabsContent value="timeoff" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Time Off Requests</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {timeOffRequests.length > 0 ? (
+                  timeOffRequests.map(req => (
+                    <div key={req.id} className="p-4 border rounded-lg">
+                      <div className="flex items-center justify-between mb-2">
+                        <div>
+                          <p className="font-semibold">{req.workerName}</p>
+                          <p className="text-sm text-gray-600">{req.reason}</p>
+                          <p className="text-xs text-gray-500 mt-1">{req.startDate} to {req.endDate}</p>
+                        </div>
+                        <Badge
+                          variant="outline"
+                          className={`
+                            ${req.status === 'approved' ? 'bg-green-100 text-green-800' : ''}
+                            ${req.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : ''}
+                            ${req.status === 'rejected' ? 'bg-red-100 text-red-800' : ''}
+                          `}
+                        >
+                          {req.status}
+                        </Badge>
+                      </div>
+                      {req.status === 'pending' && (
+                        <div className="flex gap-2 mt-3">
+                          <Button
+                            size="sm"
+                            className="bg-green-600 hover:bg-green-700"
+                            onClick={() => handleApproveTimeOff(req.id, 1)}
+                          >
+                            <CheckCircle className="w-4 h-4 mr-1" /> Approve
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-red-600"
+                            onClick={() => handleRejectTimeOff(req.id, 1, 'Denied')}
+                          >
+                            <X className="w-4 h-4 mr-1" /> Reject
+                          </Button>
+                        </div>
+                      )}
                     </div>
-                    <div className="p-3 bg-blue-50 border border-blue-200 rounded">
-                      <p className="text-sm text-gray-600">Standard Day Shifts</p>
-                      <p className="text-2xl font-bold text-blue-600">3</p>
-                      <p className="text-xs text-gray-600 mt-1">workers scheduled</p>
-                    </div>
-                    <div className="p-3 bg-blue-50 border border-blue-200 rounded">
-                      <p className="text-sm text-gray-600">Afternoon Shifts</p>
-                      <p className="text-2xl font-bold text-blue-600">1</p>
-                      <p className="text-xs text-gray-600 mt-1">workers scheduled</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  <h4 className="font-semibold">Upcoming Conflicts to Monitor</h4>
-                  <div className="p-3 bg-yellow-50 border border-yellow-200 rounded">
-                    <p className="text-sm text-yellow-900">
-                      John Smith has a time-off request for Feb 17-19. Consider reassigning his tasks.
-                    </p>
-                  </div>
-                </div>
+                  ))
+                ) : (
+                  <p className="text-center text-gray-500 py-8">No time off requests</p>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -551,5 +378,3 @@ export const ShiftManagement = () => {
     </div>
   );
 };
-
-export default ShiftManagement;
