@@ -96,8 +96,8 @@ export function ManagerTaskAssignment() {
     fieldId: undefined,
   });
 
-  // Fetch field workers from database
-  const { data: fieldWorkers = [] } = trpc.workforce.workers.list.useQuery(
+  // Fetch field workers from database with loading state
+  const { data: fieldWorkers = [], isLoading: isLoadingWorkers } = trpc.workforce.workers.list.useQuery(
     { farmId: farmId || 1, status: 'active' },
     { enabled: !!farmId }
   );
@@ -304,18 +304,32 @@ export function ManagerTaskAssignment() {
                     onValueChange={(value) =>
                       setNewTask({ ...newTask, assignedToUserId: parseInt(value) })
                     }
+                    disabled={isLoadingWorkers}
                   >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select field worker" />
+                    <SelectTrigger className={isLoadingWorkers ? 'opacity-50' : ''}>
+                      <SelectValue placeholder={isLoadingWorkers ? 'Loading workers...' : 'Select field worker'} />
                     </SelectTrigger>
                     <SelectContent>
-                      {fieldWorkers.map((worker) => (
-                        <SelectItem key={worker.id} value={worker.id.toString()}>
-                          {worker.name}
-                        </SelectItem>
-                      ))}
+                      {isLoadingWorkers ? (
+                        <div className="p-2 text-sm text-gray-500 text-center">
+                          Loading workers...
+                        </div>
+                      ) : fieldWorkers.length === 0 ? (
+                        <div className="p-2 text-sm text-gray-500 text-center">
+                          No active workers available
+                        </div>
+                      ) : (
+                        fieldWorkers.map((worker) => (
+                          <SelectItem key={worker.id} value={worker.id.toString()}>
+                            {worker.name} {worker.email ? `(${worker.email})` : ''}
+                          </SelectItem>
+                        ))
+                      )}
                     </SelectContent>
                   </Select>
+                  {errors.assignedToUserId && (
+                    <p className="text-sm text-red-500 mt-1">{errors.assignedToUserId}</p>
+                  )}
                 </div>
 
                 {/* Priority */}
