@@ -202,7 +202,7 @@ function DashboardLayoutContent({
 
           <SidebarContent className="gap-0 overflow-y-auto">
             <div className="space-y-2 px-2 py-1">
-              {filterNavigationByRole(user?.role === 'admin').map((group) => {
+              {filterNavigationByRole(user?.role).map((group) => {
                 const filteredItems = group.items.filter(
                   (item) => !item.adminOnly || user?.role === 'admin'
                 );
