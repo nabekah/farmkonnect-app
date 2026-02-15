@@ -395,7 +395,7 @@ export function ChemicalInventoryUI() {
 
             <div className="flex gap-2">
               <Button className="flex-1" variant="outline">Record Usage</Button>
-              <Button className="flex-1" variant="outline" className="gap-1">
+              <Button className="flex-1 flex items-center gap-1" variant="outline">
                 <Download className="w-4 h-4" /> Download SDS
               </Button>
             </div>
