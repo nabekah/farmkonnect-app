@@ -138,6 +138,7 @@ import { FarmComparison } from "./components/FarmComparison";
 import { FarmConsolidationDashboard } from "./components/FarmConsolidationDashboard";
 import { FarmDetailedAnalytics } from "./components/FarmDetailedAnalytics";
 import { TaskAssignmentUI } from "./components/TaskAssignmentUI";
+import { TaskAssignmentUIWithDatabase } from "./components/TaskAssignmentUIWithDatabase";
 import { TaskCompletionTracking } from "./components/TaskCompletionTracking";
 import { TaskTemplatesUI } from "./components/TaskTemplatesUI";
 import { AlertDashboard } from "./components/AlertDashboard";
@@ -315,11 +316,15 @@ function Router() {
         )}
       </Route>
       <Route path="/task-assignment">
-        {() => (
-          <DashboardLayout>
-            <TaskAssignmentUI />
-          </DashboardLayout>
-        )}
+        {() => {
+          const { user } = useAuth();
+          const userFarmId = user?.farmId || 1; // Default to farm 1 if not set
+          return (
+            <DashboardLayout>
+              <TaskAssignmentUIWithDatabase farmId={userFarmId} />
+            </DashboardLayout>
+          );
+        }}
       </Route>
       <Route path="/task-completion-tracking">
         {() => (

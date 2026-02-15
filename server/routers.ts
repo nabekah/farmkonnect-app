@@ -93,6 +93,7 @@ import { healthReportsRouter } from "./routers/healthReports";
 import { medicationTrackingRouter } from "./routers/medicationTracking";
 import { healthTrendsAnalyticsRouter } from "./routers/healthTrendsAnalytics";
 import { pushNotificationsRouter } from "./routers/pushNotificationsRouter";
+import { taskAssignmentDatabaseRouter } from "./routers/taskAssignmentDatabase";
 // import { searchRouter } from "./routers/search";
 // import { searchEnhancementsRouter } from "./routers/searchEnhancements";
 // import { multiSpeciesRouter } from "./routers/multiSpecies";
@@ -1048,6 +1049,7 @@ export const appRouter = router({
   activityApproval: activityApprovalRouter,
   shiftAssignmentWithNotifications: shiftAssignmentWithNotificationsRouter,
   taskAssignmentWithNotifications: taskAssignmentWithNotificationsRouter,
+  taskAssignmentDatabase: taskAssignmentDatabaseRouter,
 });
 
 export type AppRouter = typeof appRouter;
