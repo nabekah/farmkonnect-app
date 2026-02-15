@@ -290,6 +290,7 @@ export const navigationStructure: MenuGroup[] = [
       { icon: Smartphone, label: "Push Notifications", path: "/push-notifications" },
       { icon: Zap, label: "Smart Scheduler", path: "/smart-scheduler" },
       { icon: CheckCircle, label: "Approval Workflow", path: "/approval-workflow" },
+      { icon: Copy, label: "Notification Templates", path: "/notification-templates", adminOnly: true },
     ],
   },
 
@@ -351,6 +352,9 @@ export const navigationStructure: MenuGroup[] = [
       { icon: TrendingUp, label: "Performance Trends", path: "/performance-trends" },
       { icon: Clock, label: "Shift Management", path: "/shift-management" },
       { icon: BarChart3, label: "Performance Analytics", path: "/worker-performance" },
+      { icon: Zap, label: "Bulk Shift Assignment", path: "/bulk-shift-assignment" },
+      { icon: Bell, label: "Notification Preferences", path: "/notification-preferences" },
+      { icon: BarChart3, label: "Notification Analytics", path: "/notification-analytics" },
     ],
   },
 

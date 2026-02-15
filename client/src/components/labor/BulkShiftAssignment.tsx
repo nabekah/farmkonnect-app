@@ -53,7 +53,7 @@ interface AssignmentPreview {
   conflicts: ConflictDetection[]
 }
 
-export default function BulkShiftAssignment() {
+function BulkShiftAssignmentComponent() {
   const [selectedWorkers, setSelectedWorkers] = useState<number[]>([])
   const [selectedShifts, setSelectedShifts] = useState<number[]>([])
   const [assignmentMode, setAssignmentMode] = useState<'manual' | 'auto'>('manual')
@@ -556,3 +556,6 @@ export default function BulkShiftAssignment() {
     </div>
   )
 }
+
+export { BulkShiftAssignmentComponent as BulkShiftAssignment };
+export default BulkShiftAssignmentComponent;

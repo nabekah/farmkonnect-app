@@ -144,6 +144,7 @@ import { AlertDashboard } from "./components/AlertDashboard";
 import { WorkerAvailabilityCalendar } from "./components/WorkerAvailabilityCalendar";
 import { WorkerPerformanceTrends } from "./components/WorkerPerformanceTrends";
 import { ShiftManagement } from "./components/ShiftManagement";
+import { BulkShiftAssignment } from "./components/labor/BulkShiftAssignment";
 import { ComplianceDashboard } from "./components/ComplianceDashboard";
 import AdvancedAnalyticsDashboard from "./pages/AdvancedAnalyticsDashboard";
 import AISchedulingDashboard from "./pages/AISchedulingDashboard";
@@ -359,6 +360,13 @@ function Router() {
         {() => (
           <DashboardLayout>
             <ShiftManagement />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/bulk-shift-assignment">
+        {() => (
+          <DashboardLayout>
+            <BulkShiftAssignment />
           </DashboardLayout>
         )}
       </Route>
