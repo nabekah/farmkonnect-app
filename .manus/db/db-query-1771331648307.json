@@ -1,0 +1,55 @@
+{
+  "query": "SELECT COUNT(*) as total_workers, farmId, COUNT(DISTINCT farmId) as farms_with_workers FROM farmWorkers GROUP BY farmId;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2kNF22PapS9mysw.root --database WZQk4bD8DnsRHwYBkmh7FN --execute SELECT COUNT(*) as total_workers, farmId, COUNT(DISTINCT farmId) as farms_with_workers FROM farmWorkers GROUP BY farmId;",
+  "rows": [
+    {
+      "total_workers": "3",
+      "farmId": "1",
+      "farms_with_workers": "1"
+    },
+    {
+      "total_workers": "5",
+      "farmId": "2",
+      "farms_with_workers": "1"
+    },
+    {
+      "total_workers": "2",
+      "farmId": "240003",
+      "farms_with_workers": "1"
+    },
+    {
+      "total_workers": "2",
+      "farmId": "240004",
+      "farms_with_workers": "1"
+    },
+    {
+      "total_workers": "2",
+      "farmId": "390012",
+      "farms_with_workers": "1"
+    },
+    {
+      "total_workers": "1",
+      "farmId": "390013",
+      "farms_with_workers": "1"
+    },
+    {
+      "total_workers": "1",
+      "farmId": "390014",
+      "farms_with_workers": "1"
+    },
+    {
+      "total_workers": "1",
+      "farmId": "390015",
+      "farms_with_workers": "1"
+    },
+    {
+      "total_workers": "1",
+      "farmId": "510026",
+      "farms_with_workers": "1"
+    }
+  ],
+  "messages": [],
+  "stdout": "total_workers\tfarmId\tfarms_with_workers\n3\t1\t1\n5\t2\t1\n2\t240003\t1\n2\t240004\t1\n2\t390012\t1\n1\t390013\t1\n1\t390014\t1\n1\t390015\t1\n1\t510026\t1\n",
+  "stderr": "",
+  "execution_time_ms": 403
+}

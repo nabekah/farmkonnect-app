@@ -1,0 +1,9 @@
+{
+  "query": "INSERT INTO farmWorkers (name, farmId, role, status, hireDate, createdAt, updatedAt) VALUES \n('James Osei', 1, 'Field Worker', 'active', NOW(), NOW(), NOW()),\n('Ama Mensah', 1, 'Supervisor', 'active', NOW(), NOW(), NOW()),\n('Kwesi Boateng', 1, 'Field Worker', 'active', NOW(), NOW(), NOW()),\n('Abena Asante', 1, 'Field Worker', 'active', NOW(), NOW(), NOW()),\n('Yaw Amponsah', 1, 'Equipment Operator', 'active', NOW(), NOW(), NOW());",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2kNF22PapS9mysw.root --database WZQk4bD8DnsRHwYBkmh7FN --execute INSERT INTO farmWorkers (name, farmId, role, status, hireDate, createdAt, updatedAt) VALUES \n('James Osei', 1, 'Field Worker', 'active', NOW(), NOW(), NOW()),\n('Ama Mensah', 1, 'Supervisor', 'active', NOW(), NOW(), NOW()),\n('Kwesi Boateng', 1, 'Field Worker', 'active', NOW(), NOW(), NOW()),\n('Abena Asante', 1, 'Field Worker', 'active', NOW(), NOW(), NOW()),\n('Yaw Amponsah', 1, 'Equipment Operator', 'active', NOW(), NOW(), NOW());",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 377
+}

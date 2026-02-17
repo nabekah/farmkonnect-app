@@ -1,0 +1,58 @@
+{
+  "query": "SELECT id, name, farmId, status FROM farmWorkers WHERE farmId = 1 ORDER BY name;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2kNF22PapS9mysw.root --database WZQk4bD8DnsRHwYBkmh7FN --execute SELECT id, name, farmId, status FROM farmWorkers WHERE farmId = 1 ORDER BY name;",
+  "rows": [
+    {
+      "id": "120004",
+      "name": "Abena Asante",
+      "farmId": "1",
+      "status": "active"
+    },
+    {
+      "id": "120002",
+      "name": "Ama Mensah",
+      "farmId": "1",
+      "status": "active"
+    },
+    {
+      "id": "120001",
+      "name": "James Osei",
+      "farmId": "1",
+      "status": "active"
+    },
+    {
+      "id": "30003",
+      "name": "John Doe",
+      "farmId": "1",
+      "status": "active"
+    },
+    {
+      "id": "120003",
+      "name": "Kwesi Boateng",
+      "farmId": "1",
+      "status": "active"
+    },
+    {
+      "id": "30002",
+      "name": "Paulina Ofori Adu",
+      "farmId": "1",
+      "status": "active"
+    },
+    {
+      "id": "30006",
+      "name": "Ruth Agyeman",
+      "farmId": "1",
+      "status": "active"
+    },
+    {
+      "id": "120005",
+      "name": "Yaw Amponsah",
+      "farmId": "1",
+      "status": "active"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\tfarmId\tstatus\n120004\tAbena Asante\t1\tactive\n120002\tAma Mensah\t1\tactive\n120001\tJames Osei\t1\tactive\n30003\tJohn Doe\t1\tactive\n120003\tKwesi Boateng\t1\tactive\n30002\tPaulina Ofori Adu\t1\tactive\n30006\tRuth Agyeman\t1\tactive\n120005\tYaw Amponsah\t1\tactive\n",
+  "stderr": "",
+  "execution_time_ms": 362
+}

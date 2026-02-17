@@ -1,0 +1,148 @@
+{
+  "query": "SELECT id, name, farmId, status FROM farmWorkers ORDER BY farmId, name LIMIT 30;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2kNF22PapS9mysw.root --database WZQk4bD8DnsRHwYBkmh7FN --execute SELECT id, name, farmId, status FROM farmWorkers ORDER BY farmId, name LIMIT 30;",
+  "rows": [
+    {
+      "id": "120004",
+      "name": "Abena Asante",
+      "farmId": "1",
+      "status": "active"
+    },
+    {
+      "id": "120002",
+      "name": "Ama Mensah",
+      "farmId": "1",
+      "status": "active"
+    },
+    {
+      "id": "120001",
+      "name": "James Osei",
+      "farmId": "1",
+      "status": "active"
+    },
+    {
+      "id": "30003",
+      "name": "John Doe",
+      "farmId": "1",
+      "status": "active"
+    },
+    {
+      "id": "120003",
+      "name": "Kwesi Boateng",
+      "farmId": "1",
+      "status": "active"
+    },
+    {
+      "id": "30002",
+      "name": "Paulina Ofori Adu",
+      "farmId": "1",
+      "status": "active"
+    },
+    {
+      "id": "30006",
+      "name": "Ruth Agyeman",
+      "farmId": "1",
+      "status": "active"
+    },
+    {
+      "id": "120005",
+      "name": "Yaw Amponsah",
+      "farmId": "1",
+      "status": "active"
+    },
+    {
+      "id": "90001",
+      "name": "Kwame that",
+      "farmId": "2",
+      "status": "active"
+    },
+    {
+      "id": "3",
+      "name": "Noah Ekow Danquah",
+      "farmId": "2",
+      "status": "active"
+    },
+    {
+      "id": "2",
+      "name": "Noah abekah",
+      "farmId": "2",
+      "status": "active"
+    },
+    {
+      "id": "1",
+      "name": "ekow danquah",
+      "farmId": "2",
+      "status": "active"
+    },
+    {
+      "id": "60001",
+      "name": "nana yaw",
+      "farmId": "2",
+      "status": "active"
+    },
+    {
+      "id": "30007",
+      "name": "Silva Twum",
+      "farmId": "240003",
+      "status": "active"
+    },
+    {
+      "id": "30008",
+      "name": "Timothy Abu Rasta",
+      "farmId": "240003",
+      "status": "active"
+    },
+    {
+      "id": "90003",
+      "name": "Esinam Akulugu",
+      "farmId": "240004",
+      "status": "active"
+    },
+    {
+      "id": "30009",
+      "name": "Patricia Okoroko",
+      "farmId": "240004",
+      "status": "active"
+    },
+    {
+      "id": "90002",
+      "name": "Adwoa Ewusu",
+      "farmId": "390012",
+      "status": "active"
+    },
+    {
+      "id": "30010",
+      "name": "James Ewusu",
+      "farmId": "390012",
+      "status": "active"
+    },
+    {
+      "id": "90004",
+      "name": "Oduro Nana",
+      "farmId": "390013",
+      "status": "active"
+    },
+    {
+      "id": "30005",
+      "name": "Emma Yaw Mieza",
+      "farmId": "390014",
+      "status": "active"
+    },
+    {
+      "id": "30004",
+      "name": "Tina Fosuwaa",
+      "farmId": "390015",
+      "status": "active"
+    },
+    {
+      "id": "90005",
+      "name": "Prince Ampanyi",
+      "farmId": "510026",
+      "status": "active"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\tfarmId\tstatus\n120004\tAbena Asante\t1\tactive\n120002\tAma Mensah\t1\tactive\n120001\tJames Osei\t1\tactive\n30003\tJohn Doe\t1\tactive\n120003\tKwesi Boateng\t1\tactive\n30002\tPaulina Ofori Adu\t1\tactive\n30006\tRuth Agyeman\t1\tactive\n120005\tYaw Amponsah\t1\tactive\n90001\tKwame that\t2\tactive\n3\tNoah Ekow Danquah\t2\tactive\n2\tNoah abekah\t2\tactive\n1\tekow danquah\t2\tactive\n60001\tnana yaw\t2\tactive\n30007\tSilva Twum\t240003\tactive\n30008\tTimothy Abu Rasta\t240003\tactive\n90003\tEsinam Akulugu\t240004\tactive\n30009\tPatricia Okoroko\t240004\tactive\n90002\tAdwoa Ewusu\t390012\tactive\n30010\tJames Ewusu\t390012\tactive\n90004\tOduro Nana\t390013\tactive\n30005\tEmma Yaw Mieza\t390014\tactive\n30004\tTina Fosuwaa\t390015\tactive\n90005\tPrince Ampanyi\t510026\tactive\n",
+  "stderr": "",
+  "execution_time_ms": 360
+}

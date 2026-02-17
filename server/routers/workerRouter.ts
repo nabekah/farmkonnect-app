@@ -11,14 +11,15 @@ export const workerRouter = router({
   getAllWorkers: protectedProcedure
     .input(z.object({ farmId: z.number() }))
     .query(async ({ input }) => {
-      const db = getDb();
+      const db = await getDb();
+      if (!db) throw new Error('Database not available');
       try {
         const result = await db
           .select({
             id: farmWorkers.id,
             name: farmWorkers.name,
             email: farmWorkers.email,
-            phone: farmWorkers.phone,
+            contact: farmWorkers.contact,
             farmId: farmWorkers.farmId,
             role: farmWorkers.role,
             status: farmWorkers.status,
@@ -39,7 +40,8 @@ export const workerRouter = router({
   getWorkerById: protectedProcedure
     .input(z.object({ workerId: z.number(), farmId: z.number() }))
     .query(async ({ input }) => {
-      const db = getDb();
+      const db = await getDb();
+      if (!db) throw new Error('Database not available');
       try {
         const result = await db
           .select()
@@ -63,14 +65,15 @@ export const workerRouter = router({
   getAvailableWorkers: protectedProcedure
     .input(z.object({ farmId: z.number() }))
     .query(async ({ input }) => {
-      const db = getDb();
+      const db = await getDb();
+      if (!db) throw new Error('Database not available');
       try {
         const result = await db
           .select({
             id: farmWorkers.id,
             name: farmWorkers.name,
             email: farmWorkers.email,
-            phone: farmWorkers.phone,
+            contact: farmWorkers.contact,
             role: farmWorkers.role,
             status: farmWorkers.status,
           })
@@ -91,14 +94,15 @@ export const workerRouter = router({
   searchWorkers: protectedProcedure
     .input(z.object({ farmId: z.number(), query: z.string() }))
     .query(async ({ input }) => {
-      const db = getDb();
+      const db = await getDb();
+      if (!db) throw new Error('Database not available');
       try {
         const result = await db
           .select({
             id: farmWorkers.id,
             name: farmWorkers.name,
             email: farmWorkers.email,
-            phone: farmWorkers.phone,
+            contact: farmWorkers.contact,
             role: farmWorkers.role,
             status: farmWorkers.status,
           })
@@ -123,7 +127,8 @@ export const workerRouter = router({
   getWorkerCount: protectedProcedure
     .input(z.object({ farmId: z.number() }))
     .query(async ({ input }) => {
-      const db = getDb();
+      const db = await getDb();
+      if (!db) throw new Error('Database not available');
       try {
         const result = await db
           .select()

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/_core/hooks/useAuth';
 import { trpc } from '@/lib/trpc';
 import { Button } from '@/components/ui/button';
@@ -97,10 +97,19 @@ export function ManagerTaskAssignment() {
   });
 
   // Fetch field workers from database with loading state
+  // Use farmId if set, otherwise default to 1. Always enable the query.
+  // Note: Not filtering by status to get all workers
   const { data: fieldWorkers = [], isLoading: isLoadingWorkers } = trpc.workforce.workers.list.useQuery(
-    { farmId: farmId || 1, status: 'active' },
-    { enabled: !!farmId }
+    { farmId: farmId || 1 },
+    { enabled: true }
   );
+
+  // Set default farmId on component mount if not already set
+  useEffect(() => {
+    if (!farmId && user) {
+      setFarmId(1); // Default to farm 1
+    }
+  }, [user, farmId]);
 
   // Mock tasks - TODO: Fetch from API
   const allTasks = [

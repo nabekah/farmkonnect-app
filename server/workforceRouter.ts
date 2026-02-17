@@ -49,7 +49,12 @@ export const workforceRouter = router({
           whereConditions.push(eq(farmWorkers.status, input.status));
         }
 
-        return await db.select().from(farmWorkers).where(and(...whereConditions));
+        const result = await db.select().from(farmWorkers).where(and(...whereConditions));
+        console.log('[workers.list] farmId:', input.farmId, 'result count:', result.length);
+        if (result.length > 0) {
+          console.log('[workers.list] First worker object:', JSON.stringify(result[0], null, 2));
+        }
+        return result;
       }),
 
     update: protectedProcedure

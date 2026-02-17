@@ -56,10 +56,24 @@ class PushNotificationService {
         return false
       }
 
-      // Register service worker
-      this.serviceWorkerRegistration = await navigator.serviceWorker.register('/sw.js', {
-        scope: '/',
-      })
+      // Unregister all existing service workers
+      const registrations = await navigator.serviceWorker.getRegistrations()
+      for (const registration of registrations) {
+        await registration.unregister()
+      }
+
+      // Clear all caches
+      if ('caches' in window) {
+        const cacheNames = await caches.keys()
+        for (const cacheName of cacheNames) {
+          await caches.delete(cacheName)
+        }
+      }
+
+      // DO NOT register service worker - disabled for development
+      // this.serviceWorkerRegistration = await navigator.serviceWorker.register('/sw.js', {
+      //   scope: '/',
+      // })
 
       // Load preferences from localStorage
       this.loadPreferences()

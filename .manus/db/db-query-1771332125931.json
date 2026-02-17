@@ -1,0 +1,50 @@
+{
+  "query": "SELECT id, farmName FROM farms LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2kNF22PapS9mysw.root --database WZQk4bD8DnsRHwYBkmh7FN --execute SELECT id, farmName FROM farms LIMIT 10;",
+  "rows": [
+    {
+      "id": "1",
+      "farmName": "Torgborme "
+    },
+    {
+      "id": "2",
+      "farmName": "GreenFarm"
+    },
+    {
+      "id": "240003",
+      "farmName": "Peki Banana Farm"
+    },
+    {
+      "id": "240004",
+      "farmName": "Eastern Rice Venture"
+    },
+    {
+      "id": "300023",
+      "farmName": "Test Report Farm"
+    },
+    {
+      "id": "330001",
+      "farmName": "Test Report Farm"
+    },
+    {
+      "id": "330002",
+      "farmName": "Test Report Farm"
+    },
+    {
+      "id": "330003",
+      "farmName": "Test Report Farm"
+    },
+    {
+      "id": "330004",
+      "farmName": "Test Report Farm"
+    },
+    {
+      "id": "330005",
+      "farmName": "Test Report Farm"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tfarmName\n1\tTorgborme \n2\tGreenFarm\n240003\tPeki Banana Farm\n240004\tEastern Rice Venture\n300023\tTest Report Farm\n330001\tTest Report Farm\n330002\tTest Report Farm\n330003\tTest Report Farm\n330004\tTest Report Farm\n330005\tTest Report Farm\n",
+  "stderr": "",
+  "execution_time_ms": 355
+}

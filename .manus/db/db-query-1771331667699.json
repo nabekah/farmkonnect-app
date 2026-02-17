@@ -1,0 +1,25 @@
+{
+  "query": "SELECT id, name, farmId FROM farmWorkers WHERE farmId = 1 LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2kNF22PapS9mysw.root --database WZQk4bD8DnsRHwYBkmh7FN --execute SELECT id, name, farmId FROM farmWorkers WHERE farmId = 1 LIMIT 10;",
+  "rows": [
+    {
+      "id": "30002",
+      "name": "Paulina Ofori Adu",
+      "farmId": "1"
+    },
+    {
+      "id": "30003",
+      "name": "John Doe",
+      "farmId": "1"
+    },
+    {
+      "id": "30006",
+      "name": "Ruth Agyeman",
+      "farmId": "1"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\tfarmId\n30002\tPaulina Ofori Adu\t1\n30003\tJohn Doe\t1\n30006\tRuth Agyeman\t1\n",
+  "stderr": "",
+  "execution_time_ms": 429
+}

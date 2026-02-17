@@ -1,0 +1,38 @@
+{
+  "query": "SELECT * FROM farmWorkers WHERE farmId = 2 LIMIT 2",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2kNF22PapS9mysw.root --database WZQk4bD8DnsRHwYBkmh7FN --execute SELECT * FROM farmWorkers WHERE farmId = 2 LIMIT 2",
+  "rows": [
+    {
+      "id": "1",
+      "farmId": "2",
+      "name": "ekow danquah",
+      "role": "general_laborer",
+      "contact": "+233244405827",
+      "email": "abekah.ekow@Gmail.com",
+      "hireDate": "2026-02-02",
+      "salary": "1000.00",
+      "salaryFrequency": "monthly",
+      "status": "active",
+      "createdAt": "2026-02-05 23:01:35",
+      "updatedAt": "2026-02-05 23:01:35"
+    },
+    {
+      "id": "2",
+      "farmId": "2",
+      "name": "Noah abekah",
+      "role": "supervisor",
+      "contact": "+233244405827",
+      "email": "abekah.ekow@Gmail.com",
+      "hireDate": "2026-02-03",
+      "salary": "4000.00",
+      "salaryFrequency": "monthly",
+      "status": "active",
+      "createdAt": "2026-02-05 23:02:46",
+      "updatedAt": "2026-02-05 23:02:46"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tfarmId\tname\trole\tcontact\temail\thireDate\tsalary\tsalaryFrequency\tstatus\tcreatedAt\tupdatedAt\n1\t2\tekow danquah\tgeneral_laborer\t+233244405827\tabekah.ekow@Gmail.com\t2026-02-02\t1000.00\tmonthly\tactive\t2026-02-05 23:01:35\t2026-02-05 23:01:35\n2\t2\tNoah abekah\tsupervisor\t+233244405827\tabekah.ekow@Gmail.com\t2026-02-03\t4000.00\tmonthly\tactive\t2026-02-05 23:02:46\t2026-02-05 23:02:46\n",
+  "stderr": "",
+  "execution_time_ms": 353
+}

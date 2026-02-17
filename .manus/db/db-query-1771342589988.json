@@ -1,0 +1,70 @@
+{
+  "query": "SELECT id, name, status, farmId FROM farmWorkers LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2kNF22PapS9mysw.root --database WZQk4bD8DnsRHwYBkmh7FN --execute SELECT id, name, status, farmId FROM farmWorkers LIMIT 10;",
+  "rows": [
+    {
+      "id": "1",
+      "name": "ekow danquah",
+      "status": "active",
+      "farmId": "2"
+    },
+    {
+      "id": "2",
+      "name": "Noah abekah",
+      "status": "active",
+      "farmId": "2"
+    },
+    {
+      "id": "3",
+      "name": "Noah Ekow Danquah",
+      "status": "active",
+      "farmId": "2"
+    },
+    {
+      "id": "30002",
+      "name": "Paulina Ofori Adu",
+      "status": "active",
+      "farmId": "1"
+    },
+    {
+      "id": "30003",
+      "name": "John Doe",
+      "status": "active",
+      "farmId": "1"
+    },
+    {
+      "id": "30004",
+      "name": "Tina Fosuwaa",
+      "status": "active",
+      "farmId": "390015"
+    },
+    {
+      "id": "30005",
+      "name": "Emma Yaw Mieza",
+      "status": "active",
+      "farmId": "390014"
+    },
+    {
+      "id": "30006",
+      "name": "Ruth Agyeman",
+      "status": "active",
+      "farmId": "1"
+    },
+    {
+      "id": "30007",
+      "name": "Silva Twum",
+      "status": "active",
+      "farmId": "240003"
+    },
+    {
+      "id": "30008",
+      "name": "Timothy Abu Rasta",
+      "status": "active",
+      "farmId": "240003"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\tstatus\tfarmId\n1\tekow danquah\tactive\t2\n2\tNoah abekah\tactive\t2\n3\tNoah Ekow Danquah\tactive\t2\n30002\tPaulina Ofori Adu\tactive\t1\n30003\tJohn Doe\tactive\t1\n30004\tTina Fosuwaa\tactive\t390015\n30005\tEmma Yaw Mieza\tactive\t390014\n30006\tRuth Agyeman\tactive\t1\n30007\tSilva Twum\tactive\t240003\n30008\tTimothy Abu Rasta\tactive\t240003\n",
+  "stderr": "",
+  "execution_time_ms": 350
+}

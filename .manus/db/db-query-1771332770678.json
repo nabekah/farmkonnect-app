@@ -1,0 +1,38 @@
+{
+  "query": "SELECT id, farmName FROM farms WHERE farmerUserId = 1 ORDER BY id",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2kNF22PapS9mysw.root --database WZQk4bD8DnsRHwYBkmh7FN --execute SELECT id, farmName FROM farms WHERE farmerUserId = 1 ORDER BY id",
+  "rows": [
+    {
+      "id": "2",
+      "farmName": "GreenFarm"
+    },
+    {
+      "id": "330021",
+      "farmName": "brown farm"
+    },
+    {
+      "id": "330022",
+      "farmName": "pink farm"
+    },
+    {
+      "id": "540024",
+      "farmName": "Miss Piggy Farms"
+    },
+    {
+      "id": "750044",
+      "farmName": "Test Farm for Advanced Features"
+    },
+    {
+      "id": "750050",
+      "farmName": "Test Farm Advanced"
+    },
+    {
+      "id": "750051",
+      "farmName": "Test Farm Advanced"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tfarmName\n2\tGreenFarm\n330021\tbrown farm\n330022\tpink farm\n540024\tMiss Piggy Farms\n750044\tTest Farm for Advanced Features\n750050\tTest Farm Advanced\n750051\tTest Farm Advanced\n",
+  "stderr": "",
+  "execution_time_ms": 359
+}

@@ -1,0 +1,40 @@
+{
+  "query": "SELECT id, name, farmId, status FROM farmWorkers WHERE farmId = 1 ORDER BY id LIMIT 5",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2kNF22PapS9mysw.root --database WZQk4bD8DnsRHwYBkmh7FN --execute SELECT id, name, farmId, status FROM farmWorkers WHERE farmId = 1 ORDER BY id LIMIT 5",
+  "rows": [
+    {
+      "id": "30002",
+      "name": "Paulina Ofori Adu",
+      "farmId": "1",
+      "status": "active"
+    },
+    {
+      "id": "30003",
+      "name": "John Doe",
+      "farmId": "1",
+      "status": "active"
+    },
+    {
+      "id": "30006",
+      "name": "Ruth Agyeman",
+      "farmId": "1",
+      "status": "active"
+    },
+    {
+      "id": "120001",
+      "name": "James Osei",
+      "farmId": "1",
+      "status": "active"
+    },
+    {
+      "id": "120002",
+      "name": "Ama Mensah",
+      "farmId": "1",
+      "status": "active"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\tfarmId\tstatus\n30002\tPaulina Ofori Adu\t1\tactive\n30003\tJohn Doe\t1\tactive\n30006\tRuth Agyeman\t1\tactive\n120001\tJames Osei\t1\tactive\n120002\tAma Mensah\t1\tactive\n",
+  "stderr": "",
+  "execution_time_ms": 348
+}
