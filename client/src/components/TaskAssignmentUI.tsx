@@ -27,6 +27,7 @@ export const TaskAssignmentUI = () => {
   const user = authData?.user || { farmId: 1 };
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [selectedFarmId, setSelectedFarmId] = useState<number | string>(user?.farmId || 1);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -40,8 +41,8 @@ export const TaskAssignmentUI = () => {
 
   // Fetch tasks from database
   const { data: tasks = [], isLoading, refetch } = trpc.taskAssignmentDatabase.getAllTasks.useQuery(
-    { farmId: user?.farmId || 1 },
-    { enabled: !!user?.farmId }
+    { farmId: typeof selectedFarmId === 'number' ? selectedFarmId : (user?.farmId || 1) },
+    { enabled: true }
   );
 
   // Fetch workers from database
@@ -177,7 +178,19 @@ export const TaskAssignmentUI = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Task Assignment & Tracking</h1>
+        <div className="flex items-center gap-4">
+          <h1 className="text-3xl font-bold">Task Assignment & Tracking</h1>
+          <div className="flex items-center gap-2">
+            <label className="text-sm font-medium">Farm:</label>
+            <select
+              value={selectedFarmId}
+              onChange={(e) => setSelectedFarmId(parseInt(e.target.value))}
+              className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+            >
+              <option value={user?.farmId || 1}>{user?.farmName || 'Current Farm'}</option>
+            </select>
+          </div>
+        </div>
         <Button onClick={() => { setShowForm(!showForm); setEditingId(null); }} className="gap-2">
           <Plus className="w-4 h-4" />
           Assign New Task
