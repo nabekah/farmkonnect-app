@@ -48,17 +48,48 @@ export async function setupVite(app: Express, server: Server) {
 }
 
 export function serveStatic(app: Express) {
-  const distPath = path.resolve(import.meta.dirname, "../.", "dist", "public");
-  if (!fs.existsSync(distPath)) {
-    console.error(
-      `Could not find the build directory: ${distPath}, make sure to build the client first`
-    );
+  // Use process.cwd() for reliable path resolution in production
+  const distPath = path.join(process.cwd(), "dist", "public");
+  
+  // Check if the directory exists, if not try alternative paths
+  let finalDistPath = distPath;
+  if (!fs.existsSync(finalDistPath)) {
+    // Try relative to the current file location
+    const altPath = path.resolve(import.meta.dirname, "../../dist/public");
+    if (fs.existsSync(altPath)) {
+      finalDistPath = altPath;
+    } else {
+      console.error(
+        `Could not find the build directory at ${distPath} or ${altPath}. Available paths: ${process.cwd()}`
+      );
+      // Create a fallback that serves a simple HTML page
+      app.use("*", (_req, res) => {
+        res.status(200).set({ "Content-Type": "text/html" }).send(`
+          <!DOCTYPE html>
+          <html>
+            <head><title>FarmKonnect</title></head>
+            <body>
+              <h1>Build directory not found</h1>
+              <p>Expected: ${distPath}</p>
+              <p>Current working directory: ${process.cwd()}</p>
+            </body>
+          </html>
+        `);
+      });
+      return;
+    }
   }
 
-  app.use(express.static(distPath));
+  console.log(`[Static] Serving files from: ${finalDistPath}`);
+  app.use(express.static(finalDistPath));
 
   // fall through to index.html if the file doesn't exist
   app.use("*", (_req, res) => {
-    res.sendFile(path.resolve(distPath, "index.html"));
+    const indexPath = path.resolve(finalDistPath, "index.html");
+    if (fs.existsSync(indexPath)) {
+      res.sendFile(indexPath);
+    } else {
+      res.status(404).send("index.html not found");
+    }
   });
 }
