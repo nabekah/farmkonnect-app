@@ -5210,3 +5210,25 @@ All components are integrated into the Financial Management Dashboard and tested
 - [ ] Create completion verification UI component
 - [ ] Implement completion rejection with feedback
 - [ ] Test completion verification workflow
+
+
+## SMS Notifications with Twilio Integration
+- [ ] Setup Twilio account and configure API credentials
+- [ ] Create SMS notification tRPC procedures (sendSMS, createSMSAlert, etc.)
+- [ ] Add SMS alert preferences to user settings
+- [ ] Create SMS alert triggers for critical events (soil pH, animal health, etc.)
+- [ ] Implement SMS rate limiting and cost tracking
+- [ ] Create unit tests for SMS procedures
+- [ ] Test SMS delivery with real phone numbers
+
+## Mobile-Friendly Dashboard
+- [ ] Create MobileDashboard component with responsive design
+- [ ] Implement mobile navigation with bottom tab bar
+- [ ] Build mobile task list view (simplified from desktop)
+- [ ] Create mobile worker status view
+- [ ] Implement mobile livestock quick view
+- [ ] Add mobile weather alerts and forecasts
+- [ ] Create mobile marketplace quick access
+- [ ] Optimize for touch interactions and mobile UX
+- [ ] Test on various mobile devices and screen sizes
+- [ ] Add mobile route to App.tsx
