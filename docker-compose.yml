@@ -1,0 +1,109 @@
+version: '3.9'
+
+services:
+  # MySQL Database Service
+  mysql:
+    image: mysql:8.0
+    container_name: farmkonnect-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root123}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-farmkonnect}
+      MYSQL_USER: ${MYSQL_USER:-farmkonnect}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-farmkonnect123}
+      MYSQL_TCP_PORT: ${MYSQL_PORT:-3306}
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - farmkonnect-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+      interval: 10s
+    restart: unless-stopped
+
+  # Node.js Application Service
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: farmkonnect-app
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      # Database Configuration
+      DATABASE_URL: mysql://${MYSQL_USER:-farmkonnect}:${MYSQL_PASSWORD:-farmkonnect123}@mysql:3306/${MYSQL_DATABASE:-farmkonnect}
+      
+      # Node Environment
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: ${PORT:-3000}
+      
+      # OAuth Configuration
+      VITE_APP_ID: ${VITE_APP_ID}
+      OAUTH_SERVER_URL: ${OAUTH_SERVER_URL}
+      VITE_OAUTH_PORTAL_URL: ${VITE_OAUTH_PORTAL_URL}
+      JWT_SECRET: ${JWT_SECRET:-your-secret-key-change-in-production}
+      
+      # Owner Information
+      OWNER_NAME: ${OWNER_NAME:-Admin}
+      OWNER_OPEN_ID: ${OWNER_OPEN_ID}
+      
+      # API Keys (Optional - for features)
+      OPENWEATHER_API_KEY: ${OPENWEATHER_API_KEY}
+      SENDGRID_API_KEY: ${SENDGRID_API_KEY}
+      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID}
+      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN}
+      TWILIO_PHONE_NUMBER: ${TWILIO_PHONE_NUMBER}
+      
+      # Manus APIs
+      BUILT_IN_FORGE_API_URL: ${BUILT_IN_FORGE_API_URL}
+      BUILT_IN_FORGE_API_KEY: ${BUILT_IN_FORGE_API_KEY}
+      VITE_FRONTEND_FORGE_API_URL: ${VITE_FRONTEND_FORGE_API_URL}
+      VITE_FRONTEND_FORGE_API_KEY: ${VITE_FRONTEND_FORGE_API_KEY}
+      
+      # Notifications
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY}
+      VITE_VAPID_PUBLIC_KEY: ${VITE_VAPID_PUBLIC_KEY}
+      
+      # Analytics
+      VITE_ANALYTICS_ENDPOINT: ${VITE_ANALYTICS_ENDPOINT}
+      VITE_ANALYTICS_WEBSITE_ID: ${VITE_ANALYTICS_WEBSITE_ID}
+      
+      # App Configuration
+      VITE_APP_TITLE: ${VITE_APP_TITLE:-FarmKonnect}
+      VITE_APP_LOGO: ${VITE_APP_LOGO}
+    
+    ports:
+      - "${PORT:-3000}:3000"
+    
+    volumes:
+      # Development: Mount source code for live reload
+      - ./client:/app/client
+      - ./server:/app/server
+      - ./drizzle:/app/drizzle
+      # Exclude node_modules to use container's version
+      - /app/node_modules
+      - /app/client/node_modules
+    
+    networks:
+      - farmkonnect-network
+    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      timeout: 10s
+      retries: 5
+      interval: 30s
+    
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  farmkonnect-network:
+    driver: bridge
