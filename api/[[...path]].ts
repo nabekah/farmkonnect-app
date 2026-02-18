@@ -2,11 +2,12 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 import "dotenv/config";
 import express from "express";
 import compression from "compression";
+import path from "path";
+import fs from "fs";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "../server/_core/oauth";
 import { appRouter } from "../server/routers";
 import { createContext } from "../server/_core/context";
-import { serveStatic } from "../server/_core/vite";
 import { initializeWeatherCron } from "../server/weatherCron";
 import { initializeNotificationCron } from "../server/notificationCron";
 import { initializeNotificationScheduler } from "../server/services/notificationScheduler";
@@ -46,6 +47,56 @@ function cacheMiddleware(req: express.Request, res: express.Response, next: expr
 
 app.use(cacheMiddleware);
 
+// ============================================================================
+// STEP 2: SERVE STATIC FILES FROM PUBLIC DIRECTORY FIRST
+// ============================================================================
+// This must come BEFORE API routes to ensure static files are served first
+
+const publicDir = path.join(process.cwd(), 'public');
+console.log(`[Static] Attempting to serve from: ${publicDir}`);
+
+// Check if public directory exists
+if (fs.existsSync(publicDir)) {
+  console.log(`[Static] ✓ Found public directory`);
+  
+  // Serve static files with proper cache headers
+  app.use(express.static(publicDir, {
+    maxAge: '1d',
+    etag: false,
+    index: ['index.html'],
+  }));
+  
+  // Serve index.html for all non-API routes (SPA routing)
+  app.get('*', (req, res, next) => {
+    // Skip API routes
+    if (req.path.startsWith('/api/')) {
+      return next();
+    }
+    
+    const indexPath = path.join(publicDir, 'index.html');
+    if (fs.existsSync(indexPath)) {
+      res.set({
+        'Content-Type': 'text/html; charset=utf-8',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      });
+      res.sendFile(indexPath);
+    } else {
+      console.error(`[Static] index.html not found at: ${indexPath}`);
+      next();
+    }
+  });
+} else {
+  console.error(`[Static] ✗ Public directory not found at: ${publicDir}`);
+  console.error(`[Static] Current working directory: ${process.cwd()}`);
+  console.error(`[Static] Directory contents:`, fs.readdirSync(process.cwd()).join(', '));
+}
+
+// ============================================================================
+// API ROUTES (After static files)
+// ============================================================================
+
 // OAuth routes
 registerOAuthRoutes(app);
 
@@ -57,9 +108,6 @@ app.use(
     createContext,
   })
 );
-
-// Serve static files and frontend
-serveStatic(app);
 
 // Global error handler
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
