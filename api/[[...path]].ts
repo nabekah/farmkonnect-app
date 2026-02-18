@@ -48,53 +48,7 @@ function cacheMiddleware(req: express.Request, res: express.Response, next: expr
 app.use(cacheMiddleware);
 
 // ============================================================================
-// STEP 2: SERVE STATIC FILES FROM PUBLIC DIRECTORY FIRST
-// ============================================================================
-// This must come BEFORE API routes to ensure static files are served first
-
-const publicDir = path.join(process.cwd(), 'public');
-console.log(`[Static] Attempting to serve from: ${publicDir}`);
-
-// Check if public directory exists
-if (fs.existsSync(publicDir)) {
-  console.log(`[Static] ✓ Found public directory`);
-  
-  // Serve static files with proper cache headers
-  app.use(express.static(publicDir, {
-    maxAge: '1d',
-    etag: false,
-    index: ['index.html'],
-  }));
-  
-  // Serve index.html for all non-API routes (SPA routing)
-  app.get('*', (req, res, next) => {
-    // Skip API routes
-    if (req.path.startsWith('/api/')) {
-      return next();
-    }
-    
-    const indexPath = path.join(publicDir, 'index.html');
-    if (fs.existsSync(indexPath)) {
-      res.set({
-        'Content-Type': 'text/html; charset=utf-8',
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0',
-      });
-      res.sendFile(indexPath);
-    } else {
-      console.error(`[Static] index.html not found at: ${indexPath}`);
-      next();
-    }
-  });
-} else {
-  console.error(`[Static] ✗ Public directory not found at: ${publicDir}`);
-  console.error(`[Static] Current working directory: ${process.cwd()}`);
-  console.error(`[Static] Directory contents:`, fs.readdirSync(process.cwd()).join(', '));
-}
-
-// ============================================================================
-// API ROUTES (After static files)
+// CRITICAL: OAuth and API routes FIRST (before static file serving)
 // ============================================================================
 
 // OAuth routes
@@ -108,6 +62,50 @@ app.use(
     createContext,
   })
 );
+
+// ============================================================================
+// Static files and SPA fallback
+// ============================================================================
+// This comes AFTER API routes so /api/* requests don't get intercepted
+
+const publicDir = path.join(process.cwd(), 'public');
+console.log(`[Static] Serving from: ${publicDir}`);
+
+if (fs.existsSync(publicDir)) {
+  console.log(`[Static] ✓ Found public directory`);
+  
+  // Serve static files with proper cache headers
+  app.use(express.static(publicDir, {
+    maxAge: '1d',
+    etag: false,
+    index: false, // Don't auto-serve index.html
+  }));
+  
+  // SPA fallback: serve index.html for all non-API, non-static routes
+  app.get('*', (req, res) => {
+    const indexPath = path.join(publicDir, 'index.html');
+    if (fs.existsSync(indexPath)) {
+      res.set({
+        'Content-Type': 'text/html; charset=utf-8',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      });
+      res.sendFile(indexPath);
+    } else {
+      console.error(`[Static] index.html not found at: ${indexPath}`);
+      res.status(404).json({ error: 'Not found' });
+    }
+  });
+} else {
+  console.error(`[Static] ✗ Public directory not found at: ${publicDir}`);
+  console.error(`[Static] Current working directory: ${process.cwd()}`);
+  
+  // Fallback: serve a simple error page
+  app.get('*', (req, res) => {
+    res.status(500).json({ error: 'Static files not available' });
+  });
+}
 
 // Global error handler
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
